@@ -935,6 +935,243 @@ html[data-gl="on"] .fallback-photo {
   }
 }
 
+/* ---------- Tools: UTM builder and budget estimator ---------- */
+.tools {
+  position: relative;
+  padding: 14vh 0;
+}
+.tools .footnote {
+  margin-top: 1rem;
+}
+.tools-grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .tools-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.tool {
+  display: grid;
+  gap: 0.85rem;
+  background: var(--glass-strong);
+}
+.tool .panel-title {
+  margin: 0;
+}
+.tool-note {
+  margin: -0.35rem 0 0.2rem;
+  font-size: 0.95rem;
+  color: var(--color-muted);
+}
+.field {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.field[hidden] {
+  display: none;
+}
+.field label,
+.field legend {
+  padding: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.field .opt {
+  font-weight: 400;
+  color: var(--color-muted);
+}
+.field-row {
+  display: grid;
+  gap: 0.85rem;
+}
+@media (min-width: 520px) {
+  .field-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.field input:not([type="radio"]) {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgb(174 179 232 / 0.45);
+  background: rgb(7 11 58 / 0.6);
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 1rem;
+}
+.field input::placeholder {
+  color: rgb(184 189 236 / 0.75);
+}
+.field input:focus-visible {
+  outline: 3px solid var(--color-sun);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+.seg-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+.seg-opt {
+  position: relative;
+  flex: 1;
+}
+.seg-opt input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.seg-opt span {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  border-radius: 10px;
+  border: 1px solid rgb(174 179 232 / 0.45);
+  font-weight: 600;
+}
+.seg-opt input:checked + span {
+  background: var(--color-sun);
+  border-color: var(--color-sun);
+  color: var(--color-night);
+}
+.seg-opt input:focus-visible + span {
+  outline: 3px solid var(--color-sun);
+  outline-offset: 3px;
+}
+.tool-label {
+  margin: 0.3rem 0 -0.45rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-sun);
+}
+.tool-out {
+  display: block;
+  min-height: 3rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  border: 1px dashed var(--line);
+  background: rgb(7 11 58 / 0.45);
+  color: var(--color-muted);
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+.tool-out.is-ready {
+  border-style: solid;
+  color: var(--color-ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.88rem;
+}
+.tool-rows {
+  margin: 0;
+  display: grid;
+  gap: 0.35rem;
+  color: var(--color-ink);
+}
+.tool-rows div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.tool-rows dd {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.tool-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.tool-btn {
+  min-height: 44px;
+  padding: 0.45rem 1.1rem;
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+.tool-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.tool-status {
+  font-size: 0.9rem;
+  color: var(--color-ok);
+}
+
+/* ---------- Proof: results, references, samples (shown once filled in) ---------- */
+.proof {
+  position: relative;
+  padding: 14vh 0;
+}
+.proof .section-title {
+  margin-bottom: 2rem;
+}
+.proof-results,
+.proof-samples {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+.proof-results li {
+  display: grid;
+  gap: 0.25rem;
+}
+.proof-value {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  line-height: 1;
+  color: var(--color-sun);
+}
+.proof-label {
+  font-weight: 600;
+}
+.proof-context,
+.proof-kind {
+  font-size: 0.9rem;
+  color: var(--color-muted);
+}
+.proof-quotes {
+  margin: 0 0 1rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+}
+.proof-quote {
+  margin: 0;
+}
+.proof-samples a {
+  text-decoration: underline;
+  text-decoration-color: rgb(255 210 63 / 0.55);
+  text-underline-offset: 0.2em;
+}
+.proof-quote blockquote {
+  margin: 0 0 0.8rem;
+  font-size: 1.1rem;
+}
+.proof-quote blockquote p {
+  margin: 0;
+}
+
 /* ---------- Skills, certifications, education ---------- */
 .creds {
   position: relative;
@@ -979,6 +1216,14 @@ html[data-gl="on"] .fallback-photo {
 .ticks li {
   position: relative;
   padding-left: 1.2rem;
+}
+.cert-meta {
+  color: var(--color-muted);
+}
+.cert-link {
+  font-size: 0.9rem;
+  color: var(--color-sun);
+  text-underline-offset: 0.2em;
 }
 .ticks li::before {
   content: "";

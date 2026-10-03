@@ -128,7 +128,12 @@ export default function CvPage() {
                 </h2>
                 <ul className="cv-list">
                   {credentials.certifications.map((c) => (
-                    <li key={c}>{c}</li>
+                    <li key={c.name}>
+                      {c.url ? <a href={c.url}>{c.name}</a> : c.name}
+                      {c.issuer || c.year ? (
+                        <span className="cv-dim"> ({[c.issuer, c.year].filter(Boolean).join(", ")})</span>
+                      ) : null}
+                    </li>
                   ))}
                 </ul>
               </section>

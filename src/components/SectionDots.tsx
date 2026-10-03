@@ -13,13 +13,15 @@ const middle: Record<SectionId, string> = {
   websites: "WordPress",
 };
 
-export default function SectionDots({ order }: { order: SectionId[] }) {
+export default function SectionDots({ order, proof }: { order: SectionId[]; proof: boolean }) {
   useEffect(() => startSectionDots(), []);
   const sections: [string, string][] = [
     ["top", "Start"],
     ["summary", "The short version"],
     ["about", "About"],
     ...order.map((id): [string, string] => [id, middle[id]]),
+    ["tools", "Tools"],
+    ...(proof ? [["proof", "Results and references"] as [string, string]] : []),
     ["built-with-ai", "Built with AI"],
     ["skills", "Skills"],
     ["contact", "Contact"],

@@ -38,6 +38,8 @@ Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages u
 | `src/content/roles.ts`, `src/app/for/[role]/page.tsx` | Role versions to send with job applications: `/for/account-management/`, `/for/performance-marketing/`, `/for/web/`. Same facts, a different opening line and section order. Noindex, not in the sitemap. |
 | `src/app/cv/page.tsx`, `public/devan-cv.pdf` | Print-ready one-page A4 CV built from `cv` and `credentials` in `src/content/site.ts`. |
 | `src/components/Summary.tsx`, `SectionDots.tsx` | Quick-read path: one card with the whole profile after the hero, and fixed section dots on wide screens (active dot from `src/stage/section-dots.ts`). |
+| `src/components/Tools.tsx`, `src/tools/` | Two tools visitors can use: a UTM link builder and a CPM/CPC/CPD budget estimator. Plain TypeScript bound to static markup, so they also run in the preview bundle. No rates built in, nothing sent anywhere. |
+| `src/components/Proof.tsx` | Results, testimonials and work samples. Hidden until a list in `proof` (`src/content/site.ts`) has an entry. Certifications take an optional issuer, year and verification link. |
 | `src/components/mocks/` | Animated illustration panels for the measurement (Tag Manager, GA4, Google Ads, Looker Studio) and WordPress (site editor, blocks, WooCommerce store, responsive preview, speed and SEO) sections. Drawn from scratch, sample data, CSS-only motion that stops under reduced motion. |
 | `src/app/layout.tsx` | Metadata, JSON-LD, and the inline boot script that picks motion and WebGL mode before first paint. |
 | `src/stage/boot.ts`, `src/components/Stage.tsx` | Load the WebGL engine only on capable devices, after the page is idle. |

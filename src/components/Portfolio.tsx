@@ -2,6 +2,8 @@ import Stage from "@/components/Stage";
 import MotionToggle from "@/components/MotionToggle";
 import Summary from "@/components/Summary";
 import SectionDots from "@/components/SectionDots";
+import Tools from "@/components/Tools";
+import Proof, { hasProof } from "@/components/Proof";
 import ScrollScenes from "@/components/ScrollScenes";
 import HeroBackdrop from "@/components/HeroBackdrop";
 import { FunnelArt, PromptArt, RailsArt } from "@/components/FallbackArt";
@@ -258,7 +260,7 @@ export default function Portfolio({ hero = defaultHero, order = defaultOrder }: 
         </div>
       </header>
 
-      <SectionDots order={order} />
+      <SectionDots order={order} proof={hasProof} />
 
       <main id="main">
         {/* 1. Hero */}
@@ -348,6 +350,10 @@ export default function Portfolio({ hero = defaultHero, order = defaultOrder }: 
           return <Section key={id} rev={i % 2 === 1} />;
         })}
 
+        {/* Interactive tools, then proof (hidden until the owner adds entries) */}
+        <Tools />
+        <Proof />
+
         {/* 7. Built with AI */}
         <section id="built-with-ai" className="ai" data-scene="prompt" aria-labelledby="ai-title">
           <div className="wrap ai-grid">
@@ -393,7 +399,20 @@ export default function Portfolio({ hero = defaultHero, order = defaultOrder }: 
                 <h3 className="panel-title">Certifications</h3>
                 <ul className="ticks">
                   {credentials.certifications.map((c) => (
-                    <li key={c}>{c}</li>
+                    <li key={c.name}>
+                      {c.name}
+                      {c.issuer || c.year ? (
+                        <span className="cert-meta"> {[c.issuer, c.year].filter(Boolean).join(", ")}</span>
+                      ) : null}
+                      {c.url ? (
+                        <>
+                          {" "}
+                          <a className="cert-link" href={c.url} target="_blank" rel="noopener noreferrer">
+                            Verify<span className="sr-only"> {c.name} (opens in a new tab)</span>
+                          </a>
+                        </>
+                      ) : null}
+                    </li>
                   ))}
                 </ul>
               </div>

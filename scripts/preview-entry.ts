@@ -4,9 +4,11 @@ import { bootStage } from "../src/stage/boot";
 import { startScrollScenes } from "../src/stage/scroll-scenes";
 import { bindMotionToggle } from "../src/stage/motion-toggle";
 import { startSectionDots } from "../src/stage/section-dots";
+import { bindTools } from "../src/tools";
 
 startScrollScenes();
 startSectionDots();
+bindTools();
 const toggle = document.querySelector<HTMLButtonElement>("[data-motion-toggle]");
 if (toggle) bindMotionToggle(toggle);
 const canvas = document.querySelector<HTMLCanvasElement>("canvas.stage");

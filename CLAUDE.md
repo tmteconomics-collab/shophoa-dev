@@ -25,6 +25,8 @@ The full original brief is in `docs/original-brief.md`. This file records what w
 
 - Quick-read path: a "The short version" card after the hero (`summary` in `src/content/site.ts`) and fixed section dots on wide screens (`src/components/SectionDots.tsx`, active dot from `src/stage/section-dots.ts`). Keep the dot list in step with the section ids.
 - Job-hunting kit: a one-page A4 CV at `/cv/` with `public/devan-cv.pdf` rendered from it (`scripts/render-cv-pdf.mjs`; keep the PDF in sync whenever CV facts change), and role versions at `/for/<slug>/` (`src/content/roles.ts`): same facts, own hero line and section order, noindex. The CV shows "Devan" only and no email, like the site.
+- Proof slots (`proof` in `src/content/site.ts`): results, testimonials and work samples stay empty until the owner supplies them; the section is hidden while empty. Testimonials only with the person's written permission. Certifications can take issuer, year and a verification link.
+- Tools section: UTM builder and budget estimator. They never ship platform prices; every rate comes from the visitor.
 
 ## Content rules
 - English only, sentence case, plain verbs, no hype.

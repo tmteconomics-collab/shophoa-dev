@@ -230,6 +230,34 @@ export const websites = {
   note: "Editor panels are illustrations, with sample content.",
 };
 
+// Interactive tools (src/components/Tools.tsx, logic in src/tools/). They run in the
+// visitor's browser and send nothing anywhere. No platform prices are built in.
+export const tools = {
+  title: "Two tools you can try",
+  intro:
+    "Tag a landing page so GA4 shows where each visit came from, and turn a budget and your own rates into a rough plan. Both run in your browser and send nothing anywhere.",
+  utm: {
+    title: "UTM link builder",
+    text: "GA4 reads these tags case by case, so the builder keeps them lowercase with no spaces.",
+  },
+  budget: {
+    title: "Budget estimator",
+    text: "Use the rates from your own quote. Results are estimates, not a forecast for any platform.",
+  },
+};
+
+// Proof slots. Each list stays empty until the owner supplies the facts; the section
+// (and its dot) appears only once a list has an entry. Never fill these from guesses.
+// - results: numbers the owner can stand behind, each with what, where and when.
+// - testimonials: only with the person's written permission; no client company names.
+// - samples: public work the owner can link to (sites, reports with data removed).
+export const proof = {
+  title: "Results and references",
+  results: [] as { value: string; label: string; context: string }[],
+  testimonials: [] as { quote: string; name: string; role: string }[],
+  samples: [] as { title: string; kind: string; text: string; url: string }[],
+};
+
 export const ai = {
   title: "Built with AI",
   intro:
@@ -271,8 +299,14 @@ export const credentials = {
     "WooCommerce",
     "Vibe coding with Claude",
   ],
-  // Names only, as on LinkedIn.
-  certifications: ["SEO Certificate", "SEO II", "Social Media Marketing", "Graphic Design Essentials"],
+  // Names as on LinkedIn. TODO: owner to add issuer, year and a verification link
+  // (url) for each; they show on the page and the CV as soon as they are filled in.
+  certifications: [
+    { name: "SEO Certificate" },
+    { name: "SEO II" },
+    { name: "Social Media Marketing" },
+    { name: "Graphic Design Essentials" },
+  ] as { name: string; issuer?: string; year?: string; url?: string }[],
   education: {
     degree: "Master of Business Administration",
     school: "Foreign Trade University, Hanoi",
