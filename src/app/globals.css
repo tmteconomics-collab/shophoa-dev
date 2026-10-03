@@ -2184,3 +2184,23 @@ html:not([data-scenes="on"]) .mk {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------- 404 ---------- */
+.not-found {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  padding-block: 6rem;
+}
+.not-found-code {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-stretch: 76%;
+  font-size: clamp(5rem, 20vw, 11rem);
+  line-height: 0.85;
+  color: var(--color-sun);
+}
+.not-found .scene-intro {
+  margin-bottom: 1.75rem;
+}

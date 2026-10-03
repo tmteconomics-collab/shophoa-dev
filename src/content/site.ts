@@ -2,6 +2,14 @@
 // (see docs/original-brief.md). Do not add achievements, metrics, quotes or
 // client names that the owner has not confirmed.
 
+function siteUrl() {
+  const env = process.env;
+  if (env.NEXT_PUBLIC_SITE_URL) return env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
+  if (env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  if (env.CF_PAGES_URL) return env.CF_PAGES_URL.replace(/\/$/, "");
+  return "http://localhost:3000";
+}
+
 export const site = {
   name: "Devan",
   // Owner's LinkedIn name. Used only in structured data, never shown on the page.
@@ -9,8 +17,10 @@ export const site = {
   role: "Strategic Account Executive",
   company: "Cốc Cốc Ad Platform",
   location: "Hanoi, Vietnam",
-  // TODO: set the production domain once the site is deployed.
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  // Absolute base for canonical, Open Graph and sitemap links. Set NEXT_PUBLIC_SITE_URL
+  // for a custom domain; otherwise the build uses the address Vercel or Cloudflare
+  // Pages gives the project, so shared links never point at localhost.
+  url: siteUrl(),
   linkedin: "https://www.linkedin.com/in/tuantran-ams",
   title: "Devan · Digital advertising in Vietnam",
   description:

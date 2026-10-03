@@ -27,7 +27,7 @@ Testing switches (query string):
 
 ## Deploy
 
-Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages uses `public/_headers` (build command `npm run build`, output `out`). Set `NEXT_PUBLIC_SITE_URL` to the production URL so canonical and Open Graph links are absolute.
+Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages uses `public/_headers` (build command `npm run build`, output `out`). Canonical, Open Graph and sitemap links use `NEXT_PUBLIC_SITE_URL` when set (custom domain); otherwise the address Vercel (`VERCEL_PROJECT_PRODUCTION_URL`) or Cloudflare Pages (`CF_PAGES_URL`) gives the build. `robots.txt`, `sitemap.xml` (pages listed in `src/content/routes.ts`) and a custom 404 are generated.
 
 ## How it is built
 
