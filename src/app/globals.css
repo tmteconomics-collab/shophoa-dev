@@ -126,6 +126,9 @@ html[data-gl="off"] .stage {
   justify-content: space-between;
   gap: 1rem;
 }
+.header-inner nav {
+  margin-left: auto;
+}
 .wordmark {
   font-family: var(--font-display);
   font-weight: 800;
@@ -163,10 +166,13 @@ html[data-gl="off"] .stage {
 .nav-list a:focus-visible {
   background-size: 100% 2px;
 }
-@media (max-width: 640px) {
+@media (max-width: 1000px) {
   .nav-extra {
     display: none;
   }
+}
+.nav-list a {
+  white-space: nowrap;
 }
 
 /* ---------- Buttons ---------- */
@@ -2170,6 +2176,61 @@ html:not([data-scenes="on"]) .mk {
   }
   .split-mock .split-copy {
     padding-top: 6vh;
+  }
+}
+
+/* ---------- Pause motion ---------- */
+.motion-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 40px;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgb(242 243 255 / 0.35);
+  background: rgb(7 11 58 / 0.35);
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.motion-toggle:hover {
+  border-color: var(--color-sun);
+}
+.motion-toggle .mt-play,
+.motion-toggle[data-state="paused"] .mt-pause {
+  display: none;
+}
+.motion-toggle[data-state="paused"] .mt-play {
+  display: inline;
+}
+.motion-toggle[data-state="paused"] {
+  border-color: var(--color-sun);
+  color: var(--color-sun);
+}
+/* Nothing moves under reduced motion, so the button is not needed there. */
+html[data-motion="reduce"] .motion-toggle {
+  display: none;
+}
+/* Paused: CSS animations stop at their finished state. */
+html[data-paused="on"] *,
+html[data-paused="on"] *::before,
+html[data-paused="on"] *::after {
+  animation: none !important;
+}
+@media (max-width: 640px) {
+  .motion-toggle {
+    padding: 0.45rem 0.6rem;
+  }
+  .motion-toggle .mt-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 }
 

@@ -35,6 +35,7 @@ The full original brief is in `docs/original-brief.md`. This file records what w
 - Character behaviour numbers come from `character.config.json`; do not hard-code them in the shaders.
 - The painting has two layouts (wide and tall) in `src/stage/starry.ts`; keep the hero text area (bottom left on wide screens, bottom half on tall ones) free of bright features.
 - Particle shapes are blended on the GPU; per-frame CPU work is uniforms only.
+- Every looping or automatic motion must stop when `<html data-paused="on">` (the header Pause motion button, WCAG 2.2.2): the stage freezes its clock, CSS animations are switched off.
 - `assets/portrait/source.png` is the original photo. Never edit it, never move it into `public/`. Keep EXIF stripped on any new export.
 
 ## Licensing

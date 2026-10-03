@@ -1,4 +1,5 @@
 import Stage from "@/components/Stage";
+import MotionToggle from "@/components/MotionToggle";
 import ScrollScenes from "@/components/ScrollScenes";
 import HeroBackdrop from "@/components/HeroBackdrop";
 import { FunnelArt, PromptArt, RailsArt } from "@/components/FallbackArt";
@@ -60,6 +61,7 @@ export default function Home() {
               </li>
             </ul>
           </nav>
+          <MotionToggle />
         </div>
       </header>
 

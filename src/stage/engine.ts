@@ -176,7 +176,7 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
       y += (c.y - y) * k;
     }
     gazeFromPoint(x, y, now, pointer.touch ? 0.6 : 1);
-    if (trails && !pointer.touch) {
+    if (trails && !pointer.touch && root.dataset.paused !== "on") {
       trails.push((e.clientX / vw) * 2 - 1, -((e.clientY / vh) * 2 - 1), now / 1000, vw / vh);
     }
   };
@@ -208,7 +208,11 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
   // (the static photo is already showing by then). The formed particle portrait is the
   // hero's resting state; there is no hand-off to the photo.
   const introAllowed =
-    hp.enabled && scrollY < innerHeight * 0.3 && !params.has("nointro") && performance.now() < 4000;
+    hp.enabled &&
+    scrollY < innerHeight * 0.3 &&
+    !params.has("nointro") &&
+    performance.now() < 4000 &&
+    root.dataset.paused !== "on";
   let introStart = introAllowed ? performance.now() : -1e9;
   const introEnd = hp.maxDurationMs;
   const skip = () => {
@@ -289,6 +293,9 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
   let ready = false;
   const hi = { x: -1, y: -1 };
   let mouseOn = 0;
+  let animTime = performance.now() / 1000;
+  let lastScroll = -1;
+  let wasPaused = false;
 
   const resize = () => {
     vw = innerWidth;
@@ -304,10 +311,22 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
     raf = requestAnimationFrame(frame);
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
+    let resized = false;
     if (innerWidth !== vw || innerHeight !== vh) {
       resize();
       remeasure();
+      resized = true;
     }
+
+    // Pause motion (header button, WCAG 2.2.2): time stops, so the painting, idle
+    // gaze and loops freeze. Scrolling still morphs the shapes, since the visitor
+    // drives that. While paused, frames are drawn only when something changed.
+    const paused = root.dataset.paused === "on";
+    if (paused && ready && !resized && scrollY === lastScroll && paused === wasPaused) return;
+    lastScroll = scrollY;
+    wasPaused = paused;
+    if (!paused) animTime += dt;
+    else skip(); // a paused visitor sees the finished painting, not a frozen assembly
 
     // Shared timeline from scroll position.
     let f = frameAt(scenes, scrollY, vh);
@@ -344,16 +363,17 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
       : { x: heroRect.left + heroRect.width / 2, y: Math.max(heroRect.top + heroRect.height * 0.4, vh * 0.4) };
 
     // Gaze: the particle portrait follows the cursor, eyes first.
-    gaze.update(now, dt);
+    if (!paused) gaze.update(now, dt);
     U.uLook.value.set(gaze.head.x, gaze.head.y);
     const iris = gaze.iris();
     U.uIris.value.set(iris.x, iris.y);
-    U.uBlink.value = gaze.blink;
+    U.uBlink.value = paused ? 0 : gaze.blink;
     const ls = character.tracking.headParallax.strengthFractionOfWidth;
     U.uLookStrength.value.set(ls, ls * character.tracking.headParallax.yAxisGain * (info.size[0] / info.size[1]));
-    const t = now / 1000;
-    const mx = pointer.inside ? ndcX(pointer.x) : 0;
-    const my = pointer.inside ? ndcY(pointer.y) : 0;
+    const t = animTime;
+    const active3d = pointer.inside && !paused;
+    const mx = active3d ? ndcX(pointer.x) : 0;
+    const my = active3d ? ndcY(pointer.y) : 0;
     particles.xf[SHAPE.cloud].set(0, 0, (vw / vh) * 1.05, 1.25);
     U.uZs.value[SHAPE.cloud] = 1;
     const anchorOf = (kind: string) => scenes.find((s) => s.kind === kind)?.anchor;
@@ -438,7 +458,7 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
     U.uCamD.value = CAM_D;
     U.uPortraitSize.value = Math.sqrt((portraitPx.w * portraitPx.h) / Math.max(1, drawCount));
     U.uSize.value = coarse || small ? 2.4 : 2.1;
-    mouseOn += ((pointer.inside ? 1 : 0) - mouseOn) * Math.min(1, dt * 4);
+    mouseOn += ((pointer.inside && !paused ? 1 : 0) - mouseOn) * Math.min(1, dt * 4);
     U.uMouseOn.value = mouseOn;
     U.uMouse.value.set(ndcX(pointer.x), ndcY(pointer.y));
     U.uMouseR.value = P.cursorTrail.influenceRadiusFractionOfWidth * 2 * (vw / vh) * 0.5;
@@ -459,6 +479,7 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
 
     // Trails stay off the face.
     if (trails) {
+      trails.points.visible = !paused && drawCount >= 30000;
       const TU = trails.material.uniforms;
       TU.uTime.value = now / 1000;
       TU.uAspect.value = vw / vh;

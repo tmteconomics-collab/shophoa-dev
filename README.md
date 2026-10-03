@@ -39,6 +39,7 @@ Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages u
 | `src/app/layout.tsx` | Metadata, JSON-LD, and the inline boot script that picks motion and WebGL mode before first paint. |
 | `src/stage/boot.ts`, `src/components/Stage.tsx` | Load the WebGL engine only on capable devices, after the page is idle. |
 | `src/stage/scroll-scenes.ts`, `src/components/ScrollScenes.tsx` | DOM half of the scroll timeline: typed search query, bio lines, active funnel stage and step. |
+| `src/stage/motion-toggle.ts`, `src/components/MotionToggle.tsx` | Header Pause motion button (WCAG 2.2.2): freezes the stage clock and all CSS animation, remembered per visitor. |
 | `src/stage/engine.ts` | three.js renderer, render loop, input, intro, adaptive quality, pause when hidden. |
 | `src/stage/timeline.ts` | One shared timeline: each `data-scene` section maps scroll position to a particle shape and a morph. |
 | `src/stage/gaze.ts` | Eyes ease faster than the head; idle sway, glances and blinks. Reads `character.config.json`. |
