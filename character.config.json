@@ -1,0 +1,263 @@
+{
+  "_note": "Starting values estimated by hand from the source photo. Verify visually and tune. Coordinates are normalized 0-1 inside each crop unless stated.",
+  "subject": {
+    "displayName": "Devan",
+    "source": {
+      "file": "assets/portrait/source.png",
+      "sizePx": [
+        2048,
+        2048
+      ],
+      "originalIsOwnersPhoto": true,
+      "note": "Kept out of public/ so the 2048px original is never deployed."
+    }
+  },
+  "sourceLandmarksPx": {
+    "leftEye": [
+      1021,
+      628
+    ],
+    "rightEye": [
+      1116,
+      634
+    ],
+    "noseTip": [
+      1057,
+      689
+    ],
+    "mouthCenter": [
+      1060,
+      730
+    ],
+    "faceCenter": [
+      1073,
+      640
+    ]
+  },
+  "faceBoxPx": {
+    "x": 962,
+    "y": 515,
+    "w": 223,
+    "h": 285,
+    "hairTopY": 432
+  },
+  "variants": {
+    "desktop": {
+      "cropPx": {
+        "x": 124,
+        "y": 230,
+        "w": 1800,
+        "h": 1200
+      },
+      "image": "public/portrait/portrait-desktop.webp",
+      "depth": "public/portrait/depthmask-desktop.png",
+      "poster": "public/portrait/poster-desktop.webp",
+      "landmarks": {
+        "leftEye": [
+          0.4983,
+          0.3317
+        ],
+        "rightEye": [
+          0.5511,
+          0.3367
+        ],
+        "noseTip": [
+          0.5183,
+          0.3825
+        ],
+        "mouthCenter": [
+          0.52,
+          0.4167
+        ],
+        "faceCenter": [
+          0.5272,
+          0.3417
+        ]
+      },
+      "depthChannels": "R = depth (0 far, 1 near), G = subject mask",
+      "eyeRadius": [
+        0.0117,
+        0.0075
+      ]
+    },
+    "mobile": {
+      "cropPx": {
+        "x": 535,
+        "y": 330,
+        "w": 1100,
+        "h": 1375
+      },
+      "image": "public/portrait/portrait-mobile.webp",
+      "depth": "public/portrait/depthmask-mobile.png",
+      "poster": "public/portrait/poster-mobile.webp",
+      "landmarks": {
+        "leftEye": [
+          0.4418,
+          0.2167
+        ],
+        "rightEye": [
+          0.5282,
+          0.2211
+        ],
+        "noseTip": [
+          0.4745,
+          0.2611
+        ],
+        "mouthCenter": [
+          0.4773,
+          0.2909
+        ],
+        "faceCenter": [
+          0.4891,
+          0.2255
+        ]
+      },
+      "depthChannels": "R = depth (0 far, 1 near), G = subject mask",
+      "eyeRadius": [
+        0.0191,
+        0.0065
+      ]
+    }
+  },
+  "depthMap": {
+    "convention": "0 = far, 1 = near",
+    "method": "procedural: ground-plane gradient + person mask + face ellipsoid + nose bump + shoulders stepped back + hands forward",
+    "resolution": "half of the crop",
+    "status": "second pass: chest step and right-leg seam smoothed with a 14px blur outside the head; face ellipsoid kept. Hand-correct hair edge near the right rail before launch.",
+    "sourceFiles": "assets/portrait/depth-desktop.png, assets/portrait/depth-mobile.png (first pass, kept for reference)"
+  },
+  "tracking": {
+    "headParallax": {
+      "strengthFractionOfWidth": 0.03,
+      "yAxisGain": 0.6,
+      "clamp": 1.0,
+      "easing": {
+        "type": "lerp",
+        "perFrameAt60fps": 0.08
+      }
+    },
+    "eyes": {
+      "extraGainOverHead": 1.6,
+      "easing": {
+        "type": "lerp",
+        "perFrameAt60fps": 0.18
+      },
+      "note": "eyes move first, head follows"
+    },
+    "backgroundParallax": "comes from the depth map; do not add separate background motion",
+    "pointerLeave": {
+      "returnToNeutralMs": 600
+    },
+    "ctaGaze": {
+      "enabled": true,
+      "blendTowardElement": 0.5,
+      "note": "gaze leans toward the hovered CTA or ad-solution item"
+    }
+  },
+  "idleLife": {
+    "startAfterIdleMs": 2500,
+    "sway": {
+      "amplitude": 0.25,
+      "periodSeconds": [
+        6,
+        9
+      ]
+    },
+    "glance": {
+      "everySeconds": [
+        3,
+        7
+      ],
+      "durationMs": [
+        500,
+        900
+      ],
+      "amplitude": 0.5
+    },
+    "blink": {
+      "everySeconds": [
+        2.5,
+        6
+      ],
+      "durationMs": 140,
+      "doubleBlinkChance": 0.15,
+      "technique": "close each eye by sampling skin from just above it and compressing vertically inside a soft ellipse; keep it subtle"
+    }
+  },
+  "devices": {
+    "desktop": "full pointer tracking",
+    "touch": "nudge gaze toward touch point; otherwise idle motion only; no gyroscope",
+    "reducedMotion": "show portrait-*.webp as a static image; no tracking, no idle motion",
+    "noWebGL": "static image with identical layout and all content readable"
+  },
+  "performance": {
+    "maxDevicePixelRatio": 2,
+    "pauseWhenOffscreen": true,
+    "pauseWhenTabHidden": true,
+    "loadWebglOnClientOnly": true,
+    "showPosterFirst": true
+  },
+  "privacy": {
+    "exifStripped": true,
+    "note": "Source file has no metadata. Keep it that way for any new export."
+  },
+  "todo": [
+    "Place the original highest-resolution photo as public/portrait/source.png if you have one larger than 2048px and regenerate crops and depth maps",
+    "Tune strength, easing and eye gain by eye in the hero prototype",
+    "Hand-correct the depth map hair edge near the right rail, shoes and hands"
+  ],
+  "particles": {
+    "_note": "Starting values; tune on real devices. Counts are particles, not pixels.",
+    "heroAssembly": {
+      "enabled": true,
+      "maxDurationMs": 3500,
+      "handoffCrossfadeMs": 1400,
+      "skippable": true,
+      "sampleFrom": [
+        "public/portrait/portrait-desktop.webp",
+        "public/portrait/depthmask-desktop.png"
+      ]
+    },
+    "cursorTrail": {
+      "enabled": true,
+      "lifetimeMs": 900,
+      "influenceRadiusFractionOfWidth": 0.12,
+      "mode": "gentle attract",
+      "keepClearOfFace": true
+    },
+    "sceneMorph": {
+      "drivenBy": "scroll progress of each scene timeline",
+      "targets": [
+        "browserWindow (About)",
+        "funnel (Ad solutions)",
+        "rails path (between scenes)"
+      ]
+    },
+    "stage": {
+      "wireframeCage": true,
+      "glassPanels": true,
+      "textScrim": "add when contrast is below WCAG AA"
+    },
+    "quality": {
+      "desktop": {
+        "count": 120000,
+        "trails": true
+      },
+      "mobile": {
+        "count": 20000,
+        "trails": false
+      },
+      "lowPower": {
+        "count": 0,
+        "fallback": "static"
+      },
+      "adaptive": "reduce count when frame time stays above 20 ms for 1 second"
+    },
+    "reducedMotion": "no assembly, no trails, static portrait and panels"
+  },
+  "eyeRadiusPx": {
+    "x": 21,
+    "y": 9,
+    "_note": "half-width and half-height of each eye opening in source pixels, measured on the 2048px source"
+  }
+}
