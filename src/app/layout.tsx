@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     url: "/",
     siteName: site.name,
     locale: "en_US",
-    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "Devan sitting on an old railway track in a green park" }],
+    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "Devan, over a particle night sky after Van Gogh's The Starry Night" }],
   },
   twitter: {
     card: "summary_large_image",

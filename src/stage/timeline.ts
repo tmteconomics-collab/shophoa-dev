@@ -8,7 +8,7 @@ import { SHAPE } from "./shapes";
 export type SceneKind = "hero" | "browser" | "funnel" | "rails" | "prompt" | "cloud" | "portrait";
 
 const KINDS: Record<SceneKind, { shape: number; alpha: number }> = {
-  hero: { shape: SHAPE.portrait, alpha: 1 },
+  hero: { shape: SHAPE.starry, alpha: 1 },
   browser: { shape: SHAPE.browser, alpha: 1 },
   funnel: { shape: SHAPE.funnel, alpha: 1 },
   rails: { shape: SHAPE.rails, alpha: 1 },

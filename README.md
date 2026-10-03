@@ -1,6 +1,6 @@
 # Devan · personal portfolio
 
-A scroll-driven portfolio for Devan (Tuan Tran), Strategic Account Executive at Cốc Cốc Ad Platform in Hanoi. The hero is a living particle portrait: thousands of particles assemble into Devan's photo and then follow your cursor with depth parallax, leading eyes and idle blinks. Built by vibe coding with Claude Code.
+A scroll-driven portfolio for Devan (Tuan Tran), Strategic Account Executive at Cốc Cốc Ad Platform in Hanoi. The hero is a living particle painting: thousands of particles assemble into a night sky after Van Gogh's *The Starry Night* (1889, public domain) and keep moving like brushstrokes, layered in depth so the scene shifts with your cursor. The Contact section closes with Devan's particle portrait, which follows your cursor with leading eyes and idle blinks. Built by vibe coding with Claude Code.
 
 ## Run it
 
@@ -41,17 +41,19 @@ Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages u
 | `src/stage/engine.ts` | three.js renderer, render loop, input, intro, adaptive quality, pause when hidden. |
 | `src/stage/timeline.ts` | One shared timeline: each `data-scene` section maps scroll position to a particle shape and a morph. |
 | `src/stage/gaze.ts` | Eyes ease faster than the head; idle sway, glances and blinks. Reads `character.config.json`. |
-| `src/stage/shapes.ts` | Particle targets: cloud, portrait, rails, browser window, funnel, `>_` prompt. |
+| `src/stage/starry.ts` | The hero painting: layouts for wide and tall screens, particle families (sky, spirals, halos, moon, wind band, cypress, hills, village) and the GLSL that moves them. Drawn from scratch, nothing traced. |
+| `src/stage/shapes.ts` | Particle targets: cloud, portrait, rails, browser window, funnel, `>_` prompt, painting. |
 | `src/stage/particles.ts` | GPU-only particle shader: shape morphs, and on the portrait the depth parallax, iris shift and blink (eye particles sample the photo). Portrait particles paint over each other; other shapes add light. |
 | `src/stage/trails.ts`, `cage.ts` | Cursor trails that keep off the face; wireframe cages. |
 | `character.config.json` | Single source of truth for the portrait: crops, landmarks, tracking, idle life, particles. |
 | `scripts/prepare_portrait.py` | Rebuilds `public/portrait/depthmask-*.png` (R = depth, G = mask). |
-| `scripts/particle_poster.py` | Pre-renders the static particle portraits and blur-up posters with the same sampling and grade as the shader. |
+| `scripts/render-starry-poster.mjs` | Renders the static hero painting and blur-up posters from the live stage. |
+| `scripts/particle_poster.py` | Pre-renders the static particle portrait for Contact with the same sampling and grade as the shader. |
 | `scripts/render-og.mjs` | Renders `public/og.jpg` from the static hero. |
 
-Scene flow: particle portrait → rails → browser window (About) → rails → funnel (Ad solutions) → rails with four stations (How I work) → `>_` prompt (Built with AI) → ambient cloud (Skills) → particle portrait (Contact).
+Scene flow: Starry Night painting → rails → browser window (About) → rails → funnel (Ad solutions) → rails with four stations (How I work) → `>_` prompt (Built with AI) → ambient cloud (Skills) → particle portrait that looks at you (Contact).
 
-Fallbacks: reduced motion, no WebGL, software WebGL, low memory or Save-Data all get the same static layout with SVG drawings and a pre-rendered particle portrait. No content lives only in WebGL.
+Fallbacks: reduced motion, no WebGL, software WebGL, low memory or Save-Data all get the same static layout with SVG drawings, a still of the painting and a pre-rendered particle portrait. No content lives only in WebGL.
 
 ## Checks run
 

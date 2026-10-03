@@ -1,6 +1,6 @@
 import Stage from "@/components/Stage";
 import ScrollScenes from "@/components/ScrollScenes";
-import HeroPhoto from "@/components/HeroPhoto";
+import HeroBackdrop from "@/components/HeroBackdrop";
 import { FunnelArt, PromptArt, RailsArt } from "@/components/FallbackArt";
 import { about, ai, contact, credentials, hero, site, solutions, workflow } from "@/content/site";
 
@@ -59,7 +59,7 @@ export default function Home() {
         {/* 1. Hero */}
         <section id="top" className="hero" data-scene="hero" aria-labelledby="hero-title">
           <div className="hero-media">
-            <HeroPhoto alt="Portrait of Devan drawn in particles: sitting cross-legged on an old railway track in a green park, looking at the camera." />
+            <HeroBackdrop />
           </div>
           <div className="hero-scrim" aria-hidden="true" />
           <div className="wrap hero-inner">
@@ -82,6 +82,7 @@ export default function Home() {
                 {hero.secondaryCta.label}
               </a>
             </div>
+            <p className="hero-credit">{hero.credit}</p>
           </div>
           <button type="button" className="skip-intro" data-skip-intro>
             Skip intro

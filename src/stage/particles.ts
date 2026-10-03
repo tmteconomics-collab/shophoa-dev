@@ -13,6 +13,7 @@ import {
   Vector4,
 } from "three";
 import { RAILS, SHAPE_COUNT, type ShapeBuffers } from "./shapes";
+import { MAX_VORTICES, STARRY_GLSL } from "./starry";
 import { palette } from "./palette";
 
 const vertex = /* glsl */ `
@@ -36,7 +37,6 @@ uniform vec2 uHi;
 uniform float uAlpha;
 uniform float uDensity;
 uniform float uPortraitBg; // how much to dim the photo's background particles
-uniform vec4 uPortraitWin; // visible part of the portrait, in its local -0.5..0.5 space
 uniform vec3 uInk;
 uniform vec3 uSun;
 uniform vec3 uSoft;
@@ -50,6 +50,10 @@ uniform float uBlink;        // 0 open, 1 closed
 uniform vec2 uEyeL;
 uniform vec2 uEyeR;
 uniform vec2 uEyeRad;
+// Hero painting.
+uniform float uStarParallax; // depth parallax strength, world units per unit of look
+uniform float uStarSize;     // stroke sprite size in CSS px
+${STARRY_GLSL}
 
 attribute vec3 aPortrait;
 attribute vec3 aRails;
@@ -58,10 +62,14 @@ attribute vec3 aFunnel;
 attribute vec3 aPrompt;
 attribute vec4 aColor;
 attribute vec4 aRand;
+attribute vec4 aStarryA;
+attribute vec4 aStarryB;
 
 varying vec4 vColor;
 varying float vSoft;
 varying float vOver;
+varying vec2 vDir;
+varying float vElong;
 
 vec3 rotate(vec3 p, vec2 r) {
   float cy = cos(r.x), sy = sin(r.x);
@@ -101,7 +109,8 @@ vec3 local(int id) {
     }
     return p;
   }
-  return aPrompt;
+  if (id == 5) return aPrompt;
+  return starryLocal(aStarryA, aStarryB, uTime);
 }
 
 // Returns the shape-space position scaled to world units; center goes out in NDC.
@@ -109,7 +118,14 @@ vec3 placed(int id, out vec2 center) {
   vec3 p = rotate(local(id), uRot[id]);
   vec4 xf = uXf[id];
   center = xf.xy;
-  return vec3(p.xy * xf.zw, p.z * uZs[id]);
+  vec3 w = vec3(p.xy * xf.zw, p.z * uZs[id]);
+  // The painting is layered in depth (sky far, cypress near): shift by depth with the look.
+  if (id == 6) {
+    // Undo perspective shrink so every layer still fills the hero, then parallax.
+    w.xy *= (uCamD - w.z) / uCamD;
+    w.xy += vec2(uLook.x, -uLook.y) * w.z * uStarParallax;
+  }
+  return w;
 }
 
 // Eye region in image uv: shift the iris toward the gaze and close the lid on blink.
@@ -146,9 +162,11 @@ void main() {
   float m = clamp(uMix * 1.35 - aRand.x * 0.35, 0.0, 1.0);
   m = m * m * (3.0 - 2.0 * m);
 
-  vec2 cA, cB;
+  vec2 cA;
   vec3 pA = placed(from, cA);
-  vec3 pB = placed(to, cB);
+  vec2 cB = cA;
+  vec3 pB = pA;
+  if (to != from) pB = placed(to, cB);
   vec3 p = mix(pA, pB, m);
   vec2 center = mix(cA, cB, m);
 
@@ -168,6 +186,7 @@ void main() {
   float wFunnel = weightOf(4, m);
   float wCloud = weightOf(0, m);
   float wPrompt = weightOf(5, m);
+  float wStarry = weightOf(6, m);
 
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   vec4 clip = projectionMatrix * mv;
@@ -178,7 +197,9 @@ void main() {
   vec2 d = uMouse - ndc;
   d.x *= uAspect;
   float f = exp(-dot(d, d) / (uMouseR * uMouseR)) * uMouseOn * (1.0 - wPortrait * 0.85);
-  ndc += vec2(d.x / uAspect, d.y) * f * 0.18;
+  ndc += vec2(d.x / uAspect, d.y) * f * 0.18 * (1.0 - wStarry * 0.6);
+  // On the painting the cursor stirs the paint around it.
+  ndc += vec2(-d.y / uAspect, d.x) * f * 0.3 * wStarry;
   clip.xy = ndc * clip.w;
   gl_Position = clip;
 
@@ -204,6 +225,7 @@ void main() {
   pcol = max(pcol, vec3(0.07, 0.09, 0.26) * (1.0 - bgness * 0.5));
   vec3 pal = aRand.y < 0.1 ? uSun : (aRand.y < 0.32 ? uSoft : uInk);
   vec3 col = mix(pal, pcol * 1.05, wPortrait);
+  if (wStarry > 0.001) col = mix(col, starryColor(aStarryA, aStarryB, aRand.y, aRand.z), wStarry);
   float alpha = 0.8;
 
   // Funnel: light up the active stage.
@@ -212,10 +234,6 @@ void main() {
   col = mix(col, uSun, hiF * wFunnel * 0.9);
   alpha *= mix(1.0, 0.55 + 0.6 * hiF, wFunnel * step(-0.5, uHi.y));
 
-  // Portrait: hide particles that fall outside the visible window of the hero.
-  float inWin = step(uPortraitWin.x, aPortrait.x) * step(aPortrait.x, uPortraitWin.z)
-              * step(uPortraitWin.y, aPortrait.y) * step(aPortrait.y, uPortraitWin.w);
-  alpha *= mix(1.0, inWin, wPortrait);
   // Dim the background so the person leads.
   alpha *= mix(1.0, 1.0 - uPortraitBg * bgness, wPortrait);
 
@@ -243,23 +261,33 @@ void main() {
 
   alpha *= mix(1.0, 0.55, wCloud);
   alpha = mix(alpha, 0.95, wPortrait);
-  alpha += f * 0.5;
+  alpha = mix(alpha, 0.95 * gStarFade, wStarry);
+  alpha += f * 0.5 * (1.0 - wStarry);
+  // Paint-like shapes (portrait, painting) keep painting over each other until a morph
+  // is well under way, so dense clouds never pile up into a white blow-out.
+  float paint = smoothstep(0.0, 0.5, wPortrait + wStarry);
   // Fewer particles on small devices: let each one carry more light.
-  alpha *= mix(uDensity, 1.0, wPortrait);
+  alpha *= mix(uDensity, 1.0, paint);
 
   // Depth of field: particles in front of the focal plane grow and soften.
   float depth = -mv.z;
   float near = clamp((uCamD - depth) / 1.6, 0.0, 1.0);
   float persp = uCamD / max(depth, 0.2);
   float base = uSize * (0.55 + aRand.w * 0.9);
-  float size = mix(base, uPortraitSize * clamp(aColor.w, 0.75, 1.55) * 1.6, wPortrait) * persp * (1.0 + near * 3.0);
+  vec2 stroke = starryStroke(gStarFamily);
+  float sizeShape = mix(base, uPortraitSize * clamp(aColor.w, 0.75, 1.55) * 1.6, wPortrait);
+  sizeShape = mix(sizeShape, uStarSize * stroke.x * (0.8 + aRand.w * 0.4), wStarry);
+  float size = sizeShape * persp * (1.0 + near * 3.0);
   gl_PointSize = min(size * uDpr, 64.0);
   alpha *= 1.0 - near * 0.75;
 
   vSoft = near;
   // Portrait particles cover each other like paint (keeps contrast in the face);
   // every other shape adds light and glows.
-  vOver = wPortrait;
+  vOver = paint;
+  // Painting strokes are elongated along their motion; everything else stays round.
+  vDir = gStarDir;
+  vElong = mix(1.0, stroke.y, wStarry);
   vColor = vec4(col, alpha * uAlpha);
 }
 `;
@@ -270,8 +298,13 @@ const fragment = /* glsl */ `
 varying vec4 vColor;
 varying float vSoft;
 varying float vOver;
+varying vec2 vDir;
+varying float vElong;
 void main() {
-  float d = length(gl_PointCoord - 0.5);
+  vec2 pc = gl_PointCoord - 0.5;
+  vec2 q = vec2(dot(pc, vDir), dot(pc, vec2(-vDir.y, vDir.x)));
+  q.y *= vElong;
+  float d = length(q);
   float a = smoothstep(0.5, mix(mix(0.12, 0.3, vOver), 0.0, vSoft), d);
   if (a < 0.01) discard;
   float k = vColor.a * a;
@@ -295,6 +328,8 @@ export function createParticles(b: ShapeBuffers, map: Texture, eyes: EyeSetup) {
   g.setAttribute("aPrompt", new BufferAttribute(b.prompt, 3));
   g.setAttribute("aColor", new BufferAttribute(b.color, 4));
   g.setAttribute("aRand", new BufferAttribute(b.rand, 4));
+  g.setAttribute("aStarryA", new BufferAttribute(b.starryA, 4));
+  g.setAttribute("aStarryB", new BufferAttribute(b.starryB, 4));
 
   const xf = Array.from({ length: SHAPE_COUNT }, () => new Vector4(0, 0, 1, 1));
   const rot = Array.from({ length: SHAPE_COUNT }, () => new Vector2());
@@ -328,8 +363,7 @@ export function createParticles(b: ShapeBuffers, map: Texture, eyes: EyeSetup) {
       uHi: { value: new Vector2(-1, -1) },
       uAlpha: { value: 0 },
       uDensity: { value: 1 },
-      uPortraitBg: { value: 0 },
-      uPortraitWin: { value: new Vector4(-0.5, -0.5, 0.5, 0.5) },
+      uPortraitBg: { value: 0.75 },
       uInk: { value: new Color(palette.ink) },
       uSun: { value: new Color(palette.sun) },
       uSoft: { value: new Color(palette.soft) },
@@ -342,6 +376,11 @@ export function createParticles(b: ShapeBuffers, map: Texture, eyes: EyeSetup) {
       uEyeL: { value: new Vector2(...eyes.left) },
       uEyeR: { value: new Vector2(...eyes.right) },
       uEyeRad: { value: new Vector2(...eyes.radius) },
+      uStarParallax: { value: 0.12 },
+      uStarSize: { value: 6 },
+      uHeroAspect: { value: 1.6 },
+      uVort: { value: Array.from({ length: MAX_VORTICES }, () => new Vector4()) },
+      uBand: { value: new Vector4() },
     },
   });
   const points = new Points(g, material);

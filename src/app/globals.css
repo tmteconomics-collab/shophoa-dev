@@ -232,34 +232,8 @@ html[data-gl="off"] .stage {
   height: 100%;
   max-width: none;
   object-fit: cover;
-  object-position: 55% 30%;
+  object-position: 62% 40%;
   transition: opacity 0.6s ease;
-}
-/* Same framing as the stage (heroFraming + focalCover in src/stage/config.ts):
-   scale the photo just enough to put the face at the target point and still
-   cover the hero. Numbers come from the face landmark in character.config.json. */
-@supports (width: 1cqw) {
-  .hero-media {
-    container-type: size;
-  }
-  .hero-photo {
-    --w: max(122.31cqw, 182.62cqh);
-    --h: calc(var(--w) * 1200 / 1800);
-    inset: auto;
-    width: var(--w);
-    height: var(--h);
-    left: clamp(calc(100cqw - var(--w)), calc(62cqw - 0.5272 * var(--w)), 0px);
-    top: clamp(calc(100cqh - var(--h)), calc(40cqh - 0.3417 * var(--h)), 0px);
-    object-fit: fill;
-  }
-  @media (max-aspect-ratio: 19/20) {
-    .hero-photo {
-      --w: max(106.32cqw, 110.69cqh);
-      --h: calc(var(--w) * 1375 / 1100);
-      left: clamp(calc(100cqw - var(--w)), calc(50cqw - 0.4891 * var(--w)), 0px);
-      top: clamp(calc(100cqh - var(--h)), calc(30cqh - 0.2255 * var(--h)), 0px);
-    }
-  }
 }
 html[data-gl="pending"] .hero-media,
 html[data-gl="on"] .hero-media {
@@ -300,7 +274,7 @@ html[data-gl="on"] .hero-photo {
 @media (max-aspect-ratio: 19/20) {
   .hero-scrim {
     background:
-      linear-gradient(0deg, rgb(7 11 58 / 0.97) 0%, rgb(7 11 58 / 0.86) 30%, rgb(7 11 58 / 0) 58%),
+      linear-gradient(0deg, rgb(7 11 58 / 0.97) 0%, rgb(7 11 58 / 0.88) 34%, rgb(7 11 58 / 0.6) 50%, rgb(7 11 58 / 0) 64%),
       linear-gradient(180deg, rgb(7 11 58 / 0.6) 0%, rgb(7 11 58 / 0) 16%);
   }
   .hero-scrim::after {
@@ -355,10 +329,20 @@ html[data-gl="on"] .hero-photo {
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
+.hero-credit {
+  position: absolute;
+  right: clamp(1rem, 4vw, 2.5rem);
+  bottom: clamp(2rem, 8vh, 5rem);
+  margin: 0;
+  max-width: 22rem;
+  text-align: right;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
 .skip-intro {
   position: absolute;
   right: clamp(1rem, 4vw, 2.5rem);
-  bottom: clamp(1.25rem, 4vh, 2.5rem);
+  top: calc(var(--header-h) + 1rem);
   display: none;
   padding: 0.6rem 1rem;
   border-radius: 999px;
@@ -372,10 +356,12 @@ html[data-gl="on"] .hero-photo {
 html[data-intro="on"] .skip-intro {
   display: inline-block;
 }
-@media (max-aspect-ratio: 19/20) {
-  .skip-intro {
-    top: calc(var(--header-h) + 1rem);
-    bottom: auto;
+@media (max-width: 899px) {
+  /* Phones: the credit sits under the buttons instead of in the corner. */
+  .hero-credit {
+    position: static;
+    margin-top: 1rem;
+    text-align: left;
   }
 }
 

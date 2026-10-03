@@ -1,5 +1,6 @@
 import {
   ColorManagement,
+  Vector4,
   Color,
   LinearFilter,
   PerspectiveCamera,
@@ -8,11 +9,12 @@ import {
   TextureLoader,
   WebGLRenderer,
 } from "three";
-import { character, focalCover, heroFraming, pickVariant, variantInfo, type ImageBox, type Variant } from "./config";
+import { character, pickVariant, variantInfo, type Variant } from "./config";
 import { Gaze } from "./gaze";
 import { palette } from "./palette";
 import { createParticles } from "./particles";
 import { buildShapes, SHAPE, type PortraitSample } from "./shapes";
+import { starryLayout, vortexUniforms } from "./starry";
 import { collectScenes, frameAt, measureScenes, type Frame, type Scene } from "./timeline";
 import { createTrails } from "./trails";
 import { createFunnelCage, createPromptCage } from "./cage";
@@ -101,7 +103,10 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
   };
   // ?count=N overrides the particle budget (testing and tuning).
   const count = clamp(Number(params.get("count")) || tier.count, 2000, 200000);
-  const shapes = buildShapes(count, sample);
+  // The hero painting is laid out for the viewport's shape (wide or tall).
+  const heroAspect = innerWidth / Math.max(1, innerHeight);
+  const layout = starryLayout(heroAspect);
+  const shapes = buildShapes(count, sample, { layout, aspect: heroAspect });
 
   const renderer = new WebGLRenderer({
     canvas,
@@ -223,41 +228,31 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
   const ndcX = (px: number) => (px / vw) * 2 - 1;
   const ndcY = (py: number) => -((py / vh) * 2 - 1);
   const wpp = () => 2 / vh; // world units per CSS pixel at the focal plane
-  let heroBox: ImageBox = { x: 0, y: 0, w: 1, h: 1 };
   const face = info.landmarks.faceCenter;
 
-  const placePortrait = (frame: Frame) => {
-    const useContact = contact && (frame.a === contact || frame.b === contact);
-    if (useContact) {
-      const r = contact.anchor.getBoundingClientRect();
-      const ia = info.size[0] / info.size[1];
-      const w = Math.min(r.width, r.height * ia);
-      const h = w / ia;
-      particles.xf[SHAPE.portrait].set(ndcX(r.left + r.width / 2), ndcY(r.top + r.height / 2), w * wpp(), h * wpp());
-      U.uZs.value[SHAPE.portrait] = h * wpp() * 0.2;
-      U.uPortraitWin.value.set(-0.5, -0.5, 0.5, 0.5);
-      U.uPortraitBg.value = 0.75;
-      portraitPx = { w, h };
-      faceScreen = { x: r.left + (r.width - w) / 2 + face[0] * w, y: r.top + (r.height - h) / 2 + face[1] * h };
-    } else {
-      particles.xf[SHAPE.portrait].set(
-        ndcX(heroRect.left + heroBox.x + heroBox.w / 2),
-        ndcY(heroRect.top + heroBox.y + heroBox.h / 2),
-        heroBox.w * wpp(),
-        heroBox.h * wpp(),
-      );
-      U.uZs.value[SHAPE.portrait] = heroBox.h * wpp() * 0.12;
-      // Only the part of the image inside the hero box is visible.
-      const x0 = -heroBox.x / heroBox.w - 0.5;
-      const x1 = (heroRect.width - heroBox.x) / heroBox.w - 0.5;
-      const y1 = 0.5 + heroBox.y / heroBox.h;
-      const y0 = 0.5 - (heroRect.height - heroBox.y) / heroBox.h;
-      U.uPortraitWin.value.set(x0, y0, x1, y1);
-      U.uPortraitBg.value = 0.55;
-      portraitPx = { w: heroBox.w, h: heroBox.h };
-      faceScreen = { x: heroRect.left + heroBox.x + face[0] * heroBox.w, y: heroRect.top + heroBox.y + face[1] * heroBox.h };
-    }
+  // The particle portrait lives in the Contact scene, fitted inside its box.
+  const placePortrait = () => {
+    if (!contact) return;
+    const r = contact.anchor.getBoundingClientRect();
+    const ia = info.size[0] / info.size[1];
+    const w = Math.min(r.width, r.height * ia);
+    const h = w / ia;
+    particles.xf[SHAPE.portrait].set(ndcX(r.left + r.width / 2), ndcY(r.top + r.height / 2), w * wpp(), h * wpp());
+    U.uZs.value[SHAPE.portrait] = h * wpp() * 0.2;
+    portraitPx = { w, h };
+    portraitFace = { x: r.left + (r.width - w) / 2 + face[0] * w, y: r.top + (r.height - h) / 2 + face[1] * h };
   };
+
+  // The painting fills the hero box.
+  const placeHero = () => {
+    const r = heroRect;
+    particles.xf[SHAPE.starry].set(ndcX(r.left + r.width / 2), ndcY(r.top + r.height / 2), (r.width / 2) * wpp(), (r.height / 2) * wpp());
+    U.uZs.value[SHAPE.starry] = r.height * wpp() * 0.5;
+    U.uHeroAspect.value = r.width / Math.max(1, r.height);
+    U.uStarSize.value = Math.sqrt((r.width * r.height) / Math.max(1, drawCount)) * 2.5;
+  };
+  vortexUniforms(layout).forEach((v, i) => (U.uVort.value[i] as Vector4).set(v[0], v[1], v[2], v[3]));
+  U.uBand.value.set(layout.band.v, layout.band.amp, layout.band.tilt, layout.band.thick);
 
   const placeAnchor = (shape: number, el: HTMLElement, mode: "box" | "square", fill = 1) => {
     const r = el.getBoundingClientRect();
@@ -276,6 +271,7 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
 
   let heroRect = hero.el.getBoundingClientRect();
   let portraitPx = { w: 1, h: 1 };
+  let portraitFace = { x: 0, y: 0 };
 
   // ---------- Quality ----------
   // ?fixed keeps the full particle budget (for screenshots on slow test machines).
@@ -326,7 +322,7 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
         a: hero,
         b: hero,
         from: SHAPE.cloud,
-        to: SHAPE.portrait,
+        to: SHAPE.starry,
         mix: smooth(150, introEnd - 300, el),
         alpha: smooth(0, 450, el),
         travel: 0,
@@ -337,12 +333,15 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
 
     // Hero framing.
     heroRect = hero.el.getBoundingClientRect();
-    const fr = heroFraming[variant];
-    heroBox = focalCover(heroRect.width, heroRect.height, info.size[0], info.size[1], face, fr.target, fr.overscan);
-    const heroVisible = heroRect.bottom > 0 && heroRect.top < vh;
+    const contactInView = !!contact && (f.a === contact || f.b === contact);
 
-    // Shape placement (also decides where the face is on screen).
-    placePortrait(f);
+    // Shape placement. The gaze is measured from the face in Contact, and from the
+    // centre of the hero elsewhere (it drives the painting's depth parallax).
+    placeHero();
+    placePortrait();
+    faceScreen = contactInView
+      ? portraitFace
+      : { x: heroRect.left + heroRect.width / 2, y: Math.max(heroRect.top + heroRect.height * 0.4, vh * 0.4) };
 
     // Gaze: the particle portrait follows the cursor, eyes first.
     gaze.update(now, dt);
@@ -430,9 +429,9 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
       TU.uAspect.value = vw / vh;
       TU.uDpr.value = renderer.getPixelRatio();
       TU.uLife.value = P.cursorTrail.lifetimeMs / 1000;
-      const faceR = (character.faceBoxPx.h / character.variants[variant].cropPx.h) * heroBox.h * 1.1;
-      TU.uFace.value.set(ndcX(faceScreen.x), ndcY(faceScreen.y), faceR * wpp());
-      TU.uFaceOn.value = P.cursorTrail.keepClearOfFace && heroVisible ? 1 : 0;
+      const faceR = (character.faceBoxPx.h / character.variants[variant].cropPx.h) * portraitPx.h * 1.1;
+      TU.uFace.value.set(ndcX(portraitFace.x), ndcY(portraitFace.y), faceR * wpp());
+      TU.uFaceOn.value = P.cursorTrail.keepClearOfFace && contactInView ? 1 : 0;
     }
 
     // A short trip down the rails between scenes.

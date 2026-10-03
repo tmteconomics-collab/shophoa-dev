@@ -24,6 +24,7 @@ export const hero = {
   tail: "I also build my own tools with AI.",
   primaryCta: { label: "Connect on LinkedIn", href: site.linkedin },
   secondaryCta: { label: "See ad solutions", href: "#solutions" },
+  credit: "Sky after Vincent van Gogh, The Starry Night (1889)",
 };
 
 export const about = {
@@ -144,7 +145,7 @@ export const ai = {
     },
     {
       name: "Prototype",
-      text: "The hero came first: thousands of particles that form my portrait and follow your cursor.",
+      text: "The hero came first: thousands of particles that paint a night sky after Van Gogh's The Starry Night and move with your cursor.",
     },
     {
       name: "Iterate",

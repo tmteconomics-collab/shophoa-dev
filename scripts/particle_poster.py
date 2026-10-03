@@ -1,11 +1,11 @@
 """Render the static particle portraits used when WebGL is off.
 
-The live hero draws the portrait as particles (src/stage). Visitors with reduced
-motion, no WebGL or a low-power device get this pre-rendered still instead, made
-with the same sampling and colour grade, so the site never shows the soft photo.
-It also feeds the blur-up posters and the Open Graph image.
+The Contact section draws the portrait as particles (src/stage). Visitors with
+reduced motion, no WebGL or a low-power device get this pre-rendered still instead,
+made with the same sampling and colour grade, so the site never shows the soft photo.
+Used by the Contact section's static fallback.
 
-Writes public/portrait/particles-{desktop,mobile}.webp and poster-{desktop,mobile}.webp.
+Writes public/portrait/particles-{desktop,mobile}.webp.
 Usage: pip install pillow numpy && python3 scripts/particle_poster.py
 """
 import json
@@ -90,6 +90,4 @@ for v in ["desktop", "mobile"]:
         d.ellipse((xs[i] - r, ys[i] - r, xs[i] + r, ys[i] + r), fill=tuple(rgb[i]))
     img = img.resize((W, H), Image.LANCZOS)
     img.save(f"public/portrait/particles-{v}.webp", quality=72, method=6)
-    tiny = (48, 32) if v == "desktop" else (40, 50)
-    img.resize(tiny, Image.LANCZOS).save(f"public/portrait/poster-{v}.webp", quality=60)
     print("wrote", v, W, H, n)

@@ -188,8 +188,8 @@
   "devices": {
     "desktop": "full pointer tracking",
     "touch": "nudge gaze toward touch point; otherwise idle motion only; no gyroscope",
-    "reducedMotion": "show the pre-rendered particle portrait (public/portrait/particles-*.webp) as a static image; no tracking, no idle motion",
-    "noWebGL": "same static particle portrait with identical layout and all content readable"
+    "reducedMotion": "static images: public/portrait/starry-*.webp in the hero, particles-*.webp in Contact; no tracking, no idle motion",
+    "noWebGL": "same static images with identical layout and all content readable"
   },
   "performance": {
     "maxDevicePixelRatio": 2,
@@ -211,12 +211,9 @@
       "enabled": true,
       "maxDurationMs": 2600,
       "skippable": true,
-      "sampleFrom": [
-        "public/portrait/portrait-desktop.webp",
-        "public/portrait/depthmask-desktop.png"
-      ],
-      "handoff": "none: the formed particle portrait is the hero (owner decision, the 1:1 photo looked soft on 2x screens). The photo is only shown in the static fallback.",
-      "density": "face weight +1.6 and eye area +2.5 over the body, so gaze and blinks read in particles"
+      "handoff": "none: the painting is the hero. The particle portrait (with gaze and blinks) appears in Contact.",
+      "density": "face weight +1.6 and eye area +2.5 over the body, so gaze and blinks read in particles",
+      "target": "the hero painting after Van Gogh, The Starry Night (src/stage/starry.ts), which keeps moving as brushstrokes"
     },
     "cursorTrail": {
       "enabled": true,
@@ -228,9 +225,12 @@
     "sceneMorph": {
       "drivenBy": "scroll progress of each scene timeline",
       "targets": [
+        "starryNight (hero)",
         "browserWindow (About)",
         "funnel (Ad solutions)",
-        "rails path (between scenes)"
+        "rails path (between scenes, How I work)",
+        "prompt (Built with AI)",
+        "particle portrait (Contact)"
       ]
     },
     "stage": {

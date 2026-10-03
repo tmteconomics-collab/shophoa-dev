@@ -8,7 +8,9 @@ The full original brief is in `docs/original-brief.md`. This file records what w
 - Contact: **LinkedIn only**. Do not put the email address on the site.
 - Vibe coding: **both the Claude app and Claude Code**. This site was built with Claude Code.
 - Dark theme only (particles need the dark stage). Revisit only if the owner asks.
-- Hero: the **particle portrait is the resting state**. The 1:1 photo looked soft on 2x screens, so it is never shown; it is only a texture for particle colours and the eyes. Static visitors get `public/portrait/particles-*.webp` from `scripts/particle_poster.py`.
+- Hero: a **particle painting after Van Gogh's The Starry Night** (owner request, 2026-10-03), not the owner's photo. Built procedurally in `src/stage/starry.ts`; never trace or copy a reproduction of the painting (the owner's reference was a photo of a 3D print, used for mood only). A small credit line names the painting.
+- Portrait: the particle portrait (gaze, blinks) lives in Contact. The 1:1 photo looked soft on 2x screens, so it is never shown; it is only a texture for particle colours and the eyes.
+- Static stills: `public/portrait/starry-*.webp` (hero, from `scripts/render-starry-poster.mjs`) and `particles-*.webp` (Contact, from `scripts/particle_poster.py`).
 
 ## Decisions delegated to Claude (2026-10-03)
 - Positioning line: kept as proposed in the brief.
@@ -28,7 +30,7 @@ The full original brief is in `docs/original-brief.md`. This file records what w
 - Static export (`output: "export"`). No server code, no tracking scripts.
 - WebGL is decided before first paint by the boot script in `src/app/layout.tsx` (`data-gl`, `data-motion`, `data-intro` on `<html>`). Every scene must stay fully readable with `data-gl="off"`.
 - Character behaviour numbers come from `character.config.json`; do not hard-code them in the shaders.
-- Hero framing is defined twice on purpose: `heroFraming`/`focalCover` in `src/stage/config.ts` (WebGL) and the `.hero-photo` container-unit rules in `globals.css` (static, no layout shift). Change both together.
+- The painting has two layouts (wide and tall) in `src/stage/starry.ts`; keep the hero text area (bottom left on wide screens, bottom half on tall ones) free of bright features.
 - Particle shapes are blended on the GPU; per-frame CPU work is uniforms only.
 - `assets/portrait/source.png` is the original photo. Never edit it, never move it into `public/`. Keep EXIF stripped on any new export.
 
