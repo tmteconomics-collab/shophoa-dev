@@ -1,5 +1,7 @@
 import Stage from "@/components/Stage";
 import MotionToggle from "@/components/MotionToggle";
+import Summary from "@/components/Summary";
+import SectionDots from "@/components/SectionDots";
 import ScrollScenes from "@/components/ScrollScenes";
 import HeroBackdrop from "@/components/HeroBackdrop";
 import { FunnelArt, PromptArt, RailsArt } from "@/components/FallbackArt";
@@ -65,6 +67,8 @@ export default function Home() {
         </div>
       </header>
 
+      <SectionDots />
+
       <main id="main">
         {/* 1. Hero */}
         <section id="top" className="hero" data-scene="hero" aria-labelledby="hero-title">
@@ -98,6 +102,9 @@ export default function Home() {
             Skip intro
           </button>
         </section>
+
+        {/* The short version, for visitors who skim */}
+        <Summary />
 
         {/* 2. About: a new tab that fills in as you scroll */}
         <section id="about" className="about" data-scene="browser" aria-labelledby="about-title">

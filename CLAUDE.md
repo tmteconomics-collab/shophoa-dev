@@ -15,13 +15,15 @@ The full original brief is in `docs/original-brief.md`. This file records what w
 - Sections added on request (2026-10-03): **Measurement and performance marketing** (Google Tag Manager, GA4, Google Ads, Looker Studio) and **Websites on WordPress**. Their panels are illustrations in the site's style: no product screenshots or logos, every figure labelled sample data and kept internally consistent (campaign rows add up to the report scorecards).
 
 ## Decisions delegated to Claude (2026-10-03)
-- Positioning line: kept as proposed in the brief.
+- Positioning line: the hero lead names all three pillars (Cốc Cốc ads, Google measurement, WordPress builds), since the owner added the last two on 2026-10-03.
 - Platform reach: "tens of millions of users" (public figures range 22–30 million by year); no "decade" claim.
 - CPD on Cốc Cốc = cost per duration (fixed price for a placement over a set time).
 - Certifications listed by name only. MBA research focus not shown. No extra vibe-coding projects: the site is the project.
 - Built with AI lesson line written from how this site was made; the owner can edit it in `src/content/site.ts`.
 - WooCommerce confirmed by the owner (2026-10-03): the WordPress section has an Online store step. Looker Studio and block editor vs page builder are still assumptions marked `TODO:`.
 - Funnel mapping: new-tab banner and CPM under Awareness; search, native, targeting under Consideration; shopping, retargeting, CPC and CPD under Conversion.
+
+- Quick-read path: a "The short version" card after the hero (`summary` in `src/content/site.ts`) and fixed section dots on wide screens (`src/components/SectionDots.tsx`, active dot from `src/stage/section-dots.ts`). Keep the dot list in step with the section ids.
 
 ## Content rules
 - English only, sentence case, plain verbs, no hype.

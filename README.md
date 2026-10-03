@@ -34,7 +34,8 @@ Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages u
 | Path | What it does |
 | --- | --- |
 | `src/content/site.ts` | All copy. Facts only from the owner's LinkedIn and notes. |
-| `src/app/page.tsx` | The nine scenes as semantic HTML. Works without JavaScript. |
+| `src/app/page.tsx` | The scenes as semantic HTML. Works without JavaScript. |
+| `src/components/Summary.tsx`, `SectionDots.tsx` | Quick-read path: one card with the whole profile after the hero, and fixed section dots on wide screens (active dot from `src/stage/section-dots.ts`). |
 | `src/components/mocks/` | Animated illustration panels for the measurement (Tag Manager, GA4, Google Ads, Looker Studio) and WordPress (site editor, blocks, WooCommerce store, responsive preview, speed and SEO) sections. Drawn from scratch, sample data, CSS-only motion that stops under reduced motion. |
 | `src/app/layout.tsx` | Metadata, JSON-LD, and the inline boot script that picks motion and WebGL mode before first paint. |
 | `src/stage/boot.ts`, `src/components/Stage.tsx` | Load the WebGL engine only on capable devices, after the page is idle. |

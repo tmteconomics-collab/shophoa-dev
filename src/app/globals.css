@@ -409,12 +409,137 @@ html[data-intro="on"] .skip-intro {
   margin-top: 1.6rem;
 }
 
+/* ---------- The short version ---------- */
+.summary {
+  position: relative;
+  padding: 10vh 0 6vh;
+}
+.summary-card {
+  max-width: 46rem;
+  background: var(--glass-strong);
+}
+.summary-title {
+  margin: 0 0 1.1rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-stretch: 85%;
+  font-size: clamp(1.7rem, 3.2vw, 2.3rem);
+  line-height: 1.05;
+}
+.summary-list {
+  margin: 0 0 1.6rem;
+  display: grid;
+  gap: 0.9rem;
+}
+.summary-list > div {
+  display: grid;
+  gap: 0.15rem 1.25rem;
+}
+@media (min-width: 640px) {
+  .summary-list > div {
+    grid-template-columns: 7.5rem 1fr;
+  }
+}
+.summary-list dt {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-sun);
+  padding-top: 0.2rem;
+}
+.summary-list dd {
+  margin: 0;
+}
+.summary-pillars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+.summary-pillars a {
+  text-decoration: underline;
+  text-decoration-color: rgb(255 210 63 / 0.55);
+  text-underline-offset: 0.2em;
+}
+.summary-pillars a:hover {
+  color: var(--color-sun);
+}
+
+/* ---------- Section dots (wide screens) ---------- */
+.dots {
+  display: none;
+}
+@media (min-width: 1100px) and (min-height: 620px) {
+  .dots {
+    display: block;
+    position: fixed;
+    right: 0.9rem;
+    top: 50%;
+    z-index: 30;
+    transform: translateY(-50%);
+  }
+  .dots ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.15rem;
+  }
+  .dots a {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 24px;
+    height: 24px;
+  }
+  .dots a::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    margin-right: 8px;
+    border-radius: 2px;
+    background: rgb(242 243 255 / 0.4);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+  .dots a:hover::after,
+  .dots a:focus-visible::after {
+    background: var(--color-ink);
+  }
+  .dots a[aria-current]::after {
+    background: var(--color-sun);
+    transform: scale(1.35);
+  }
+  .dots-label {
+    position: absolute;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: var(--glass-strong);
+    border: 1px solid var(--line);
+    font-size: 0.8rem;
+    line-height: 1.4;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .dots a:hover .dots-label,
+  .dots a:focus-visible .dots-label {
+    opacity: 1;
+  }
+}
+
 /* ---------- About ---------- */
 .about {
   position: relative;
 }
 html[data-scenes="on"] .about {
-  height: 280vh;
+  height: 230vh;
 }
 .about-stick {
   min-height: 100svh;
@@ -619,17 +744,17 @@ html[data-scenes="on"] .bio li.is-on {
 .split-copy {
   position: relative;
   z-index: 1;
-  padding: 22vh 0 26vh;
+  padding: 16vh 0 18vh;
 }
 .scene-head {
-  margin-bottom: 18vh;
+  margin-bottom: 12vh;
 }
 .steps {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 22vh;
+  gap: 14vh;
 }
 .step {
   transition: border-color 0.3s ease;

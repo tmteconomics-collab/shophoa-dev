@@ -24,17 +24,31 @@ export const site = {
   linkedin: "https://www.linkedin.com/in/tuantran-ams",
   title: "Devan · Digital advertising in Vietnam",
   description:
-    "Devan is a Strategic Account Executive at Cốc Cốc Ad Platform in Hanoi. He helps brands reach Vietnamese users at scale and builds his own tools with AI.",
+    "Devan is a Strategic Account Executive at Cốc Cốc Ad Platform in Hanoi. He helps brands reach Vietnamese users, measures what works with Google Analytics, Tag Manager and Google Ads, and builds WordPress and WooCommerce sites.",
 };
 
 export const hero = {
-  // Positioning line from the brief, kept as decided.
-  lead: "I help brands reach Vietnamese users at scale and turn awareness into",
-  highlight: "measurable results.",
-  tail: "I also build my own tools with AI.",
+  // Three pillars, all confirmed by the owner: ad sales, measurement, web builds.
+  lead: "I help brands reach Vietnamese users on Cốc Cốc,",
+  highlight: "measure what works",
+  tail: "with Google's tools, and build the WordPress sites their ads land on.",
   primaryCta: { label: "Connect on LinkedIn", href: site.linkedin },
   secondaryCta: { label: "See ad solutions", href: "#solutions" },
   credit: "Sky after Vincent van Gogh, The Starry Night (1889)",
+};
+
+// "The short version": the whole portfolio in one card, for visitors who skim.
+export const summary = {
+  title: "The short version",
+  role: "Strategic Account Executive at Cốc Cốc Ad Platform, Hanoi. Account Manager from November 2024, in this role since June 2025.",
+  pillars: [
+    { text: "Sell and run ad campaigns on Cốc Cốc", href: "#solutions" },
+    { text: "Set up and report on GA4, Tag Manager and Google Ads", href: "#measurement" },
+    { text: "Build WordPress sites and WooCommerce stores", href: "#websites" },
+  ],
+  tools: ["Google Analytics 4", "Google Tag Manager", "Google Ads", "Looker Studio", "WordPress", "WooCommerce", "Claude"],
+  education: "MBA, Foreign Trade University, 2026 to 2028 (part-time)",
+  languages: "Vietnamese (native), English (professional working)",
 };
 
 export const about = {
