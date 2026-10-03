@@ -1,7 +1,10 @@
 import { site, summary } from "@/content/site";
+import type { SectionId } from "@/content/roles";
 
-/** One card with the whole portfolio, for visitors who skim. */
-export default function Summary() {
+/** One card with the whole portfolio, for visitors who skim. Pillars follow the section order. */
+export default function Summary({ order }: { order: SectionId[] }) {
+  const rank = (href: string) => order.indexOf(href.slice(1) as SectionId);
+  const pillars = [...summary.pillars].sort((a, b) => rank(a.href) - rank(b.href));
   return (
     <section id="summary" className="summary" aria-labelledby="summary-title">
       <div className="wrap">
@@ -18,7 +21,7 @@ export default function Summary() {
               <dt>What I do</dt>
               <dd>
                 <ul className="summary-pillars">
-                  {summary.pillars.map((p) => (
+                  {pillars.map((p) => (
                     <li key={p.href}>
                       <a href={p.href}>{p.text}</a>
                     </li>

@@ -27,6 +27,7 @@ fs.writeFileSync(path.join(dst, "site.css"), css);
 let body = html.slice(html.indexOf("<body>") + 6, html.lastIndexOf("</body>"));
 body = body.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
 body = body.replace(/(src|srcSet|srcset|href)="\/(portrait|fonts)\//g, '$1="$2/');
+body = body.replace('data-assets="/"', 'data-assets=""');
 
 const page = `<title>Devan Portfolio</title>
 <link rel="stylesheet" href="site.css">

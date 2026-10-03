@@ -7,5 +7,5 @@ import { bootStage } from "@/stage/boot";
 export default function Stage() {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => (ref.current ? bootStage(ref.current) : undefined), []);
-  return <canvas ref={ref} className="stage" aria-hidden="true" />;
+  return <canvas ref={ref} className="stage" aria-hidden="true" data-assets="/" />;
 }

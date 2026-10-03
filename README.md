@@ -34,7 +34,9 @@ Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages u
 | Path | What it does |
 | --- | --- |
 | `src/content/site.ts` | All copy. Facts only from the owner's LinkedIn and notes. |
-| `src/app/page.tsx` | The scenes as semantic HTML. Works without JavaScript. |
+| `src/components/Portfolio.tsx`, `src/app/page.tsx` | The one-page portfolio as semantic HTML. Works without JavaScript. |
+| `src/content/roles.ts`, `src/app/for/[role]/page.tsx` | Role versions to send with job applications: `/for/account-management/`, `/for/performance-marketing/`, `/for/web/`. Same facts, a different opening line and section order. Noindex, not in the sitemap. |
+| `src/app/cv/page.tsx`, `public/devan-cv.pdf` | Print-ready one-page A4 CV built from `cv` and `credentials` in `src/content/site.ts`. |
 | `src/components/Summary.tsx`, `SectionDots.tsx` | Quick-read path: one card with the whole profile after the hero, and fixed section dots on wide screens (active dot from `src/stage/section-dots.ts`). |
 | `src/components/mocks/` | Animated illustration panels for the measurement (Tag Manager, GA4, Google Ads, Looker Studio) and WordPress (site editor, blocks, WooCommerce store, responsive preview, speed and SEO) sections. Drawn from scratch, sample data, CSS-only motion that stops under reduced motion. |
 | `src/app/layout.tsx` | Metadata, JSON-LD, and the inline boot script that picks motion and WebGL mode before first paint. |
@@ -53,6 +55,7 @@ Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages u
 | `scripts/render-starry-poster.mjs` | Renders the static hero painting and blur-up posters from the live stage. |
 | `scripts/particle_poster.py` | Pre-renders the static particle portrait for Contact with the same sampling and grade as the shader. |
 | `scripts/render-og.mjs` | Renders `public/og.jpg` from the static hero. |
+| `scripts/render-cv-pdf.mjs` | Renders `public/devan-cv.pdf` from `/cv/`. Rerun after any CV change, with `NEXT_PUBLIC_SITE_URL` set so the PDF prints the site address. |
 
 Scene flow: Starry Night painting → rails → browser window (About) → rails → funnel (Ad solutions) → rails with four stations (How I work) → 3D bar chart behind the dashboard panels (Measurement) → page blocks behind the editor panels (WordPress) → `>_` prompt (Built with AI) → ambient cloud (Skills) → particle portrait that looks at you (Contact).
 

@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./fonts.css";
 import "./globals.css";
-import { site } from "@/content/site";
+import { ogImage, site } from "@/content/site";
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -15,13 +15,13 @@ export const metadata: Metadata = {
     url: "/",
     siteName: site.name,
     locale: "en_US",
-    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "Devan, over a particle night sky after Van Gogh's The Starry Night" }],
+    images: [ogImage],
   },
   twitter: {
     card: "summary_large_image",
     title: site.title,
     description: site.description,
-    images: ["/og.jpg"],
+    images: [ogImage.url],
   },
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],

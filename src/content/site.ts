@@ -27,6 +27,14 @@ export const site = {
     "Devan is a Strategic Account Executive at Cốc Cốc Ad Platform in Hanoi. He helps brands reach Vietnamese users, measures what works with Google Analytics, Tag Manager and Google Ads, and builds WordPress and WooCommerce sites.",
 };
 
+// Shared preview image for every page (Next.js replaces, not merges, openGraph per page).
+export const ogImage = {
+  url: "/og.jpg",
+  width: 1200,
+  height: 630,
+  alt: "Devan, over a particle night sky after Van Gogh's The Starry Night",
+};
+
 export const hero = {
   // Three pillars, all confirmed by the owner: ad sales, measurement, web builds.
   lead: "I help brands reach Vietnamese users on Cốc Cốc,",
@@ -282,4 +290,44 @@ export const contact = {
   text: "Planning a campaign for Vietnamese users, or curious how I build with AI? Send me a message on LinkedIn.",
   cta: { label: "Message me on LinkedIn", href: site.linkedin },
   meta: "Hanoi, Vietnam · English and Vietnamese",
+};
+
+// The print-ready CV at /cv/ (and public/devan-cv.pdf, rendered from it by
+// scripts/render-cv-pdf.mjs). Same facts as the page, in CV form.
+export const cv = {
+  title: "CV",
+  profile:
+    "Strategic Account Executive at Cốc Cốc Ad Platform in Hanoi. I help brands and agencies reach Vietnamese users with the right placement and buying model, measure results with Google Tag Manager, Google Analytics 4 and Google Ads, and build WordPress sites and WooCommerce stores. Studying for an MBA at Foreign Trade University alongside full-time work.",
+  experience: [
+    {
+      company: "Cốc Cốc Ad Platform",
+      place: "Hanoi",
+      roles: [
+        { title: "Strategic Account Executive", dates: "June 2025 to present" },
+        { title: "Account Manager", dates: "November 2024 to June 2025" },
+      ],
+      points: [
+        "Work with brands and agencies from the first meeting through campaign management.",
+        "Manage several accounts and deadlines at once, and handle client requests and escalations.",
+        "Coordinate internal teams and outside partners to deliver campaigns.",
+        "Negotiate and close contracts that work for both sides; grow long-term relationships and find new opportunities.",
+        "Track key metrics and forecast results, so campaigns are adjusted before they drift.",
+        "Sell new-tab banners, search keyword, native and shopping product ads, audience targeting and retargeting, on CPM, CPC and CPD models.",
+      ],
+    },
+  ],
+  project: {
+    name: "This portfolio",
+    text: "Directed with Claude Code: a static site with a WebGL particle painting after The Starry Night, accessible fallbacks for every scene, and this CV.",
+  },
+  skillGroups: [
+    {
+      name: "Advertising",
+      items: ["Digital advertising", "CPM, CPC and CPD buying", "Audience targeting and retargeting", "Third-party campaign tracking"],
+    },
+    { name: "Measurement", items: ["Google Tag Manager", "Google Analytics 4", "Google Ads", "Looker Studio"] },
+    { name: "Web", items: ["WordPress", "WooCommerce", "SEO"] },
+    { name: "Marketing", items: ["Digital marketing", "Inbound marketing"] },
+    { name: "AI", items: ["Vibe coding with Claude (Claude app and Claude Code)"] },
+  ],
 };

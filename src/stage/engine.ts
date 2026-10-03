@@ -76,7 +76,9 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
   const variant: Variant = pickVariant(innerWidth, innerHeight);
   const info = variantInfo(variant);
 
-  const [photo, depth] = await Promise.all([loadImage(info.image), loadImage(info.depth)]);
+  // Asset base from the canvas: "/" on the site (pages live at any depth), "" in the preview bundle.
+  const base = canvas.dataset.assets ?? "";
+  const [photo, depth] = await Promise.all([loadImage(base + info.image), loadImage(base + info.depth)]);
 
   // Sample colour, depth and mask on a small grid to place the portrait particles.
   const sw = variant === "desktop" ? 540 : 360;
