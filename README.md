@@ -2,6 +2,8 @@
 
 A scroll-driven portfolio for Devan (Tuan Tran), Strategic Account Executive at Cốc Cốc Ad Platform in Hanoi. The hero is a living particle painting: thousands of particles assemble into a night sky after Van Gogh's *The Starry Night* (1889, public domain) and keep moving like brushstrokes, layered in depth so the scene shifts with your cursor. The Contact section closes with Devan's particle portrait, which follows your cursor with leading eyes and idle blinks. Built by vibe coding with Claude Code.
 
+Owner guides (Vietnamese): [how to update the site](docs/huong-dan-cap-nhat.md) and [checklists](docs/checklist.md) for quarterly reviews, job applications and real-device tests.
+
 ## Run it
 
 ```bash
