@@ -14,8 +14,9 @@ export interface VariantInfo {
   eyeRadius: Vec2;
 }
 
-// Files in public/ are served from the site root.
-const toUrl = (p: string) => "/" + p.replace(/^public\//, "");
+// Files in public/ are served next to the page. Relative URLs keep the stage
+// working wherever the page is hosted (site root or the preview bundle).
+const toUrl = (p: string) => p.replace(/^public\//, "");
 
 export function variantInfo(v: Variant): VariantInfo {
   const src = character.variants[v];

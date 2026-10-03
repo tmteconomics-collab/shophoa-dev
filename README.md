@@ -21,6 +21,10 @@ Testing switches (query string):
 | `?fixed` | Turn off the automatic quality drop (for screenshots on slow machines) |
 | `?gl=force` | Keep WebGL on software renderers (SwiftShader, llvmpipe), which normally get the static layout |
 
+## Preview without deploying
+
+`npm run preview:build` writes `preview/`: one HTML fragment, `site.css`, a single `app.js` (esbuild, no React runtime) and the assets, all with relative paths. It runs the same stage and scroll code as the site (`src/stage/boot.ts`, `src/stage/scroll-scenes.ts`) and is what the private claude.ai preview is published from.
+
 ## Deploy
 
 Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages uses `public/_headers` (build command `npm run build`, output `out`). Set `NEXT_PUBLIC_SITE_URL` to the production URL so canonical and Open Graph links are absolute.
@@ -32,8 +36,8 @@ Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages u
 | `src/content/site.ts` | All copy. Facts only from the owner's LinkedIn and notes. |
 | `src/app/page.tsx` | The seven scenes as semantic HTML. Works without JavaScript. |
 | `src/app/layout.tsx` | Metadata, JSON-LD, and the inline boot script that picks motion and WebGL mode before first paint. |
-| `src/components/Stage.tsx` | Loads the WebGL engine only on capable devices, after the page is idle. |
-| `src/components/ScrollScenes.tsx` | DOM half of the scroll timeline: typed search query, bio lines, active funnel stage and step. |
+| `src/stage/boot.ts`, `src/components/Stage.tsx` | Load the WebGL engine only on capable devices, after the page is idle. |
+| `src/stage/scroll-scenes.ts`, `src/components/ScrollScenes.tsx` | DOM half of the scroll timeline: typed search query, bio lines, active funnel stage and step. |
 | `src/stage/engine.ts` | three.js renderer, render loop, input, intro, adaptive quality, pause when hidden. |
 | `src/stage/timeline.ts` | One shared timeline: each `data-scene` section maps scroll position to a particle shape and a morph. |
 | `src/stage/gaze.ts` | Eyes ease faster than the head; idle sway, glances and blinks. Reads `character.config.json`. |
