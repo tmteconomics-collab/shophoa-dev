@@ -130,6 +130,64 @@ export const workflow = {
   ],
 };
 
+// Owner request (2026-10-03): show measurement and performance work on Google's tools.
+// TODO: owner to confirm Looker Studio is part of his reporting.
+export const growth = {
+  title: "Measurement and performance marketing",
+  intro:
+    "I set up Google Tag Manager, Google Analytics 4 and Google Ads so every campaign is measured the same way, then use that data to improve results and report them plainly.",
+  steps: [
+    {
+      tool: "Google Tag Manager",
+      name: "Tag",
+      text: "One container on the site, then tags, triggers and variables for the actions that matter: leads, sign-ups, purchases. Every change is checked in preview before it goes live.",
+    },
+    {
+      tool: "Google Analytics 4",
+      name: "Measure",
+      text: "Data streams, events marked as key events, audiences, and a link to Google Ads, so traffic and results read the same in both tools.",
+    },
+    {
+      tool: "Google Ads",
+      name: "Optimize",
+      text: "Key events imported as conversions, a bidding strategy that matches the goal, negative keywords to cut wasted clicks, and steady tests of ads and landing pages.",
+    },
+    {
+      tool: "Looker Studio",
+      name: "Report",
+      text: "GA4 and Google Ads in one report a client can read in a minute: spend, results, cost per result, and what changes next.",
+    },
+  ],
+  note: "Panels show sample data to illustrate the workflow. They are not client results.",
+};
+
+// Owner request (2026-10-03): show that he builds websites on WordPress.
+// TODO: owner to confirm his usual tools (block editor or a page builder, WooCommerce).
+export const websites = {
+  title: "Websites on WordPress",
+  intro:
+    "I build WordPress sites that marketing teams can update on their own: one design system, reusable blocks and fast pages.",
+  steps: [
+    {
+      name: "Theme and layout",
+      text: "Start from a theme, then shape the header, footer and page templates in the site editor so every page shares one system.",
+    },
+    {
+      name: "Blocks and patterns",
+      text: "Build pages from blocks, save repeated sections as patterns, and keep colours and type in global styles so edits stay consistent.",
+    },
+    {
+      name: "Responsive",
+      text: "Check every layout on desktop, tablet and phone before launch, and fix what breaks at each size.",
+    },
+    {
+      name: "Speed and SEO",
+      text: "Compress images, cache pages, and set titles, descriptions and a sitemap, so pages load fast and get found.",
+    },
+  ],
+  note: "Editor panels are illustrations, with sample content.",
+};
+
 export const ai = {
   title: "Built with AI",
   intro:
@@ -158,7 +216,18 @@ export const ai = {
 
 export const credentials = {
   title: "Skills, certifications and education",
-  skills: ["SEO", "Inbound marketing", "Digital marketing", "Digital advertising", "Vibe coding with Claude"],
+  skills: [
+    "SEO",
+    "Inbound marketing",
+    "Digital marketing",
+    "Digital advertising",
+    "Google Analytics 4",
+    "Google Tag Manager",
+    "Google Ads",
+    "Looker Studio",
+    "WordPress",
+    "Vibe coding with Claude",
+  ],
   // Names only, as on LinkedIn.
   certifications: ["SEO Certificate", "SEO II", "Social Media Marketing", "Graphic Design Essentials"],
   education: {

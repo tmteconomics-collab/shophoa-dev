@@ -35,15 +35,18 @@ export function startScrollScenes(): () => void {
       });
     }
 
+    const narrow = window.innerWidth < 900;
     for (const section of stepped) {
       const sr = section.getBoundingClientRect();
       let active = -1;
+      // On phones a sticky panel covers the top of the screen, so read lower down.
+      const focus = narrow && section.dataset.focusMobile ? Number(section.dataset.focusMobile) * vh : mid;
       if (sr.top < vh * 0.75 && sr.bottom > vh * 0.25) {
         const items = section.querySelectorAll<HTMLElement>("[data-step]");
         let best = Infinity;
         items.forEach((item, i) => {
           const ir = item.getBoundingClientRect();
-          const d = Math.abs(ir.top + ir.height / 2 - mid);
+          const d = Math.abs(ir.top + ir.height / 2 - focus);
           if (d < best) {
             best = d;
             active = i;
@@ -53,6 +56,12 @@ export function startScrollScenes(): () => void {
       }
       const next = active < 0 ? "" : String(active);
       if (section.dataset.active !== next) section.dataset.active = next;
+      // Illustration panels follow the step; the first one shows before any step is reached.
+      const mocks = section.querySelectorAll<HTMLElement>("[data-mock]");
+      mocks.forEach((m, i) => {
+        const on = i === Math.max(0, active);
+        if (m.classList.contains("is-on") !== on) m.classList.toggle("is-on", on);
+      });
     }
   };
 

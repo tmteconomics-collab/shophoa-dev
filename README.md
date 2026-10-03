@@ -34,7 +34,8 @@ Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages u
 | Path | What it does |
 | --- | --- |
 | `src/content/site.ts` | All copy. Facts only from the owner's LinkedIn and notes. |
-| `src/app/page.tsx` | The seven scenes as semantic HTML. Works without JavaScript. |
+| `src/app/page.tsx` | The nine scenes as semantic HTML. Works without JavaScript. |
+| `src/components/mocks/` | Animated illustration panels for the measurement (Tag Manager, GA4, Google Ads, Looker Studio) and WordPress sections. Drawn from scratch, sample data, CSS-only motion that stops under reduced motion. |
 | `src/app/layout.tsx` | Metadata, JSON-LD, and the inline boot script that picks motion and WebGL mode before first paint. |
 | `src/stage/boot.ts`, `src/components/Stage.tsx` | Load the WebGL engine only on capable devices, after the page is idle. |
 | `src/stage/scroll-scenes.ts`, `src/components/ScrollScenes.tsx` | DOM half of the scroll timeline: typed search query, bio lines, active funnel stage and step. |
@@ -42,7 +43,7 @@ Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages u
 | `src/stage/timeline.ts` | One shared timeline: each `data-scene` section maps scroll position to a particle shape and a morph. |
 | `src/stage/gaze.ts` | Eyes ease faster than the head; idle sway, glances and blinks. Reads `character.config.json`. |
 | `src/stage/starry.ts` | The hero painting: layouts for wide and tall screens, particle families (sky, spirals, halos, moon, wind band, cypress, hills, village) and the GLSL that moves them. Drawn from scratch, nothing traced. |
-| `src/stage/shapes.ts` | Particle targets: cloud, portrait, rails, browser window, funnel, `>_` prompt, painting. |
+| `src/stage/shapes.ts` | Particle targets: cloud, portrait, rails, browser window, funnel, `>_` prompt, painting, 3D bar chart, page blocks. |
 | `src/stage/particles.ts` | GPU-only particle shader: shape morphs, and on the portrait the depth parallax, iris shift and blink (eye particles sample the photo). Portrait particles paint over each other; other shapes add light. |
 | `src/stage/trails.ts`, `cage.ts` | Cursor trails that keep off the face; wireframe cages. |
 | `character.config.json` | Single source of truth for the portrait: crops, landmarks, tracking, idle life, particles. |
@@ -51,14 +52,14 @@ Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages u
 | `scripts/particle_poster.py` | Pre-renders the static particle portrait for Contact with the same sampling and grade as the shader. |
 | `scripts/render-og.mjs` | Renders `public/og.jpg` from the static hero. |
 
-Scene flow: Starry Night painting → rails → browser window (About) → rails → funnel (Ad solutions) → rails with four stations (How I work) → `>_` prompt (Built with AI) → ambient cloud (Skills) → particle portrait that looks at you (Contact).
+Scene flow: Starry Night painting → rails → browser window (About) → rails → funnel (Ad solutions) → rails with four stations (How I work) → 3D bar chart behind the dashboard panels (Measurement) → page blocks behind the editor panels (WordPress) → `>_` prompt (Built with AI) → ambient cloud (Skills) → particle portrait that looks at you (Contact).
 
 Fallbacks: reduced motion, no WebGL, software WebGL, low memory or Save-Data all get the same static layout with SVG drawings, a still of the painting and a pre-rendered particle portrait. No content lives only in WebGL.
 
 ## Checks run
 
 - axe-core: 0 violations (static desktop, reduced-motion mobile)
-- Lighthouse with brotli (as on Vercel or Cloudflare), mobile: Performance 98, Accessibility 100, Best Practices 100, SEO 100. Desktop: 100, 100, 100, 100. Software-rendered WebGL (as in Lighthouse) gets the static layout; real GPUs get the full stage.
+- Lighthouse with brotli (as on Vercel or Cloudflare), mobile: Performance 93, Accessibility 100, Best Practices 100, SEO 100. Desktop: 100, 100, 100, 100. Software-rendered WebGL (as in Lighthouse) gets the static layout; real GPUs get the full stage.
 - No horizontal scroll at 390px; layouts checked at 390x844 and 1440x900.
 
 ## Credits

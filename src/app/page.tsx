@@ -2,7 +2,9 @@ import Stage from "@/components/Stage";
 import ScrollScenes from "@/components/ScrollScenes";
 import HeroBackdrop from "@/components/HeroBackdrop";
 import { FunnelArt, PromptArt, RailsArt } from "@/components/FallbackArt";
-import { about, ai, contact, credentials, hero, site, solutions, workflow } from "@/content/site";
+import { growthMocks } from "@/components/mocks/GrowthMocks";
+import { websiteMocks } from "@/components/mocks/WebsiteMocks";
+import { about, ai, contact, credentials, growth, hero, site, solutions, websites, workflow } from "@/content/site";
 
 function Arrow() {
   return (
@@ -46,6 +48,12 @@ export default function Home() {
               </li>
               <li className="nav-extra">
                 <a href="#process">How I work</a>
+              </li>
+              <li className="nav-extra">
+                <a href="#measurement">Analytics</a>
+              </li>
+              <li className="nav-extra">
+                <a href="#websites">WordPress</a>
               </li>
               <li>
                 <a href="#contact">Contact</a>
@@ -205,7 +213,96 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 5. Built with AI */}
+        {/* 5. Measurement and performance marketing on Google's tools */}
+        <section
+          id="measurement"
+          className="split split-mock"
+          data-scene="chart"
+          data-steps
+          data-focus-mobile="0.74"
+          aria-labelledby="measurement-title"
+        >
+          <div className="wrap split-grid">
+            <div className="split-visual">
+              <div className="mk-stage" data-anchor aria-hidden="true">
+                {growthMocks.map((Mock, i) => (
+                  <div key={i} className="mk" data-mock={i}>
+                    <Mock />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="split-copy">
+              <header className="scene-head">
+                <h2 id="measurement-title" className="section-title">
+                  {growth.title}
+                </h2>
+                <p className="scene-intro">{growth.intro}</p>
+              </header>
+              <ol className="steps">
+                {growth.steps.map((step, i) => (
+                  <li key={step.name} className="panel step" data-step>
+                    <h3 className="step-title">
+                      <span className="step-num" aria-hidden="true">
+                        {i + 1}
+                      </span>
+                      {step.name}
+                    </h3>
+                    <p className="step-tool">{step.tool}</p>
+                    <p className="step-text">{step.text}</p>
+                  </li>
+                ))}
+              </ol>
+              <p className="footnote">{growth.note}</p>
+            </div>
+          </div>
+        </section>
+
+        {/* 6. Websites on WordPress */}
+        <section
+          id="websites"
+          className="split split-rev split-mock"
+          data-scene="blocks"
+          data-steps
+          data-focus-mobile="0.74"
+          aria-labelledby="websites-title"
+        >
+          <div className="wrap split-grid">
+            <div className="split-visual">
+              <div className="mk-stage" data-anchor aria-hidden="true">
+                {websiteMocks.map((Mock, i) => (
+                  <div key={i} className="mk" data-mock={i}>
+                    <Mock />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="split-copy">
+              <header className="scene-head">
+                <h2 id="websites-title" className="section-title">
+                  {websites.title}
+                </h2>
+                <p className="scene-intro">{websites.intro}</p>
+              </header>
+              <ol className="steps">
+                {websites.steps.map((step, i) => (
+                  <li key={step.name} className="panel step" data-step>
+                    <h3 className="step-title">
+                      <span className="step-num" aria-hidden="true">
+                        {i + 1}
+                      </span>
+                      {step.name}
+                    </h3>
+                    <p className="step-text">{step.text}</p>
+                  </li>
+                ))}
+              </ol>
+              <p className="footnote">{websites.note}</p>
+            </div>
+          </div>
+        </section>
+
+        {/* 7. Built with AI */}
         <section id="built-with-ai" className="ai" data-scene="prompt" aria-labelledby="ai-title">
           <div className="wrap ai-grid">
             <div className="ai-copy">
@@ -231,7 +328,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 6. Skills, certifications, education */}
+        {/* 8. Skills, certifications, education */}
         <section id="skills" className="creds" data-scene="cloud" aria-labelledby="creds-title">
           <div className="wrap">
             <h2 id="creds-title" className="section-title">
@@ -275,7 +372,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 7. Contact */}
+        {/* 9. Contact */}
         <section id="contact" className="contact" data-scene="portrait" aria-labelledby="contact-title">
           <div className="wrap contact-grid">
             <div className="contact-copy">

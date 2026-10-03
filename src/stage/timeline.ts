@@ -5,13 +5,15 @@ import { SHAPE } from "./shapes";
 // how far they are through a morph. The DOM side (ScrollScenes) reads the same
 // section ranges, so text and particles stay in step.
 
-export type SceneKind = "hero" | "browser" | "funnel" | "rails" | "prompt" | "cloud" | "portrait";
+export type SceneKind = "hero" | "browser" | "funnel" | "rails" | "chart" | "blocks" | "prompt" | "cloud" | "portrait";
 
 const KINDS: Record<SceneKind, { shape: number; alpha: number }> = {
   hero: { shape: SHAPE.starry, alpha: 1 },
   browser: { shape: SHAPE.browser, alpha: 1 },
   funnel: { shape: SHAPE.funnel, alpha: 1 },
   rails: { shape: SHAPE.rails, alpha: 1 },
+  chart: { shape: SHAPE.chart, alpha: 0.85 },
+  blocks: { shape: SHAPE.blocks, alpha: 0.85 },
   prompt: { shape: SHAPE.prompt, alpha: 1 },
   cloud: { shape: SHAPE.cloud, alpha: 0.45 },
   portrait: { shape: SHAPE.portrait, alpha: 0.9 },

@@ -12,7 +12,7 @@ import {
   Vector2,
   Vector4,
 } from "three";
-import { RAILS, SHAPE_COUNT, type ShapeBuffers } from "./shapes";
+import { CHART, RAILS, SHAPE_COUNT, type ShapeBuffers } from "./shapes";
 import { MAX_VORTICES, STARRY_GLSL } from "./starry";
 import { palette } from "./palette";
 
@@ -50,6 +50,10 @@ uniform float uBlink;        // 0 open, 1 closed
 uniform vec2 uEyeL;
 uniform vec2 uEyeR;
 uniform vec2 uEyeRad;
+// Measurement chart and WordPress blocks.
+uniform float uChartLevel;   // 0..1, how many bars are lit (follows the active step)
+uniform float uGroupHi[5];   // highlight per page-block group
+uniform float uSqueeze;      // 0 desktop width .. 1 phone width
 // Hero painting.
 uniform float uStarParallax; // depth parallax strength, world units per unit of look
 uniform float uStarSize;     // stroke sprite size in CSS px
@@ -62,6 +66,8 @@ attribute vec3 aFunnel;
 attribute vec3 aPrompt;
 attribute vec4 aColor;
 attribute vec4 aRand;
+attribute vec3 aChart;
+attribute vec3 aBlocks;
 attribute vec4 aStarryA;
 attribute vec4 aStarryB;
 
@@ -81,6 +87,10 @@ vec3 rotate(vec3 p, vec2 r) {
 float funnelRadius(float y) {
   float t = (y + 1.0) * 0.5;
   return 0.2 + 0.8 * pow(max(t, 0.0), 1.6);
+}
+
+float blockGroup(float y) {
+  return y > 0.8 ? 0.0 : (y > 0.28 ? 1.0 : (y > -0.25 ? 2.0 : (y > -0.75 ? 3.0 : 4.0)));
 }
 
 vec3 local(int id) {
@@ -110,6 +120,22 @@ vec3 local(int id) {
     return p;
   }
   if (id == 5) return aPrompt;
+  if (id == 7) {
+    vec3 p = aChart;
+    float base = ${CHART.base.toFixed(3)};
+    // Bars breathe in a wave; the trend line ripples with them.
+    if (p.y > base + 0.001 && p.z < ${(CHART.lineZ - 0.05).toFixed(3)}) {
+      p.y = base + (p.y - base) * (0.93 + 0.07 * sin(uTime * 0.9 - p.x * 2.5));
+    }
+    if (p.z > ${(CHART.lineZ - 0.05).toFixed(3)}) p.y += 0.02 * sin(uTime * 1.2 - p.x * 3.0);
+    return p;
+  }
+  if (id == 8) {
+    vec3 p = aBlocks;
+    p.z += 0.05 * sin(uTime * 0.8 + blockGroup(p.y) * 1.3);
+    p.x *= mix(1.0, 0.42, uSqueeze);
+    return p;
+  }
   return starryLocal(aStarryA, aStarryB, uTime);
 }
 
@@ -187,6 +213,8 @@ void main() {
   float wCloud = weightOf(0, m);
   float wPrompt = weightOf(5, m);
   float wStarry = weightOf(6, m);
+  float wChart = weightOf(7, m);
+  float wBlocks = weightOf(8, m);
 
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   vec4 clip = projectionMatrix * mv;
@@ -250,6 +278,19 @@ void main() {
   float marker = step(${(-0.42 + 0.08).toFixed(3)}, aRails.y);
   col = mix(col, uSun, clamp(st, 0.0, 1.0) * wRails);
   alpha *= mix(1.0, (0.55 + 0.9 * st) * mix(1.0, onStage * (0.35 + 0.65 * clamp(st, 0.0, 1.0)), marker), wRails);
+
+  // Chart: bars light up from the left as the steps advance; the trend line is sun.
+  float barIdx = floor((aChart.x + 1.0) * 0.5 * ${CHART.bars.length}.0);
+  float lit = 1.0 - smoothstep(uChartLevel * ${CHART.bars.length}.0 - 0.5, uChartLevel * ${CHART.bars.length}.0 + 0.5, barIdx + 0.5);
+  float isLine = step(${(CHART.lineZ - 0.05).toFixed(3)}, aChart.z);
+  float isGrid = step(aChart.y, ${(CHART.base + 0.0005).toFixed(4)});
+  col = mix(col, uSun, clamp(lit * 0.75 + isLine, 0.0, 1.0) * wChart);
+  alpha *= mix(1.0, mix(0.85 + 0.3 * lit, 0.35, isGrid), wChart);
+
+  // Blocks: the group that the active step is about glows sun.
+  float gh = uGroupHi[int(blockGroup(aBlocks.y) + 0.5)];
+  col = mix(col, uSun, gh * 0.85 * wBlocks);
+  alpha *= mix(1.0, 0.7 + 0.6 * gh, wBlocks);
 
   // Browser: the frame glows, the inside stays faint.
   float inside = step(max(abs(aBrowser.x), abs(aBrowser.y)), 0.985);
@@ -328,6 +369,8 @@ export function createParticles(b: ShapeBuffers, map: Texture, eyes: EyeSetup) {
   g.setAttribute("aPrompt", new BufferAttribute(b.prompt, 3));
   g.setAttribute("aColor", new BufferAttribute(b.color, 4));
   g.setAttribute("aRand", new BufferAttribute(b.rand, 4));
+  g.setAttribute("aChart", new BufferAttribute(b.chart, 3));
+  g.setAttribute("aBlocks", new BufferAttribute(b.blocks, 3));
   g.setAttribute("aStarryA", new BufferAttribute(b.starryA, 4));
   g.setAttribute("aStarryB", new BufferAttribute(b.starryB, 4));
 
@@ -376,6 +419,9 @@ export function createParticles(b: ShapeBuffers, map: Texture, eyes: EyeSetup) {
       uEyeL: { value: new Vector2(...eyes.left) },
       uEyeR: { value: new Vector2(...eyes.right) },
       uEyeRad: { value: new Vector2(...eyes.radius) },
+      uChartLevel: { value: 0 },
+      uGroupHi: { value: [0, 0, 0, 0, 0] },
+      uSqueeze: { value: 0 },
       uStarParallax: { value: 0.12 },
       uStarSize: { value: 6 },
       uHeroAspect: { value: 1.6 },

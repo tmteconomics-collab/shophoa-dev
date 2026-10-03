@@ -12,12 +12,15 @@ The full original brief is in `docs/original-brief.md`. This file records what w
 - Portrait: the particle portrait (gaze, blinks) lives in Contact. The 1:1 photo looked soft on 2x screens, so it is never shown; it is only a texture for particle colours and the eyes.
 - Static stills: `public/portrait/starry-*.webp` (hero, from `scripts/render-starry-poster.mjs`) and `particles-*.webp` (Contact, from `scripts/particle_poster.py`).
 
+- Sections added on request (2026-10-03): **Measurement and performance marketing** (Google Tag Manager, GA4, Google Ads, Looker Studio) and **Websites on WordPress**. Their panels are illustrations in the site's style: no product screenshots or logos, every figure labelled sample data and kept internally consistent (campaign rows add up to the report scorecards).
+
 ## Decisions delegated to Claude (2026-10-03)
 - Positioning line: kept as proposed in the brief.
 - Platform reach: "tens of millions of users" (public figures range 22–30 million by year); no "decade" claim.
 - CPD on Cốc Cốc = cost per duration (fixed price for a placement over a set time).
 - Certifications listed by name only. MBA research focus not shown. No extra vibe-coding projects: the site is the project.
 - Built with AI lesson line written from how this site was made; the owner can edit it in `src/content/site.ts`.
+- Looker Studio and the WordPress tooling (block editor vs page builder, WooCommerce) are assumptions marked `TODO:` for the owner to confirm.
 - Funnel mapping: new-tab banner and CPM under Awareness; search, native, targeting under Consideration; shopping, retargeting, CPC and CPD under Conversion.
 
 ## Content rules

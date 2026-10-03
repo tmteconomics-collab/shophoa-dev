@@ -362,6 +362,22 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
     const funnelEl = anchorOf("funnel");
     if (funnelEl) placeAnchor(SHAPE.funnel, funnelEl, "square", 0.74);
     particles.rot[SHAPE.funnel].set(t * 0.22 + mx * 0.25, 0.42 - my * 0.1);
+    // Measurement: a 3D bar chart rising behind the dashboard panel.
+    const chartEl = anchorOf("chart");
+    if (chartEl) {
+      const r = chartEl.getBoundingClientRect();
+      particles.xf[SHAPE.chart].set(ndcX(r.left + r.width / 2), ndcY(r.top + r.height * 0.56), r.width * 0.64 * wpp(), r.height * 0.5 * wpp());
+      U.uZs.value[SHAPE.chart] = r.width * 0.5 * wpp();
+    }
+    particles.rot[SHAPE.chart].set(-0.38 + mx * 0.15, 0.2 - my * 0.06);
+    // WordPress: page blocks floating behind the editor panel.
+    const blocksEl = anchorOf("blocks");
+    if (blocksEl) {
+      const r = blocksEl.getBoundingClientRect();
+      particles.xf[SHAPE.blocks].set(ndcX(r.left + r.width / 2), ndcY(r.top + r.height / 2), r.width * 0.62 * wpp(), r.height * 0.6 * wpp());
+      U.uZs.value[SHAPE.blocks] = r.width * 0.5 * wpp();
+    }
+    particles.rot[SHAPE.blocks].set(0.42 + mx * 0.12, 0.2 - my * 0.06);
     const promptEl = anchorOf("prompt");
     if (promptEl) placeAnchor(SHAPE.prompt, promptEl, "square", 1.1);
     particles.rot[SHAPE.prompt].set(mx * 0.35 + Math.sin(t * 0.4) * 0.12, -my * 0.15);
@@ -389,6 +405,23 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
     hi.y = tf < 0 ? -1 : hi.y < 0 ? tf : hi.y + (tf - hi.y) * k;
     hi.x = tr < 0 ? -1 : hi.x < 0 ? tr : hi.x + (tr - hi.x) * k;
     U.uHi.value.set(hi.x, hi.y);
+    // Chart lights one more stretch of bars per step; blocks light the group each step is about.
+    const tc = active("chart");
+    const tb = active("blocks");
+    const chartTarget = tc < 0 ? 0.15 : (tc + 1) / 4;
+    U.uChartLevel.value += (chartTarget - U.uChartLevel.value) * k;
+    const groupTargets = [
+      [1, 0, 0, 0, 1], // theme and layout: header and footer
+      [0, 1, 1, 1, 0], // blocks and patterns
+      [0.35, 0.35, 0.35, 0.35, 0.35], // responsive
+      [0.7, 0.7, 0.7, 0.7, 0.7], // speed and SEO
+    ];
+    const gt = tb < 0 ? [0, 0, 0, 0, 0] : groupTargets[Math.min(3, tb)];
+    const gh = U.uGroupHi.value as number[];
+    for (let i = 0; i < 5; i++) gh[i] += (gt[i] - gh[i]) * k;
+    // On the responsive step the page squeezes from desktop to phone width and back.
+    const squeezeTarget = tb === 2 ? 0.5 + 0.5 * Math.sin(t * 0.9) : 0;
+    U.uSqueeze.value += (squeezeTarget - U.uSqueeze.value) * k;
 
     // Particle uniforms.
     U.uTime.value = t;
