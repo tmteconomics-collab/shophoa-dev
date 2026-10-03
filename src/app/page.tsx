@@ -59,7 +59,7 @@ export default function Home() {
         {/* 1. Hero */}
         <section id="top" className="hero" data-scene="hero" aria-labelledby="hero-title">
           <div className="hero-media">
-            <HeroPhoto alt="Devan sitting cross-legged on an old railway track in a green park, looking at the camera." />
+            <HeroPhoto alt="Portrait of Devan drawn in particles: sitting cross-legged on an old railway track in a green park, looking at the camera." />
           </div>
           <div className="hero-scrim" aria-hidden="true" />
           <div className="wrap hero-inner">
@@ -290,10 +290,10 @@ export default function Home() {
             <div className="contact-visual">
               <div className="portrait-box" data-anchor>
                 <picture>
-                  <source media="(max-aspect-ratio: 19/20)" srcSet="/portrait/portrait-mobile.webp" type="image/webp" />
+                  <source media="(max-aspect-ratio: 19/20)" srcSet="/portrait/particles-mobile.webp" type="image/webp" />
                   <img
                     className="fallback-photo"
-                    src="/portrait/portrait-desktop.webp"
+                    src="/portrait/particles-desktop.webp"
                     alt=""
                     width={1800}
                     height={1200}

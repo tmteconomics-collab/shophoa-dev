@@ -18,7 +18,7 @@ export const site = {
 };
 
 export const hero = {
-  // TODO: owner to confirm the positioning line (proposal from the brief).
+  // Positioning line from the brief, kept as decided.
   lead: "I help brands reach Vietnamese users at scale and turn awareness into",
   highlight: "measurable results.",
   tail: "I also build my own tools with AI.",
@@ -42,9 +42,10 @@ export const about = {
 
 export const solutions = {
   title: "Ad solutions I work with",
-  // TODO: verify both platform figures with Cốc Cốc before publishing.
+  // Public figures for the browser range from 22 to 30 million users depending on the
+  // year, so the copy says "tens of millions" rather than a number that may date.
   intro:
-    "Cốc Cốc has spent nearly a decade building its ad platform. It reaches about 30 million users on PC and mobile through the Cốc Cốc browser. I match each brand's goal to the right placement and buying model.",
+    "Cốc Cốc's ad platform reaches tens of millions of Vietnamese users on PC and mobile through the Cốc Cốc browser. I match each brand's goal to the right placement and buying model.",
   stages: [
     {
       id: "awareness",
@@ -95,8 +96,8 @@ export const solutions = {
         },
         {
           name: "CPC and CPD buying",
-          // TODO: confirm CPD means cost per day on Cốc Cốc.
-          text: "Pay per click when you need traffic, or book a placement by the day.",
+          // CPD on Cốc Cốc is cost per duration: a fixed price for a placement over a set time.
+          text: "Pay per click when you need traffic, or pay a fixed price to hold a placement for a set time.",
         },
       ],
     },
@@ -143,21 +144,21 @@ export const ai = {
     },
     {
       name: "Prototype",
-      text: "The hero came first: particles that form my portrait, then a photo that follows your cursor.",
+      text: "The hero came first: thousands of particles that form my portrait and follow your cursor.",
     },
     {
       name: "Iterate",
       text: "I review each version and ask for changes until it feels right.",
     },
   ],
-  // TODO: owner to add one or two sentences on what he learned. Hidden while empty.
-  lesson: "",
+  lesson:
+    "The biggest lesson: a clear brief does most of the work. Writing down what the site must never claim, and what it must not copy, shaped every decision after it.",
 };
 
 export const credentials = {
   title: "Skills, certifications and education",
   skills: ["SEO", "Inbound marketing", "Digital marketing", "Digital advertising", "Vibe coding with Claude"],
-  // TODO: add issuers and dates.
+  // Names only, as on LinkedIn.
   certifications: ["SEO Certificate", "SEO II", "Social Media Marketing", "Graphic Design Essentials"],
   education: {
     degree: "Master of Business Administration",

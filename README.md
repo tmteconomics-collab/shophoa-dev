@@ -1,6 +1,6 @@
 # Devan · personal portfolio
 
-A scroll-driven portfolio for Devan (Tuan Tran), Strategic Account Executive at Cốc Cốc Ad Platform in Hanoi. The hero is a living portrait: particles assemble into the photo, then the photo follows your cursor with depth parallax, leading eyes and idle blinks. Built by vibe coding with Claude Code.
+A scroll-driven portfolio for Devan (Tuan Tran), Strategic Account Executive at Cốc Cốc Ad Platform in Hanoi. The hero is a living particle portrait: thousands of particles assemble into Devan's photo and then follow your cursor with depth parallax, leading eyes and idle blinks. Built by vibe coding with Claude Code.
 
 ## Run it
 
@@ -18,6 +18,7 @@ Testing switches (query string):
 | `?static` | Force the static layout (what reduced-motion, low-power and no-WebGL visitors see) |
 | `?nointro` | Skip the particle opening |
 | `?count=30000` | Override the particle budget |
+| `?fixed` | Turn off the automatic quality drop (for screenshots on slow machines) |
 | `?gl=force` | Keep WebGL on software renderers (SwiftShader, llvmpipe), which normally get the static layout |
 
 ## Deploy
@@ -35,18 +36,18 @@ Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages u
 | `src/components/ScrollScenes.tsx` | DOM half of the scroll timeline: typed search query, bio lines, active funnel stage and step. |
 | `src/stage/engine.ts` | three.js renderer, render loop, input, intro, adaptive quality, pause when hidden. |
 | `src/stage/timeline.ts` | One shared timeline: each `data-scene` section maps scroll position to a particle shape and a morph. |
-| `src/stage/portrait.ts` | Photo shader: depth parallax, iris shift, blink, cobalt grade on the background. |
 | `src/stage/gaze.ts` | Eyes ease faster than the head; idle sway, glances and blinks. Reads `character.config.json`. |
 | `src/stage/shapes.ts` | Particle targets: cloud, portrait, rails, browser window, funnel, `>_` prompt. |
-| `src/stage/particles.ts` | GPU-only particle shader (no per-frame CPU work). |
+| `src/stage/particles.ts` | GPU-only particle shader: shape morphs, and on the portrait the depth parallax, iris shift and blink (eye particles sample the photo). Portrait particles paint over each other; other shapes add light. |
 | `src/stage/trails.ts`, `cage.ts` | Cursor trails that keep off the face; wireframe cages. |
 | `character.config.json` | Single source of truth for the portrait: crops, landmarks, tracking, idle life, particles. |
 | `scripts/prepare_portrait.py` | Rebuilds `public/portrait/depthmask-*.png` (R = depth, G = mask). |
+| `scripts/particle_poster.py` | Pre-renders the static particle portraits and blur-up posters with the same sampling and grade as the shader. |
 | `scripts/render-og.mjs` | Renders `public/og.jpg` from the static hero. |
 
-Scene flow: portrait (photo) → rails → browser window (About) → rails → funnel (Ad solutions) → rails with four stations (How I work) → `>_` prompt (Built with AI) → ambient cloud (Skills) → particle portrait (Contact).
+Scene flow: particle portrait → rails → browser window (About) → rails → funnel (Ad solutions) → rails with four stations (How I work) → `>_` prompt (Built with AI) → ambient cloud (Skills) → particle portrait (Contact).
 
-Fallbacks: reduced motion, no WebGL, software WebGL, low memory or Save-Data all get the same static layout with SVG drawings and the photo. No content lives only in WebGL.
+Fallbacks: reduced motion, no WebGL, software WebGL, low memory or Save-Data all get the same static layout with SVG drawings and a pre-rendered particle portrait. No content lives only in WebGL.
 
 ## Checks run
 

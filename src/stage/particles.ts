@@ -1,5 +1,9 @@
 import {
-  AdditiveBlending,
+  AddEquation,
+  CustomBlending,
+  OneFactor,
+  OneMinusSrcAlphaFactor,
+  type Texture,
   BufferAttribute,
   BufferGeometry,
   Color,
@@ -37,6 +41,15 @@ uniform vec3 uInk;
 uniform vec3 uSun;
 uniform vec3 uSoft;
 uniform float uStations[4];
+// Portrait life: the same gaze and blink as a photo, applied per particle.
+uniform sampler2D uMap;      // the photo, sampled per particle inside the eyes
+uniform vec2 uLook;          // head direction in image space (x right, y down), -1..1
+uniform vec2 uLookStrength;  // parallax in image widths (x) and heights (y)
+uniform vec2 uIris;          // eye direction inside the socket, -1..1
+uniform float uBlink;        // 0 open, 1 closed
+uniform vec2 uEyeL;
+uniform vec2 uEyeR;
+uniform vec2 uEyeRad;
 
 attribute vec3 aPortrait;
 attribute vec3 aRails;
@@ -48,6 +61,7 @@ attribute vec4 aRand;
 
 varying vec4 vColor;
 varying float vSoft;
+varying float vOver;
 
 vec3 rotate(vec3 p, vec2 r) {
   float cy = cos(r.x), sy = sin(r.x);
@@ -68,7 +82,12 @@ vec3 local(int id) {
     p += 0.06 * vec3(sin(t + aRand.y * 6.28), cos(t * 0.8 + aRand.z * 6.28), sin(t * 0.6 + aRand.w * 6.28));
     return p;
   }
-  if (id == 1) return aPortrait;
+  if (id == 1) {
+    // Depth parallax: particles nearer than the focus shift with the gaze, farther ones against it.
+    vec3 p = aPortrait;
+    p.xy += vec2(uLook.x, -uLook.y) * uLookStrength * (p.z + 0.08);
+    return p;
+  }
   if (id == 2) return aRails;
   if (id == 3) return aBrowser;
   if (id == 4) {
@@ -91,6 +110,28 @@ vec3 placed(int id, out vec2 center) {
   vec4 xf = uXf[id];
   center = xf.xy;
   return vec3(p.xy * xf.zw, p.z * uZs[id]);
+}
+
+// Eye region in image uv: shift the iris toward the gaze and close the lid on blink.
+// Returns the uv to sample; m is the eye mask, lash darkens the lid line.
+vec2 eye(vec2 uv, vec2 c, inout float lash, inout float mask) {
+  vec2 q = (uv - c) / uEyeRad;
+  float m = 1.0 - smoothstep(0.8, 1.25, length(q));
+  if (m <= 0.0) return uv;
+  mask = max(mask, m);
+  vec2 q2 = q - uIris * vec2(0.3, 0.12) * m;
+  if (uBlink > 0.001) {
+    float lid = -1.0 + 2.0 * uBlink;
+    float y = q2.y;
+    // Above the lid: skin from just above the eye. Below: the open eye, squeezed.
+    float sy = y < lid
+      ? -1.0 - 1.3 * (lid - y) / max(lid + 1.0, 0.001)
+      : -1.0 + 2.0 * (y - lid) / max(1.0 - lid, 0.001);
+    q2.y = mix(y, sy, m);
+    float dl = (y - lid) / 0.25;
+    lash += m * smoothstep(0.0, 0.25, uBlink) * exp(-dl * dl);
+  }
+  return mix(uv, c + q2 * uEyeRad, m);
 }
 
 float weightOf(int id, float m) {
@@ -142,8 +183,27 @@ void main() {
   gl_Position = clip;
 
   // Colour: palette for shapes, photo colours for the portrait.
+  vec3 pcol = aColor.rgb;
+  if (wPortrait > 0.001) {
+    vec2 uv = vec2(aPortrait.x + 0.5, 0.5 - aPortrait.y);
+    float lash = 0.0;
+    float eyeMask = 0.0;
+    vec2 suv = eye(uv, uEyeL, lash, eyeMask);
+    suv = eye(suv, uEyeR, lash, eyeMask);
+    if (eyeMask > 0.0) {
+      vec3 e = texture2D(uMap, clamp(suv, 0.0, 1.0)).rgb * (1.0 - 0.4 * clamp(lash, 0.0, 1.0));
+      pcol = mix(pcol, e, eyeMask);
+    }
+  }
+  // Grade like a lit stage: the world recedes into cobalt, the person stays true.
+  // Sparse background samples have a larger size factor (see shapes.ts).
+  float bgness = smoothstep(1.05, 1.75, aColor.w);
+  float lum = dot(pcol, vec3(0.299, 0.587, 0.114));
+  pcol = mix(pcol, lum * vec3(0.24, 0.28, 0.66) + vec3(0.01, 0.02, 0.07), bgness * 0.9);
+  // Lift the darkest tones (the black shirt, hair) to dim cobalt so the silhouette reads.
+  pcol = max(pcol, vec3(0.07, 0.09, 0.26) * (1.0 - bgness * 0.5));
   vec3 pal = aRand.y < 0.1 ? uSun : (aRand.y < 0.32 ? uSoft : uInk);
-  vec3 col = mix(pal, aColor.rgb * 1.08, wPortrait);
+  vec3 col = mix(pal, pcol * 1.05, wPortrait);
   float alpha = 0.8;
 
   // Funnel: light up the active stage.
@@ -156,8 +216,7 @@ void main() {
   float inWin = step(uPortraitWin.x, aPortrait.x) * step(aPortrait.x, uPortraitWin.z)
               * step(uPortraitWin.y, aPortrait.y) * step(aPortrait.y, uPortraitWin.w);
   alpha *= mix(1.0, inWin, wPortrait);
-  // Sparse background samples have a larger size factor; dim them so the person leads.
-  float bgness = smoothstep(1.05, 1.75, aColor.w);
+  // Dim the background so the person leads.
   alpha *= mix(1.0, 1.0 - uPortraitBg * bgness, wPortrait);
 
   // Rails: light up the active station.
@@ -183,7 +242,7 @@ void main() {
   alpha *= mix(1.0, mix(1.0, 0.25 + 0.75 * step(0.5, fract(uTime * 0.9)), caret), wPrompt);
 
   alpha *= mix(1.0, 0.55, wCloud);
-  alpha *= mix(1.0, 0.75, wPortrait);
+  alpha = mix(alpha, 0.95, wPortrait);
   alpha += f * 0.5;
   // Fewer particles on small devices: let each one carry more light.
   alpha *= mix(uDensity, 1.0, wPortrait);
@@ -193,27 +252,40 @@ void main() {
   float near = clamp((uCamD - depth) / 1.6, 0.0, 1.0);
   float persp = uCamD / max(depth, 0.2);
   float base = uSize * (0.55 + aRand.w * 0.9);
-  float size = mix(base, uPortraitSize * aColor.w, wPortrait) * persp * (1.0 + near * 3.0);
+  float size = mix(base, uPortraitSize * clamp(aColor.w, 0.75, 1.55) * 1.6, wPortrait) * persp * (1.0 + near * 3.0);
   gl_PointSize = min(size * uDpr, 64.0);
   alpha *= 1.0 - near * 0.75;
 
   vSoft = near;
+  // Portrait particles cover each other like paint (keeps contrast in the face);
+  // every other shape adds light and glows.
+  vOver = wPortrait;
   vColor = vec4(col, alpha * uAlpha);
 }
 `;
 
+// Premultiplied output with blend (ONE, ONE_MINUS_SRC_ALPHA): alpha 0 adds light,
+// alpha 1 paints over. vOver picks between the two per particle.
 const fragment = /* glsl */ `
 varying vec4 vColor;
 varying float vSoft;
+varying float vOver;
 void main() {
   float d = length(gl_PointCoord - 0.5);
-  float a = smoothstep(0.5, mix(0.12, 0.0, vSoft), d);
+  float a = smoothstep(0.5, mix(mix(0.12, 0.3, vOver), 0.0, vSoft), d);
   if (a < 0.01) discard;
-  gl_FragColor = vec4(vColor.rgb, vColor.a * a);
+  float k = vColor.a * a;
+  gl_FragColor = vec4(vColor.rgb * k, k * vOver);
 }
 `;
 
-export function createParticles(b: ShapeBuffers) {
+export interface EyeSetup {
+  left: [number, number];
+  right: [number, number];
+  radius: [number, number];
+}
+
+export function createParticles(b: ShapeBuffers, map: Texture, eyes: EyeSetup) {
   const g = new BufferGeometry();
   g.setAttribute("position", new BufferAttribute(b.cloud, 3));
   g.setAttribute("aPortrait", new BufferAttribute(b.portrait, 3));
@@ -232,7 +304,10 @@ export function createParticles(b: ShapeBuffers) {
     transparent: true,
     depthWrite: false,
     depthTest: false,
-    blending: AdditiveBlending,
+    blending: CustomBlending,
+    blendEquation: AddEquation,
+    blendSrc: OneFactor,
+    blendDst: OneMinusSrcAlphaFactor,
     uniforms: {
       uTime: { value: 0 },
       uFrom: { value: 0 },
@@ -259,6 +334,14 @@ export function createParticles(b: ShapeBuffers) {
       uSun: { value: new Color(palette.sun) },
       uSoft: { value: new Color(palette.soft) },
       uStations: { value: RAILS.stations.slice() },
+      uMap: { value: map },
+      uLook: { value: new Vector2() },
+      uLookStrength: { value: new Vector2(0.05, 0.05) },
+      uIris: { value: new Vector2() },
+      uBlink: { value: 0 },
+      uEyeL: { value: new Vector2(...eyes.left) },
+      uEyeR: { value: new Vector2(...eyes.right) },
+      uEyeRad: { value: new Vector2(...eyes.radius) },
     },
   });
   const points = new Points(g, material);

@@ -1,4 +1,4 @@
-// Render public/og.jpg (1200x630) from the static hero.
+// Render public/og.jpg (1200x630) from the static hero (the pre-rendered particle portrait).
 // Usage: npm run build && npx serve out -l 4173 & node scripts/render-og.mjs
 // Needs Playwright with a Chromium build (npx playwright install chromium).
 import { chromium } from "playwright";

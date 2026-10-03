@@ -12,7 +12,6 @@ import { character, focalCover, heroFraming, pickVariant, variantInfo, type Imag
 import { Gaze } from "./gaze";
 import { palette } from "./palette";
 import { createParticles } from "./particles";
-import { createPortrait } from "./portrait";
 import { buildShapes, SHAPE, type PortraitSample } from "./shapes";
 import { collectScenes, frameAt, measureScenes, type Frame, type Scene } from "./timeline";
 import { createTrails } from "./trails";
@@ -87,6 +86,12 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
     height: shRows,
     color: sampleImage(photo, sw, shRows),
     depthMask: sampleImage(depth, sw, shRows),
+    eyes: {
+      left: info.landmarks.leftEye,
+      right: info.landmarks.rightEye,
+      rx: info.eyeRadius[0],
+      ry: info.eyeRadius[1],
+    },
     face: {
       x: (fb.x + fb.w / 2 - crop.x) / crop.w,
       y: (fb.hairTopY + (fb.y + fb.h - fb.hairTopY) / 2 - crop.y) / crop.h,
@@ -109,16 +114,20 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
   const camera = new PerspectiveCamera(FOV, 1, 0.05, 60);
   camera.position.set(0, 0, CAM_D);
 
-  const portrait = createPortrait(texture(photo), texture(depth), info);
-  const particles = createParticles(shapes);
+  // The photo is kept as a texture so eye particles can sample it for gaze and blinks.
+  const photoTex = texture(photo);
+  const particles = createParticles(shapes, photoTex, {
+    left: info.landmarks.leftEye,
+    right: info.landmarks.rightEye,
+    radius: info.eyeRadius,
+  });
   const trails = trailsOn ? createTrails(1536) : null;
   const funnelCage = createFunnelCage();
   const promptCage = createPromptCage();
-  scene.add(portrait.mesh, funnelCage.lines, promptCage.lines, particles.points);
+  scene.add(funnelCage.lines, promptCage.lines, particles.points);
   if (trails) scene.add(trails.points);
 
   const U = particles.material.uniforms;
-  const PU = portrait.material.uniforms;
 
   // ---------- Scenes ----------
   let scenes: Scene[] = collectScenes();
@@ -191,7 +200,8 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
   // ---------- Intro ----------
   const hp = P.heroAssembly;
   // Skip the opening if the visitor has scrolled, asked for it, or the stage started late
-  // (the static photo is already showing by then).
+  // (the static photo is already showing by then). The formed particle portrait is the
+  // hero's resting state; there is no hand-off to the photo.
   const introAllowed =
     hp.enabled && scrollY < innerHeight * 0.3 && !params.has("nointro") && performance.now() < 4000;
   let introStart = introAllowed ? performance.now() : -1e9;
@@ -224,11 +234,11 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
       const w = Math.min(r.width, r.height * ia);
       const h = w / ia;
       particles.xf[SHAPE.portrait].set(ndcX(r.left + r.width / 2), ndcY(r.top + r.height / 2), w * wpp(), h * wpp());
-      U.uZs.value[SHAPE.portrait] = h * wpp() * 0.3;
-      particles.rot[SHAPE.portrait].set(gaze.head.x * 0.18, -gaze.head.y * 0.08);
+      U.uZs.value[SHAPE.portrait] = h * wpp() * 0.2;
       U.uPortraitWin.value.set(-0.5, -0.5, 0.5, 0.5);
       U.uPortraitBg.value = 0.75;
       portraitPx = { w, h };
+      faceScreen = { x: r.left + (r.width - w) / 2 + face[0] * w, y: r.top + (r.height - h) / 2 + face[1] * h };
     } else {
       particles.xf[SHAPE.portrait].set(
         ndcX(heroRect.left + heroBox.x + heroBox.w / 2),
@@ -236,16 +246,16 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
         heroBox.w * wpp(),
         heroBox.h * wpp(),
       );
-      U.uZs.value[SHAPE.portrait] = heroBox.h * wpp() * 0.04;
-      particles.rot[SHAPE.portrait].set(0, 0);
+      U.uZs.value[SHAPE.portrait] = heroBox.h * wpp() * 0.12;
       // Only the part of the image inside the hero box is visible.
       const x0 = -heroBox.x / heroBox.w - 0.5;
       const x1 = (heroRect.width - heroBox.x) / heroBox.w - 0.5;
       const y1 = 0.5 + heroBox.y / heroBox.h;
       const y0 = 0.5 - (heroRect.height - heroBox.y) / heroBox.h;
       U.uPortraitWin.value.set(x0, y0, x1, y1);
-      U.uPortraitBg.value = 0.45;
+      U.uPortraitBg.value = 0.55;
       portraitPx = { w: heroBox.w, h: heroBox.h };
+      faceScreen = { x: heroRect.left + heroBox.x + face[0] * heroBox.w, y: heroRect.top + heroBox.y + face[1] * heroBox.h };
     }
   };
 
@@ -268,6 +278,8 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
   let portraitPx = { w: 1, h: 1 };
 
   // ---------- Quality ----------
+  // ?fixed keeps the full particle budget (for screenshots on slow test machines).
+  const adaptive = !params.has("fixed");
   let drawCount = count;
   let slowSince = -1;
   let ema = 16;
@@ -315,9 +327,8 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
         b: hero,
         from: SHAPE.cloud,
         to: SHAPE.portrait,
-        mix: smooth(150, 2300, el),
-        photo: smooth(introEnd - hp.handoffCrossfadeMs, introEnd, el),
-        alpha: smooth(0, 450, el) * (1 - smooth(2350, introEnd - 150, el)),
+        mix: smooth(150, introEnd - 300, el),
+        alpha: smooth(0, 450, el),
         travel: 0,
       };
     } else if (root.dataset.intro === "on") {
@@ -328,29 +339,19 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
     heroRect = hero.el.getBoundingClientRect();
     const fr = heroFraming[variant];
     heroBox = focalCover(heroRect.width, heroRect.height, info.size[0], info.size[1], face, fr.target, fr.overscan);
-    faceScreen = { x: heroRect.left + heroBox.x + face[0] * heroBox.w, y: heroRect.top + heroBox.y + face[1] * heroBox.h };
-
-    // Gaze.
-    gaze.update(now, dt);
-    PU.uLook.value.set(gaze.head.x, gaze.head.y);
-    const iris = gaze.iris();
-    PU.uIris.value.set(iris.x, iris.y);
-    PU.uBlink.value = gaze.blink;
-
-    // Portrait photo.
     const heroVisible = heroRect.bottom > 0 && heroRect.top < vh;
-    portrait.mesh.visible = heroVisible && f.photo > 0.001;
-    PU.uOpacity.value = f.photo;
-    PU.uRect.value.set(
-      ndcX(heroRect.left + heroRect.width / 2),
-      ndcY(heroRect.top + heroRect.height / 2),
-      heroRect.width / vw,
-      heroRect.height / vh,
-    );
-    PU.uImg.value.set(heroBox.x / heroRect.width, heroBox.y / heroRect.height, heroBox.w / heroRect.width, heroBox.h / heroRect.height);
 
-    // Shape placement.
+    // Shape placement (also decides where the face is on screen).
     placePortrait(f);
+
+    // Gaze: the particle portrait follows the cursor, eyes first.
+    gaze.update(now, dt);
+    U.uLook.value.set(gaze.head.x, gaze.head.y);
+    const iris = gaze.iris();
+    U.uIris.value.set(iris.x, iris.y);
+    U.uBlink.value = gaze.blink;
+    const ls = character.tracking.headParallax.strengthFractionOfWidth;
+    U.uLookStrength.value.set(ls, ls * character.tracking.headParallax.yAxisGain * (info.size[0] / info.size[1]));
     const t = now / 1000;
     const mx = pointer.inside ? ndcX(pointer.x) : 0;
     const my = pointer.inside ? ndcY(pointer.y) : 0;
@@ -396,7 +397,7 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
     U.uTo.value = f.to;
     U.uMix.value = f.mix;
     U.uAlpha.value = f.alpha;
-    U.uDensity.value = Math.min(1, 50000 / drawCount);
+    U.uDensity.value = Math.min(1, 35000 / drawCount);
     U.uTurb.value = intro ? 0.9 : 0.6;
     U.uAspect.value = vw / vh;
     U.uDpr.value = renderer.getPixelRatio();
@@ -431,7 +432,7 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
       TU.uLife.value = P.cursorTrail.lifetimeMs / 1000;
       const faceR = (character.faceBoxPx.h / character.variants[variant].cropPx.h) * heroBox.h * 1.1;
       TU.uFace.value.set(ndcX(faceScreen.x), ndcY(faceScreen.y), faceR * wpp());
-      TU.uFaceOn.value = P.cursorTrail.keepClearOfFace && heroVisible ? Math.max(f.photo, 0.5) : 0;
+      TU.uFaceOn.value = P.cursorTrail.keepClearOfFace && heroVisible ? 1 : 0;
     }
 
     // A short trip down the rails between scenes.
@@ -446,7 +447,7 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
 
     // Adaptive quality: drop particles if frames stay slow.
     ema += (dt * 1000 - ema) * 0.1;
-    if (now - started > 2500) {
+    if (adaptive && now - started > 2500) {
       if (ema > 20) {
         if (slowSince < 0) slowSince = now;
         if (now - slowSince > 1000 && now - lastDrop > 1500 && drawCount > 8000) {
@@ -502,8 +503,7 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
         m.geometry?.dispose();
         m.material?.dispose();
       });
-      (PU.uMap.value as Texture).dispose();
-      (PU.uDepth.value as Texture).dispose();
+      photoTex.dispose();
       renderer.dispose();
       scenes = [];
       delete root.dataset.intro;

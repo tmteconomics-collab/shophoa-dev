@@ -48,6 +48,7 @@ export interface PortraitSample {
   color: Uint8ClampedArray; // RGBA
   depthMask: Uint8ClampedArray; // R = depth, G = mask
   face: { x: number; y: number; rx: number; ry: number }; // 0-1 image space
+  eyes: { left: [number, number]; right: [number, number]; rx: number; ry: number }; // 0-1 image space
 }
 
 export interface ShapeBuffers {
@@ -110,7 +111,17 @@ function fillPortrait(
   s: PortraitSample,
 ) {
   const { width: W, height: H } = s;
-  const maxW = 2.2;
+  const maxW = 5.3;
+  const { eyes } = s;
+  const nearEye = (u: number, v: number) => {
+    // A generous box around each eye (lids and brows) gets the densest sampling.
+    for (const [ex, ey] of [eyes.left, eyes.right]) {
+      const dx = (u - ex) / (eyes.rx * 2.2);
+      const dy = (v - ey) / (eyes.ry * 3.2);
+      if (dx * dx + dy * dy < 1) return 1;
+    }
+    return 0;
+  };
   let i = 0;
   let guard = 0;
   while (i < n && guard < n * 40) {
@@ -124,8 +135,9 @@ function fillPortrait(
     const fx = (u - s.face.x) / s.face.rx;
     const fy = (v - s.face.y) / s.face.ry;
     const inFace = fx * fx + fy * fy < 1 ? 1 : 0;
-    // Denser on the person, densest on the face, sparse on the background.
-    const w = 0.28 + 0.92 * mask + inFace;
+    // Denser on the person, denser on the face, densest around the eyes so
+    // gaze and blinks read; sparse on the background.
+    const w = 0.28 + 0.92 * mask + 1.6 * inFace + 2.5 * nearEye(u, v);
     if (r() * maxW > w) continue;
     const depth = s.depthMask[k] / 255;
     out[i * 3] = u - 0.5;

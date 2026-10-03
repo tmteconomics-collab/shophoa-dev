@@ -8,6 +8,15 @@ The full original brief is in `docs/original-brief.md`. This file records what w
 - Contact: **LinkedIn only**. Do not put the email address on the site.
 - Vibe coding: **both the Claude app and Claude Code**. This site was built with Claude Code.
 - Dark theme only (particles need the dark stage). Revisit only if the owner asks.
+- Hero: the **particle portrait is the resting state**. The 1:1 photo looked soft on 2x screens, so it is never shown; it is only a texture for particle colours and the eyes. Static visitors get `public/portrait/particles-*.webp` from `scripts/particle_poster.py`.
+
+## Decisions delegated to Claude (2026-10-03)
+- Positioning line: kept as proposed in the brief.
+- Platform reach: "tens of millions of users" (public figures range 22–30 million by year); no "decade" claim.
+- CPD on Cốc Cốc = cost per duration (fixed price for a placement over a set time).
+- Certifications listed by name only. MBA research focus not shown. No extra vibe-coding projects: the site is the project.
+- Built with AI lesson line written from how this site was made; the owner can edit it in `src/content/site.ts`.
+- Funnel mapping: new-tab banner and CPM under Awareness; search, native, targeting under Consideration; shopping, retargeting, CPC and CPD under Conversion.
 
 ## Content rules
 - English only, sentence case, plain verbs, no hype.
