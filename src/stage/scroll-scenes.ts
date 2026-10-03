@@ -56,6 +56,9 @@ export function startScrollScenes(): () => void {
       }
       const next = active < 0 ? "" : String(active);
       if (section.dataset.active !== next) section.dataset.active = next;
+      const steps = section.querySelectorAll<HTMLElement>("[data-step]");
+      const key = active < 0 ? "" : (steps[active]?.dataset.key ?? "");
+      if (section.dataset.activeKey !== key) section.dataset.activeKey = key;
       // Illustration panels follow the step; the first one shows before any step is reached.
       const mocks = section.querySelectorAll<HTMLElement>("[data-mock]");
       mocks.forEach((m, i) => {

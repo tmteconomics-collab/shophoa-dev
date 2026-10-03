@@ -35,7 +35,7 @@ Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages u
 | --- | --- |
 | `src/content/site.ts` | All copy. Facts only from the owner's LinkedIn and notes. |
 | `src/app/page.tsx` | The nine scenes as semantic HTML. Works without JavaScript. |
-| `src/components/mocks/` | Animated illustration panels for the measurement (Tag Manager, GA4, Google Ads, Looker Studio) and WordPress sections. Drawn from scratch, sample data, CSS-only motion that stops under reduced motion. |
+| `src/components/mocks/` | Animated illustration panels for the measurement (Tag Manager, GA4, Google Ads, Looker Studio) and WordPress (site editor, blocks, WooCommerce store, responsive preview, speed and SEO) sections. Drawn from scratch, sample data, CSS-only motion that stops under reduced motion. |
 | `src/app/layout.tsx` | Metadata, JSON-LD, and the inline boot script that picks motion and WebGL mode before first paint. |
 | `src/stage/boot.ts`, `src/components/Stage.tsx` | Load the WebGL engine only on capable devices, after the page is idle. |
 | `src/stage/scroll-scenes.ts`, `src/components/ScrollScenes.tsx` | DOM half of the scroll timeline: typed search query, bio lines, active funnel stage and step. |
@@ -59,7 +59,7 @@ Fallbacks: reduced motion, no WebGL, software WebGL, low memory or Save-Data all
 ## Checks run
 
 - axe-core: 0 violations (static desktop, reduced-motion mobile)
-- Lighthouse with brotli (as on Vercel or Cloudflare), mobile: Performance 93, Accessibility 100, Best Practices 100, SEO 100. Desktop: 100, 100, 100, 100. Software-rendered WebGL (as in Lighthouse) gets the static layout; real GPUs get the full stage.
+- Lighthouse with brotli (as on Vercel or Cloudflare), mobile: Performance 90, Accessibility 100, Best Practices 100, SEO 100. Desktop: 100, 100, 100, 100. Software-rendered WebGL (as in Lighthouse) gets the static layout; real GPUs get the full stage.
 - No horizontal scroll at 390px; layouts checked at 390x844 and 1440x900.
 
 ## Credits

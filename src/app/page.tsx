@@ -286,7 +286,7 @@ export default function Home() {
               </header>
               <ol className="steps">
                 {websites.steps.map((step, i) => (
-                  <li key={step.name} className="panel step" data-step>
+                  <li key={step.name} className="panel step" data-step data-key={step.key}>
                     <h3 className="step-title">
                       <span className="step-num" aria-hidden="true">
                         {i + 1}

@@ -1,5 +1,5 @@
 // Illustrations for the WordPress section: an editor panel per step (theme and
-// layout, blocks and patterns, responsive, speed and SEO). Drawn from scratch in
+// layout, blocks and patterns, WooCommerce store, responsive, speed and SEO). Drawn from scratch in
 // the site's own style; no WordPress screenshots or logos. Decorative.
 
 function Bar({ title }: { title: string }) {
@@ -123,6 +123,59 @@ export function BlocksMock() {
   );
 }
 
+export function StoreMock() {
+  // Two items in the cart add up to the new order: 390K + 250K = 640K VND.
+  const products = [
+    ["Linen shirt", "390K"],
+    ["Canvas tote", "250K"],
+    ["Desk lamp", "620K"],
+    ["Ceramic mug", "150K"],
+  ];
+  return (
+    <>
+      <Bar title="WooCommerce · Store" />
+      <div className="mk-body wc">
+        <div className="wc-grid">
+          {products.map(([name, price], i) => (
+            <div key={name} className={`wc-card wc-c${i}`}>
+              <i className="wc-thumb" />
+              <b>{name}</b>
+              <span>{price} VND</span>
+              <em className="wc-add">Add to cart</em>
+            </div>
+          ))}
+        </div>
+        <div className="wc-side">
+          <div className="wc-cart">
+            <span>Cart</span>
+            <b className="wc-count">2</b>
+          </div>
+          <p className="mk-h">Checkout</p>
+          <ol className="wc-flow">
+            <li>Cart</li>
+            <li>Checkout</li>
+            <li>Paid</li>
+          </ol>
+          <p className="mk-h">Orders</p>
+          <ul className="wc-orders">
+            <li className="wc-new">
+              <span>#1042</span>
+              <b>640K</b>
+              <em>Processing</em>
+            </li>
+            <li>
+              <span>#1041</span>
+              <b>390K</b>
+              <em>Completed</em>
+            </li>
+          </ul>
+          <pre className="mk-code">{`purchase  >  GA4\nvalue: 640000, currency: "VND"`}</pre>
+        </div>
+      </div>
+    </>
+  );
+}
+
 export function ResponsiveMock() {
   return (
     <>
@@ -202,4 +255,5 @@ export function SpeedMock() {
   );
 }
 
-export const websiteMocks = [ThemeMock, BlocksMock, ResponsiveMock, SpeedMock];
+// Same order as websites.steps in src/content/site.ts.
+export const websiteMocks = [ThemeMock, BlocksMock, StoreMock, ResponsiveMock, SpeedMock];

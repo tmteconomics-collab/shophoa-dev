@@ -407,20 +407,22 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
     U.uHi.value.set(hi.x, hi.y);
     // Chart lights one more stretch of bars per step; blocks light the group each step is about.
     const tc = active("chart");
-    const tb = active("blocks");
+    const blockKey = scenes.find((x) => x.kind === "blocks")?.el.dataset.activeKey ?? "";
     const chartTarget = tc < 0 ? 0.15 : (tc + 1) / 4;
     U.uChartLevel.value += (chartTarget - U.uChartLevel.value) * k;
-    const groupTargets = [
-      [1, 0, 0, 0, 1], // theme and layout: header and footer
-      [0, 1, 1, 1, 0], // blocks and patterns
-      [0.35, 0.35, 0.35, 0.35, 0.35], // responsive
-      [0.7, 0.7, 0.7, 0.7, 0.7], // speed and SEO
-    ];
-    const gt = tb < 0 ? [0, 0, 0, 0, 0] : groupTargets[Math.min(3, tb)];
+    // Page-block groups (header, hero, columns, cards, footer) each step is about.
+    const groupTargets: Record<string, number[]> = {
+      theme: [1, 0, 0, 0, 1],
+      blocks: [0, 1, 1, 1, 0],
+      store: [0, 0.3, 0, 1, 0], // the cards become the product grid
+      responsive: [0.35, 0.35, 0.35, 0.35, 0.35],
+      speed: [0.7, 0.7, 0.7, 0.7, 0.7],
+    };
+    const gt = groupTargets[blockKey] ?? [0, 0, 0, 0, 0];
     const gh = U.uGroupHi.value as number[];
     for (let i = 0; i < 5; i++) gh[i] += (gt[i] - gh[i]) * k;
     // On the responsive step the page squeezes from desktop to phone width and back.
-    const squeezeTarget = tb === 2 ? 0.5 + 0.5 * Math.sin(t * 0.9) : 0;
+    const squeezeTarget = blockKey === "responsive" ? 0.5 + 0.5 * Math.sin(t * 0.9) : 0;
     U.uSqueeze.value += (squeezeTarget - U.uSqueeze.value) * k;
 
     // Particle uniforms.

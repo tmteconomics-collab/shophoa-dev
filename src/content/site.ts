@@ -162,25 +162,35 @@ export const growth = {
 };
 
 // Owner request (2026-10-03): show that he builds websites on WordPress.
-// TODO: owner to confirm his usual tools (block editor or a page builder, WooCommerce).
+// WooCommerce confirmed by the owner. TODO: block editor or a page builder (Elementor)?
+// Each step's key drives the particle highlight in src/stage/engine.ts.
 export const websites = {
-  title: "Websites on WordPress",
+  title: "Websites and stores on WordPress",
   intro:
-    "I build WordPress sites that marketing teams can update on their own: one design system, reusable blocks and fast pages.",
+    "I build WordPress sites and WooCommerce stores that marketing teams can update on their own: one design system, reusable blocks and fast pages.",
   steps: [
     {
+      key: "theme",
       name: "Theme and layout",
       text: "Start from a theme, then shape the header, footer and page templates in the site editor so every page shares one system.",
     },
     {
+      key: "blocks",
       name: "Blocks and patterns",
       text: "Build pages from blocks, save repeated sections as patterns, and keep colours and type in global styles so edits stay consistent.",
     },
     {
+      key: "store",
+      name: "Online store",
+      text: "Set up WooCommerce products, prices, stock, cart and checkout, with store events like add to cart and purchase ready to measure in GA4.",
+    },
+    {
+      key: "responsive",
       name: "Responsive",
       text: "Check every layout on desktop, tablet and phone before launch, and fix what breaks at each size.",
     },
     {
+      key: "speed",
       name: "Speed and SEO",
       text: "Compress images, cache pages, and set titles, descriptions and a sitemap, so pages load fast and get found.",
     },
@@ -226,6 +236,7 @@ export const credentials = {
     "Google Ads",
     "Looker Studio",
     "WordPress",
+    "WooCommerce",
     "Vibe coding with Claude",
   ],
   // Names only, as on LinkedIn.

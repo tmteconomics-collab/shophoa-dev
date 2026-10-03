@@ -20,7 +20,7 @@ The full original brief is in `docs/original-brief.md`. This file records what w
 - CPD on Cốc Cốc = cost per duration (fixed price for a placement over a set time).
 - Certifications listed by name only. MBA research focus not shown. No extra vibe-coding projects: the site is the project.
 - Built with AI lesson line written from how this site was made; the owner can edit it in `src/content/site.ts`.
-- Looker Studio and the WordPress tooling (block editor vs page builder, WooCommerce) are assumptions marked `TODO:` for the owner to confirm.
+- WooCommerce confirmed by the owner (2026-10-03): the WordPress section has an Online store step. Looker Studio and block editor vs page builder are still assumptions marked `TODO:`.
 - Funnel mapping: new-tab banner and CPM under Awareness; search, native, targeting under Consideration; shopping, retargeting, CPC and CPD under Conversion.
 
 ## Content rules
