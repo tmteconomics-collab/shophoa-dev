@@ -9,7 +9,15 @@ export const metadata: Metadata = {
   title,
   description,
   alternates: { canonical: "/cv/" },
-  openGraph: { type: "profile", title, description, url: "/cv/", siteName: site.name, locale: "en_US", images: [ogImage] },
+  openGraph: {
+    type: "profile",
+    title,
+    description,
+    url: "/cv/",
+    siteName: site.name,
+    locale: "en_US",
+    images: [ogImage],
+  },
   twitter: { card: "summary_large_image", title, description, images: [ogImage.url] },
 };
 

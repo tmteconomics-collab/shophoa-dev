@@ -22,7 +22,14 @@ export default function Tools({ rev }: { rev?: boolean }) {
             <p className="tool-note">{tools.utm.text}</p>
             <div className="field">
               <label htmlFor="utm-url">Landing page URL</label>
-              <input id="utm-url" name="url" type="url" inputMode="url" autoComplete="off" placeholder="https://example.com/sale" />
+              <input
+                id="utm-url"
+                name="url"
+                type="url"
+                inputMode="url"
+                autoComplete="off"
+                placeholder="https://example.com/sale"
+              />
             </div>
             <div className="field-row">
               <div className="field">
@@ -90,13 +97,25 @@ export default function Tools({ rev }: { rev?: boolean }) {
             </fieldset>
             <div className="field">
               <label htmlFor="budget-budget">Budget (VND)</label>
-              <input id="budget-budget" name="budget" inputMode="numeric" autoComplete="off" placeholder="Your budget" />
+              <input
+                id="budget-budget"
+                name="budget"
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder="Your budget"
+              />
             </div>
             <div className="field">
               <label htmlFor="budget-rate" data-rate-label>
                 Your price per 1,000 impressions (VND)
               </label>
-              <input id="budget-rate" name="rate" inputMode="numeric" autoComplete="off" placeholder="From your quote" />
+              <input
+                id="budget-rate"
+                name="rate"
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder="From your quote"
+              />
             </div>
             <div className="field-row">
               <div className="field" data-field="ctr">

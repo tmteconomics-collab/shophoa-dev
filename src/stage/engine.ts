@@ -6,7 +6,6 @@ import {
   PerspectiveCamera,
   Scene as ThreeScene,
   Texture,
-  TextureLoader,
   WebGLRenderer,
 } from "three";
 import { character, pickVariant, variantInfo, type Variant } from "./config";
@@ -15,7 +14,7 @@ import { palette } from "./palette";
 import { createParticles } from "./particles";
 import { buildShapes, SHAPE, type PortraitSample } from "./shapes";
 import { starryLayout, vortexUniforms } from "./starry";
-import { collectScenes, frameAt, measureScenes, type Frame, type Scene } from "./timeline";
+import { collectScenes, frameAt, measureScenes, type Scene } from "./timeline";
 import { createTrails } from "./trails";
 import { createFunnelCage, createPromptCage } from "./cage";
 
@@ -252,7 +251,12 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
   // The painting fills the hero box.
   const placeHero = () => {
     const r = heroRect;
-    particles.xf[SHAPE.starry].set(ndcX(r.left + r.width / 2), ndcY(r.top + r.height / 2), (r.width / 2) * wpp(), (r.height / 2) * wpp());
+    particles.xf[SHAPE.starry].set(
+      ndcX(r.left + r.width / 2),
+      ndcY(r.top + r.height / 2),
+      (r.width / 2) * wpp(),
+      (r.height / 2) * wpp(),
+    );
     U.uZs.value[SHAPE.starry] = r.height * wpp() * 0.5;
     U.uHeroAspect.value = r.width / Math.max(1, r.height);
     U.uStarSize.value = Math.sqrt((r.width * r.height) / Math.max(1, drawCount)) * 2.5;
@@ -388,7 +392,12 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
     const chartEl = anchorOf("chart");
     if (chartEl) {
       const r = chartEl.getBoundingClientRect();
-      particles.xf[SHAPE.chart].set(ndcX(r.left + r.width / 2), ndcY(r.top + r.height * 0.56), r.width * 0.64 * wpp(), r.height * 0.5 * wpp());
+      particles.xf[SHAPE.chart].set(
+        ndcX(r.left + r.width / 2),
+        ndcY(r.top + r.height * 0.56),
+        r.width * 0.64 * wpp(),
+        r.height * 0.5 * wpp(),
+      );
       U.uZs.value[SHAPE.chart] = r.width * 0.5 * wpp();
     }
     particles.rot[SHAPE.chart].set(-0.38 + mx * 0.15, 0.2 - my * 0.06);
@@ -396,7 +405,12 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
     const blocksEl = anchorOf("blocks");
     if (blocksEl) {
       const r = blocksEl.getBoundingClientRect();
-      particles.xf[SHAPE.blocks].set(ndcX(r.left + r.width / 2), ndcY(r.top + r.height / 2), r.width * 0.62 * wpp(), r.height * 0.6 * wpp());
+      particles.xf[SHAPE.blocks].set(
+        ndcX(r.left + r.width / 2),
+        ndcY(r.top + r.height / 2),
+        r.width * 0.62 * wpp(),
+        r.height * 0.6 * wpp(),
+      );
       U.uZs.value[SHAPE.blocks] = r.width * 0.5 * wpp();
     }
     particles.rot[SHAPE.blocks].set(0.42 + mx * 0.12, 0.2 - my * 0.06);

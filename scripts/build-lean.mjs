@@ -30,8 +30,7 @@ const entry = Object.entries(result.metafile.outputs).find(([, o]) => o.entryPoi
 if (!entry) throw new Error("lean entry not found");
 const entryUrl = "/" + path.relative(out, entry).split(path.sep).join("/");
 
-const isFrameworkScript = (attrs, body) =>
-  /\bsrc="\/_next\//.test(attrs) || /self\.__next_f|\$RC|\$RS|\$RT/.test(body);
+const isFrameworkScript = (attrs, body) => /\bsrc="\/_next\//.test(attrs) || /self\.__next_f|\$RC|\$RS|\$RT/.test(body);
 
 function lean(html) {
   // Scripts: keep the pre-paint boot script and JSON-LD, drop the framework.
@@ -77,4 +76,6 @@ for (const f of fs.readdirSync(out, { recursive: true })) {
 const js = Object.entries(result.metafile.outputs)
   .filter(([f]) => f.endsWith(".js"))
   .map(([f, o]) => `${path.basename(f)} ${(o.bytes / 1024).toFixed(1)} KB`);
-console.log(`lean: ${pages} pages, HTML ${(before / 1024).toFixed(0)} KB -> ${(after / 1024).toFixed(0)} KB; JS: ${js.join(", ")}`);
+console.log(
+  `lean: ${pages} pages, HTML ${(before / 1024).toFixed(0)} KB -> ${(after / 1024).toFixed(0)} KB; JS: ${js.join(", ")}`,
+);

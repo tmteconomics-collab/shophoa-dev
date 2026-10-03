@@ -142,13 +142,7 @@ function fillCloud(out: Float32Array, n: number, r: () => number) {
   }
 }
 
-function fillPortrait(
-  out: Float32Array,
-  color: Float32Array,
-  n: number,
-  r: () => number,
-  s: PortraitSample,
-) {
+function fillPortrait(out: Float32Array, color: Float32Array, n: number, r: () => number, s: PortraitSample) {
   const { width: W, height: H } = s;
   const maxW = 5.3;
   const { eyes } = s;
@@ -354,7 +348,16 @@ function fillPrompt(out: Float32Array, n: number, r: () => number) {
 }
 
 /** A point on the surface of a box, with most points on its 12 edges. */
-function boxPoint(r: () => number, x0: number, x1: number, y0: number, y1: number, z0: number, z1: number, edgeShare: number) {
+function boxPoint(
+  r: () => number,
+  x0: number,
+  x1: number,
+  y0: number,
+  y1: number,
+  z0: number,
+  z1: number,
+  edgeShare: number,
+) {
   const pick = (a: number, b: number) => (r() < 0.5 ? a : b);
   if (r() < edgeShare) {
     const axis = (r() * 3) | 0;
@@ -391,7 +394,7 @@ function fillChart(out: Float32Array, n: number, r: () => number) {
       const k = Math.floor(u);
       const f = u - k;
       const y = base + bars[k] + (bars[k + 1] - bars[k]) * f + 0.14;
-      p = [xAt(k) + ((xAt(k + 1) - xAt(k)) * f), y + (r() - 0.5) * 0.02, lineZ + (r() - 0.5) * 0.03];
+      p = [xAt(k) + (xAt(k + 1) - xAt(k)) * f, y + (r() - 0.5) * 0.02, lineZ + (r() - 0.5) * 0.03];
     } else {
       // Floor grid.
       if (r() < 0.6) {

@@ -12,7 +12,9 @@ export default function NotFound() {
       <div className="wrap">
         <p className="not-found-code">404</p>
         <h1 className="section-title">This page is off the rails.</h1>
-        <p className="scene-intro">The link may be old or mistyped. The portfolio is one page, so everything is a click away.</p>
+        <p className="scene-intro">
+          The link may be old or mistyped. The portfolio is one page, so everything is a click away.
+        </p>
         <div className="cta-row">
           <a className="btn btn-sun" href="/">
             Back to the portfolio

@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, build and Lighthouse
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint and typecheck
+        run: npm run lint
+
+      - name: Formatting
+        run: npm run format:check
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Build (lean static export)
+        run: npm run build
+
+      - name: Check the export
+        run: |
+          test -f out/index.html
+          test -f out/cv/index.html
+          test -f out/devan-cv.pdf
+          for f in out/for/*/index.html; do grep -q 'noindex' "$f" || { echo "$f is missing noindex"; exit 1; }; done
+          if grep -rl --include='*.html' '/_next/static/chunks/[^"]*\.js' out; then echo "framework script left in the lean build"; exit 1; fi
+          if grep -rIl --include='*.html' -E '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}' out; then echo "an email address is on the site"; exit 1; fi
+
+      - name: Lighthouse budgets
+        run: npx --yes @lhci/cli@0.15.1 autorun
+
+      - name: Keep the Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse
+          path: .lighthouseci/
+          if-no-files-found: ignore

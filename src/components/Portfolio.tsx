@@ -9,13 +9,31 @@ import HeroBackdrop from "@/components/HeroBackdrop";
 import { FunnelArt, PromptArt, RailsArt } from "@/components/FallbackArt";
 import { growthMocks } from "@/components/mocks/GrowthMocks";
 import { websiteMocks } from "@/components/mocks/WebsiteMocks";
-import { about, ai, contact, credentials, growth, hero as defaultHero, site, solutions, websites, workflow } from "@/content/site";
+import {
+  about,
+  ai,
+  contact,
+  credentials,
+  growth,
+  hero as defaultHero,
+  site,
+  solutions,
+  websites,
+  workflow,
+} from "@/content/site";
 import { defaultOrder, type HeroCopy, type SectionId } from "@/content/roles";
 
 function Arrow() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M7 17 17 7M9 7h8v8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M7 17 17 7M9 7h8v8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -33,7 +51,13 @@ function External({ href, className, children }: { href: string; className: stri
 /** Ad solutions: the funnel. */
 function SolutionsSection({ rev }: { rev: boolean }) {
   return (
-    <section id="solutions" className={`split${rev ? " split-rev" : ""}`} data-scene="funnel" data-steps aria-labelledby="solutions-title">
+    <section
+      id="solutions"
+      className={`split${rev ? " split-rev" : ""}`}
+      data-scene="funnel"
+      data-steps
+      aria-labelledby="solutions-title"
+    >
       <div className="wrap split-grid">
         <div className="split-visual">
           <div className="visual-box" data-anchor>
@@ -78,7 +102,13 @@ function SolutionsSection({ rev }: { rev: boolean }) {
 /** How I work: four stops along the rails. */
 function ProcessSection({ rev }: { rev: boolean }) {
   return (
-    <section id="process" className={`split${rev ? " split-rev" : ""}`} data-scene="rails" data-steps aria-labelledby="process-title">
+    <section
+      id="process"
+      className={`split${rev ? " split-rev" : ""}`}
+      data-scene="rails"
+      data-steps
+      aria-labelledby="process-title"
+    >
       <div className="wrap split-grid">
         <div className="split-visual">
           <div className="visual-box" data-anchor>
@@ -219,7 +249,13 @@ const middleSections: Record<SectionId, (props: { rev: boolean }) => React.React
  * The whole one-page portfolio. The home page uses the default copy and order;
  * the role versions in src/content/roles.ts pass their own hero line and order.
  */
-export default function Portfolio({ hero = defaultHero, order = defaultOrder }: { hero?: HeroCopy; order?: SectionId[] }) {
+export default function Portfolio({
+  hero = defaultHero,
+  order = defaultOrder,
+}: {
+  hero?: HeroCopy;
+  order?: SectionId[];
+}) {
   const tailSep = /^[,.;:]/.test(hero.tail) ? "" : " ";
   return (
     <>
@@ -232,7 +268,8 @@ export default function Portfolio({ hero = defaultHero, order = defaultOrder }: 
       <header className="site-header">
         <div className="wrap header-inner">
           <a className="wordmark" href="#top" aria-label="Devan, back to top">
-            Devan<span className="wordmark-dot" aria-hidden="true" />
+            Devan
+            <span className="wordmark-dot" aria-hidden="true" />
           </a>
           <nav aria-label="Primary">
             <ul className="nav-list">
@@ -453,7 +490,11 @@ export default function Portfolio({ hero = defaultHero, order = defaultOrder }: 
             <div className="contact-visual">
               <div className="portrait-box" data-anchor>
                 <picture>
-                  <source media="(max-aspect-ratio: 19/20)" srcSet="/portrait/particles-mobile.webp" type="image/webp" />
+                  <source
+                    media="(max-aspect-ratio: 19/20)"
+                    srcSet="/portrait/particles-mobile.webp"
+                    type="image/webp"
+                  />
                   <img
                     className="fallback-photo"
                     src="/portrait/particles-desktop.webp"

@@ -12,6 +12,8 @@ startSectionDots();
 bindTools();
 const toggle = document.querySelector<HTMLButtonElement>("[data-motion-toggle]");
 if (toggle) bindMotionToggle(toggle);
-document.querySelectorAll<HTMLButtonElement>("[data-print]").forEach((b) => b.addEventListener("click", () => window.print()));
+document
+  .querySelectorAll<HTMLButtonElement>("[data-print]")
+  .forEach((b) => b.addEventListener("click", () => window.print()));
 const canvas = document.querySelector<HTMLCanvasElement>("canvas.stage");
 if (canvas) bootStage(canvas);

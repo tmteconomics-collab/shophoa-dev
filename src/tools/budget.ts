@@ -24,7 +24,10 @@ export interface BudgetRow {
 
 /** Reads "25,000", "25 000" or "25000 VND" as 25000. NaN when empty or invalid. */
 export function parseAmount(s: string): number {
-  const t = s.replace(/vnd|đ|₫|%/gi, "").replace(/[\s,]/g, "").trim();
+  const t = s
+    .replace(/vnd|đ|₫|%/gi, "")
+    .replace(/[\s,]/g, "")
+    .trim();
   if (!t || !/^\d*\.?\d+$/.test(t)) return NaN;
   return Number(t);
 }
@@ -52,7 +55,8 @@ export function estimate(i: BudgetInput): BudgetRow[] {
   if (clicks !== undefined && ok(i.cvr)) {
     const conversions = clicks * (i.cvr / 100);
     rows.push({ label: "Conversions", value: conversions, kind: "count" });
-    if (Math.floor(conversions) > 0) rows.push({ label: "Cost per conversion", value: i.budget / conversions, kind: "money" });
+    if (Math.floor(conversions) > 0)
+      rows.push({ label: "Cost per conversion", value: i.budget / conversions, kind: "money" });
   }
   return rows;
 }

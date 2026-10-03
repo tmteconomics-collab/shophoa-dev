@@ -54,7 +54,15 @@ export const summary = {
     { text: "Set up and report on GA4, Tag Manager and Google Ads", href: "#measurement" },
     { text: "Build WordPress sites and WooCommerce stores", href: "#websites" },
   ],
-  tools: ["Google Analytics 4", "Google Tag Manager", "Google Ads", "Looker Studio", "WordPress", "WooCommerce", "Claude"],
+  tools: [
+    "Google Analytics 4",
+    "Google Tag Manager",
+    "Google Ads",
+    "Looker Studio",
+    "WordPress",
+    "WooCommerce",
+    "Claude",
+  ],
   education: "MBA, Foreign Trade University, 2026 to 2028 (part-time)",
   languages: "Vietnamese (native), English (professional working)",
 };
@@ -69,8 +77,7 @@ export const about = {
     "I'm studying for an MBA at Foreign Trade University, part-time, alongside full-time work.",
     "I also build my own tools with AI. This site is one of them.",
   ],
-  caption:
-    "The big banner on the new tab page is one of the placements I sell. On this page, the slot is mine.",
+  caption: "The big banner on the new tab page is one of the placements I sell. On this page, the slot is mine.",
 };
 
 export const solutions = {
@@ -135,8 +142,7 @@ export const solutions = {
       ],
     },
   ],
-  footnote:
-    "Campaigns can be measured with transparent third-party tracking, so both sides read the same numbers.",
+  footnote: "Campaigns can be measured with transparent third-party tracking, so both sides read the same numbers.",
 };
 
 export const workflow = {
@@ -357,7 +363,12 @@ export const cv = {
   skillGroups: [
     {
       name: "Advertising",
-      items: ["Digital advertising", "CPM, CPC and CPD buying", "Audience targeting and retargeting", "Third-party campaign tracking"],
+      items: [
+        "Digital advertising",
+        "CPM, CPC and CPD buying",
+        "Audience targeting and retargeting",
+        "Third-party campaign tracking",
+      ],
     },
     { name: "Measurement", items: ["Google Tag Manager", "Google Analytics 4", "Google Ads", "Looker Studio"] },
     { name: "Web", items: ["WordPress", "WooCommerce", "SEO"] },

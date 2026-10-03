@@ -218,7 +218,11 @@ export function ReportMock() {
           <p className="mk-h">Cost and conversions by week</p>
           <div className="mk-combo-plot">
             {weekCost.map((c, i) => (
-              <div key={i} className="mk-col-bar" style={{ "--h": `${(c / maxCost) * 100}%`, "--i": i } as React.CSSProperties}>
+              <div
+                key={i}
+                className="mk-col-bar"
+                style={{ "--h": `${(c / maxCost) * 100}%`, "--i": i } as React.CSSProperties}
+              >
                 <i />
                 <span>W{i + 1}</span>
               </div>

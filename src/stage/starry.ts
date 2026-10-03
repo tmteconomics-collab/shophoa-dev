@@ -238,7 +238,7 @@ export function fillStarry(
       const hsN = houses.length;
       const [hu, hv] = houses[(r() * hsN) | 0];
       const lit = r() < 0.45 ? 1 : 0;
-      const u = hu + (r() - 0.5) * (lit ? 0.006 : 0.016) / aspect;
+      const u = hu + ((r() - 0.5) * (lit ? 0.006 : 0.016)) / aspect;
       const v = hv + (r() - 0.5) * (lit ? 0.006 : 0.012);
       put(i, FAMILY.village, u, v, r(), lit, 0, 0, -0.05);
     }

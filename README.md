@@ -22,6 +22,16 @@ Testing switches (query string):
 | `?fixed` | Turn off the automatic quality drop (for screenshots on slow machines) |
 | `?gl=force` | Keep WebGL on software renderers (SwiftShader, llvmpipe), which normally get the static layout |
 
+## Checks before you push
+
+```bash
+npm run lint           # ESLint (Next.js rules) and TypeScript
+npm run format:check   # Prettier (npm run format to fix)
+npm run build          # lean export to out/
+```
+
+GitHub Actions (`.github/workflows/ci.yml`) runs the same on every pull request and on `main`, then checks the export (no framework scripts left, role versions are noindex, no email address anywhere) and runs Lighthouse CI against `lighthouserc.json`: Accessibility 100, Best Practices and SEO 95 or more, Performance 85 or more on a mobile profile, CLS under 0.05, TBT under 300 ms. Reports are kept as a build artifact, not uploaded anywhere public.
+
 ## Lean build
 
 `npm run build` runs `next build`, then `scripts/build-lean.mjs` swaps the React runtime in every exported page for one small bundle (`scripts/static-entry.ts`, about 7 KB; three.js stays a lazy chunk for WebGL devices only). The HTML is exactly what Next.js rendered, so content cannot drift. Lighthouse mobile, home page: Performance 95 to 99 lean against 79 to 89 with the React runtime; desktop 100.
