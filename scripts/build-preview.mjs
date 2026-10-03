@@ -40,7 +40,7 @@ ${body}
 fs.writeFileSync(path.join(dst, "index.html"), page);
 
 await build({
-  entryPoints: ["scripts/preview-entry.ts"],
+  entryPoints: ["scripts/static-entry.ts"],
   bundle: true,
   minify: true,
   format: "iife",

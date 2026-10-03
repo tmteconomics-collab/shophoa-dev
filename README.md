@@ -7,7 +7,8 @@ A scroll-driven portfolio for Devan (Tuan Tran), Strategic Account Executive at 
 ```bash
 npm install
 npm run dev          # http://localhost:3000
-npm run build        # static export to out/
+npm run build        # static export to out/, lean (no React runtime in the browser)
+npm run build:next   # plain Next.js export, with the React runtime
 npx serve out        # preview the export
 ```
 
@@ -21,13 +22,19 @@ Testing switches (query string):
 | `?fixed` | Turn off the automatic quality drop (for screenshots on slow machines) |
 | `?gl=force` | Keep WebGL on software renderers (SwiftShader, llvmpipe), which normally get the static layout |
 
+## Lean build
+
+`npm run build` runs `next build`, then `scripts/build-lean.mjs` swaps the React runtime in every exported page for one small bundle (`scripts/static-entry.ts`, about 7 KB; three.js stays a lazy chunk for WebGL devices only). The HTML is exactly what Next.js rendered, so content cannot drift. Lighthouse mobile, home page: Performance 95 to 99 lean against 79 to 89 with the React runtime; desktop 100.
+
+Rule that keeps this working: interactive behaviour lives in plain TypeScript (`src/stage/`, `src/tools/`) bound to the markup, and is started from `scripts/static-entry.ts`. React client components are only thin wrappers that call the same functions, so `npm run dev` and `npm run build:next` behave the same.
+
 ## Preview without deploying
 
-`npm run preview:build` writes `preview/`: one HTML fragment, `site.css`, a single `app.js` (esbuild, no React runtime) and the assets, all with relative paths. It runs the same stage and scroll code as the site (`src/stage/boot.ts`, `src/stage/scroll-scenes.ts`) and is what the private claude.ai preview is published from.
+`npm run preview:build` writes `preview/`: one HTML fragment, `site.css`, a single `app.js` (esbuild, no React runtime) and the assets, all with relative paths. It runs the same entry as the lean build (`scripts/static-entry.ts`) and is what the private claude.ai preview is published from.
 
 ## Deploy
 
-Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages uses `public/_headers` (build command `npm run build`, output `out`). Canonical, Open Graph and sitemap links use `NEXT_PUBLIC_SITE_URL` when set (custom domain); otherwise the address Vercel (`VERCEL_PROJECT_PRODUCTION_URL`) or Cloudflare Pages (`CF_PAGES_URL`) gives the build. `robots.txt`, `sitemap.xml` (pages listed in `src/content/routes.ts`) and a custom 404 are generated.
+Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages uses `public/_headers` (build command `npm run build`, output `out`). Both get the lean build. Canonical, Open Graph and sitemap links use `NEXT_PUBLIC_SITE_URL` when set (custom domain); otherwise the address Vercel (`VERCEL_PROJECT_PRODUCTION_URL`) or Cloudflare Pages (`CF_PAGES_URL`) gives the build. `robots.txt`, `sitemap.xml` (pages listed in `src/content/routes.ts`) and a custom 404 are generated.
 
 ## How it is built
 
@@ -56,6 +63,7 @@ Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages u
 | `scripts/prepare_portrait.py` | Rebuilds `public/portrait/depthmask-*.png` (R = depth, G = mask). |
 | `scripts/render-starry-poster.mjs` | Renders the static hero painting and blur-up posters from the live stage. |
 | `scripts/particle_poster.py` | Pre-renders the static particle portrait for Contact with the same sampling and grade as the shader. |
+| `scripts/build-lean.mjs`, `scripts/static-entry.ts` | Lean build (see above). The same entry runs the preview bundle. |
 | `scripts/render-og.mjs` | Renders `public/og.jpg` from the static hero. |
 | `scripts/render-cv-pdf.mjs` | Renders `public/devan-cv.pdf` from `/cv/`. Rerun after any CV change, with `NEXT_PUBLIC_SITE_URL` set so the PDF prints the site address. |
 
@@ -66,7 +74,7 @@ Fallbacks: reduced motion, no WebGL, software WebGL, low memory or Save-Data all
 ## Checks run
 
 - axe-core: 0 violations (static desktop, reduced-motion mobile)
-- Lighthouse with brotli (as on Vercel or Cloudflare), mobile: Performance 90, Accessibility 100, Best Practices 100, SEO 100. Desktop: 100, 100, 100, 100. Software-rendered WebGL (as in Lighthouse) gets the static layout; real GPUs get the full stage.
+- Lighthouse with brotli (as on Vercel or Cloudflare), lean build, mobile: Performance 95 to 99, Accessibility 100, Best Practices 100, SEO 100. Desktop: 100, 100, 100, 100 (home and CV). Role versions score lower on SEO by design (noindex). Software-rendered WebGL (as in Lighthouse) gets the static layout; real GPUs get the full stage.
 - No horizontal scroll at 390px; layouts checked at 390x844 and 1440x900.
 
 ## Credits

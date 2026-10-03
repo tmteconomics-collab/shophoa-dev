@@ -36,6 +36,7 @@ The full original brief is in `docs/original-brief.md`. This file records what w
 
 ## Technical rules
 - Static export (`output: "export"`). No server code, no tracking scripts.
+- `npm run build` is the lean build: `scripts/build-lean.mjs` strips the React runtime from the export and loads `scripts/static-entry.ts`. Any interactive behaviour must live in plain TypeScript bound to the markup and be started from `static-entry.ts`; React client components only wrap those functions. A new `onClick` in React alone will not work in production.
 - WebGL is decided before first paint by the boot script in `src/app/layout.tsx` (`data-gl`, `data-motion`, `data-intro` on `<html>`). Every scene must stay fully readable with `data-gl="off"`.
 - Character behaviour numbers come from `character.config.json`; do not hard-code them in the shaders.
 - The painting has two layouts (wide and tall) in `src/stage/starry.ts`; keep the hero text area (bottom left on wide screens, bottom half on tall ones) free of bright features.
