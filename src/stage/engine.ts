@@ -16,6 +16,9 @@ import { buildShapes, SHAPE, type PortraitSample } from "./shapes";
 import { starryLayout, vortexUniforms } from "./starry";
 import { collectScenes, frameAt, measureScenes, type Scene } from "./timeline";
 import { createTrails } from "./trails";
+
+// Content the cursor trail must not draw behind.
+const TRAIL_FREE = ".panel, .mk-stage, .browser, .scene-head, .site-header, .toc-panel, .dots";
 import { createFunnelCage, createPromptCage } from "./cage";
 
 ColorManagement.enabled = false;
@@ -177,7 +180,10 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
       y += (c.y - y) * k;
     }
     gazeFromPoint(x, y, now, pointer.touch ? 0.6 : 1);
-    if (trails && !pointer.touch && root.dataset.paused !== "on") {
+    // Trails draw only over open sky: behind a glass card or a panel they would show
+    // through as streaks across the text.
+    const overContent = (e.target as Element | null)?.closest?.(TRAIL_FREE);
+    if (trails && !pointer.touch && root.dataset.paused !== "on" && !overContent) {
       trails.push((e.clientX / vw) * 2 - 1, -((e.clientY / vh) * 2 - 1), now / 1000, vw / vh);
     }
   };

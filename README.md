@@ -71,7 +71,7 @@ Static export, no server code. Vercel picks up `vercel.json`: the Next.js preset
 | `src/stage/starry.ts` | The hero painting: layouts for wide and tall screens, particle families (sky, spirals, halos, moon, wind band, cypress, hills, village) and the GLSL that moves them. Drawn from scratch, nothing traced. |
 | `src/stage/shapes.ts` | Particle targets: cloud, portrait, rails, browser window, funnel, `>_` prompt, painting, 3D bar chart, page blocks. |
 | `src/stage/particles.ts` | GPU-only particle shader: shape morphs, and on the portrait the depth parallax, iris shift and blink (eye particles sample the photo). Portrait particles paint over each other; other shapes add light. |
-| `src/stage/trails.ts`, `cage.ts` | Cursor trails that keep off the face; wireframe cages. |
+| `src/stage/trails.ts`, `cage.ts` | Cursor trails that keep off the face and do not draw while the pointer is over a card or panel (`TRAIL_FREE` in `engine.ts`); wireframe cages. |
 | `character.config.json` | Single source of truth for the portrait: crops, landmarks, tracking, idle life, particles. |
 | `scripts/prepare_portrait.py` | Rebuilds `public/portrait/depthmask-*.png` (R = depth, G = mask). |
 | `scripts/render-starry-poster.mjs` | Renders the static hero painting and blur-up posters from the live stage. |
