@@ -2,7 +2,8 @@
  * Where you are on a long page, in every motion mode:
  * - marks the current section's links (section dots and the Sections menu) with
  *   aria-current: the last section whose top has passed the middle of the screen;
- * - fills the reading progress bar under the header;
+ * - fills the reading progress bar under the header, and makes the header solid
+ *   once the page has scrolled (data-scrolled on <html>);
  * - closes the Sections menu after a jump, on Escape, or on a click outside it.
  * Returns a cleanup function.
  */
@@ -18,6 +19,9 @@ export function startSectionNav(): () => void {
   const update = () => {
     raf = 0;
     const root = document.documentElement;
+    // Solid header once the page moves, so text never shows through it.
+    const scrolled = window.scrollY > 8 ? "on" : "off";
+    if (root.dataset.scrolled !== scrolled) root.dataset.scrolled = scrolled;
     const max = root.scrollHeight - window.innerHeight;
     if (bar) bar.style.transform = `scaleX(${max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)).toFixed(4) : 0})`;
 

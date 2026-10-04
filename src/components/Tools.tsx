@@ -20,57 +20,65 @@ export default function Tools({ rev }: { rev?: boolean }) {
               {tools.utm.title}
             </h3>
             <p className="tool-note">{tools.utm.text}</p>
-            <div className="field">
-              <label htmlFor="utm-url">Landing page URL</label>
-              <input
-                id="utm-url"
-                name="url"
-                type="url"
-                inputMode="url"
-                autoComplete="off"
-                placeholder="https://example.com/sale"
-              />
-            </div>
-            <div className="field-row">
-              <div className="field">
-                <label htmlFor="utm-source">Source</label>
-                <input id="utm-source" name="source" autoComplete="off" placeholder="coccoc" />
+            <details className="tool-body" data-collapse-narrow open>
+              <summary className="btn btn-ghost tool-toggle">
+                <span className="when-closed">Open the UTM builder</span>
+                <span className="when-open">Hide</span>
+              </summary>
+              <div className="tool-fields">
+                <div className="field">
+                  <label htmlFor="utm-url">Landing page URL</label>
+                  <input
+                    id="utm-url"
+                    name="url"
+                    type="url"
+                    inputMode="url"
+                    autoComplete="off"
+                    placeholder="https://example.com/sale"
+                  />
+                </div>
+                <div className="field-row">
+                  <div className="field">
+                    <label htmlFor="utm-source">Source</label>
+                    <input id="utm-source" name="source" autoComplete="off" placeholder="coccoc" />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="utm-medium">Medium</label>
+                    <input id="utm-medium" name="medium" autoComplete="off" placeholder="cpc" />
+                  </div>
+                </div>
+                <div className="field">
+                  <label htmlFor="utm-campaign">Campaign</label>
+                  <input id="utm-campaign" name="campaign" autoComplete="off" placeholder="spring_sale" />
+                </div>
+                <div className="field-row">
+                  <div className="field">
+                    <label htmlFor="utm-term">
+                      Term <span className="opt">optional</span>
+                    </label>
+                    <input id="utm-term" name="term" autoComplete="off" placeholder="running shoes" />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="utm-content">
+                      Content <span className="opt">optional</span>
+                    </label>
+                    <input id="utm-content" name="content" autoComplete="off" placeholder="banner_a" />
+                  </div>
+                </div>
+                <p className="tool-label" id="utm-out-label">
+                  Tagged link
+                </p>
+                <output className="tool-out" data-out aria-labelledby="utm-out-label" aria-live="polite">
+                  Fill in the page URL, source, medium and campaign.
+                </output>
+                <div className="tool-actions">
+                  <button type="button" className="btn btn-ghost tool-btn" data-copy disabled>
+                    Copy link
+                  </button>
+                  <span className="tool-status" data-copy-status role="status" />
+                </div>
               </div>
-              <div className="field">
-                <label htmlFor="utm-medium">Medium</label>
-                <input id="utm-medium" name="medium" autoComplete="off" placeholder="cpc" />
-              </div>
-            </div>
-            <div className="field">
-              <label htmlFor="utm-campaign">Campaign</label>
-              <input id="utm-campaign" name="campaign" autoComplete="off" placeholder="spring_sale" />
-            </div>
-            <div className="field-row">
-              <div className="field">
-                <label htmlFor="utm-term">
-                  Term <span className="opt">optional</span>
-                </label>
-                <input id="utm-term" name="term" autoComplete="off" placeholder="running shoes" />
-              </div>
-              <div className="field">
-                <label htmlFor="utm-content">
-                  Content <span className="opt">optional</span>
-                </label>
-                <input id="utm-content" name="content" autoComplete="off" placeholder="banner_a" />
-              </div>
-            </div>
-            <p className="tool-label" id="utm-out-label">
-              Tagged link
-            </p>
-            <output className="tool-out" data-out aria-labelledby="utm-out-label" aria-live="polite">
-              Fill in the page URL, source, medium and campaign.
-            </output>
-            <div className="tool-actions">
-              <button type="button" className="btn btn-ghost tool-btn" data-copy disabled>
-                Copy link
-              </button>
-              <span className="tool-status" data-copy-status role="status" />
-            </div>
+            </details>
           </form>
 
           <form className="panel tool" data-tool="budget" aria-labelledby="budget-title" noValidate>
@@ -78,65 +86,73 @@ export default function Tools({ rev }: { rev?: boolean }) {
               {tools.budget.title}
             </h3>
             <p className="tool-note">{tools.budget.text}</p>
-            <fieldset className="field seg">
-              <legend>Buying model</legend>
-              <div className="seg-row">
-                {(
-                  [
-                    ["cpm", "CPM"],
-                    ["cpc", "CPC"],
-                    ["cpd", "CPD"],
-                  ] as const
-                ).map(([v, label], i) => (
-                  <label key={v} className="seg-opt">
-                    <input type="radio" name="model" value={v} defaultChecked={i === 0} />
-                    <span>{label}</span>
+            <details className="tool-body" data-collapse-narrow open>
+              <summary className="btn btn-ghost tool-toggle">
+                <span className="when-closed">Open the budget estimator</span>
+                <span className="when-open">Hide</span>
+              </summary>
+              <div className="tool-fields">
+                <fieldset className="field seg">
+                  <legend>Buying model</legend>
+                  <div className="seg-row">
+                    {(
+                      [
+                        ["cpm", "CPM"],
+                        ["cpc", "CPC"],
+                        ["cpd", "CPD"],
+                      ] as const
+                    ).map(([v, label], i) => (
+                      <label key={v} className="seg-opt">
+                        <input type="radio" name="model" value={v} defaultChecked={i === 0} />
+                        <span>{label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+                <div className="field">
+                  <label htmlFor="budget-budget">Budget (VND)</label>
+                  <input
+                    id="budget-budget"
+                    name="budget"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    placeholder="Your budget"
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="budget-rate" data-rate-label>
+                    Your price per 1,000 impressions (VND)
                   </label>
-                ))}
+                  <input
+                    id="budget-rate"
+                    name="rate"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    placeholder="From your quote"
+                  />
+                </div>
+                <div className="field-row">
+                  <div className="field" data-field="ctr">
+                    <label htmlFor="budget-ctr">
+                      Click-through rate (%) <span className="opt">optional</span>
+                    </label>
+                    <input id="budget-ctr" name="ctr" inputMode="decimal" autoComplete="off" />
+                  </div>
+                  <div className="field" data-field="cvr">
+                    <label htmlFor="budget-cvr">
+                      Conversion rate (%) <span className="opt">optional</span>
+                    </label>
+                    <input id="budget-cvr" name="cvr" inputMode="decimal" autoComplete="off" />
+                  </div>
+                </div>
+                <p className="tool-label" id="budget-out-label">
+                  Estimate
+                </p>
+                <output className="tool-out" data-out aria-labelledby="budget-out-label" aria-live="polite">
+                  Enter a budget and your price to see an estimate.
+                </output>
               </div>
-            </fieldset>
-            <div className="field">
-              <label htmlFor="budget-budget">Budget (VND)</label>
-              <input
-                id="budget-budget"
-                name="budget"
-                inputMode="numeric"
-                autoComplete="off"
-                placeholder="Your budget"
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="budget-rate" data-rate-label>
-                Your price per 1,000 impressions (VND)
-              </label>
-              <input
-                id="budget-rate"
-                name="rate"
-                inputMode="numeric"
-                autoComplete="off"
-                placeholder="From your quote"
-              />
-            </div>
-            <div className="field-row">
-              <div className="field" data-field="ctr">
-                <label htmlFor="budget-ctr">
-                  Click-through rate (%) <span className="opt">optional</span>
-                </label>
-                <input id="budget-ctr" name="ctr" inputMode="decimal" autoComplete="off" />
-              </div>
-              <div className="field" data-field="cvr">
-                <label htmlFor="budget-cvr">
-                  Conversion rate (%) <span className="opt">optional</span>
-                </label>
-                <input id="budget-cvr" name="cvr" inputMode="decimal" autoComplete="off" />
-              </div>
-            </div>
-            <p className="tool-label" id="budget-out-label">
-              Estimate
-            </p>
-            <output className="tool-out" data-out aria-labelledby="budget-out-label" aria-live="polite">
-              Enter a budget and your price to see an estimate.
-            </output>
+            </details>
           </form>
         </div>
       </div>
