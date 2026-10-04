@@ -47,7 +47,7 @@ Rule that keeps this working: interactive behaviour lives in plain TypeScript (`
 
 ## Deploy
 
-Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages uses `public/_headers` (build command `npm run build`, output `out`). Both get the lean build. Canonical, Open Graph and sitemap links use `NEXT_PUBLIC_SITE_URL` when set (custom domain); otherwise the address Vercel (`VERCEL_PROJECT_PRODUCTION_URL`) or Cloudflare Pages (`CF_PAGES_URL`) gives the build. `robots.txt`, `sitemap.xml` (pages listed in `src/content/routes.ts`) and a custom 404 are generated.
+Static export, no server code. Vercel picks up `vercel.json`: the Next.js preset with `npm run build`. Do not set an Output Directory on Vercel; its Next.js builder finds the static export in `out` by itself, and pointing it at `out` fails the build (`routes-manifest.json couldn't be found`). Cloudflare Pages uses `public/_headers` (build command `npm run build`, output `out`). Both get the lean build. Canonical, Open Graph and sitemap links use `NEXT_PUBLIC_SITE_URL` when set (custom domain); otherwise the address Vercel (`VERCEL_PROJECT_PRODUCTION_URL`) or Cloudflare Pages (`CF_PAGES_URL`) gives the build. `robots.txt`, `sitemap.xml` (pages listed in `src/content/routes.ts`) and a custom 404 are generated.
 
 ## How it is built
 
