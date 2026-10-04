@@ -2952,6 +2952,9 @@ html[data-scrolled="on"] .site-header {
 }
 
 /* Comfortable tap targets (at least 32px tall, 44px where there is room). */
+.summary-pillars {
+  gap: 0;
+}
 .summary-pillars a {
   display: inline-block;
   padding: 0.3rem 0;
@@ -2967,9 +2970,6 @@ html[data-scrolled="on"] .site-header {
   /* Shorter page on phones: vh-based gaps that suit a laptop feel endless here. */
   .summary {
     padding: 6vh 0 2vh;
-  }
-  html[data-scenes="on"] .about {
-    height: 190vh;
   }
   .split-copy {
     padding: 8vh 0 10vh;
@@ -2993,8 +2993,9 @@ html[data-scrolled="on"] .site-header {
     padding: 9vh 0;
   }
   /* Panels sit over moving particles: near-solid reads better, and skipping the
-     backdrop blur keeps scrolling smooth on phone GPUs. */
-  .panel,
+     backdrop blur keeps scrolling smooth on phone GPUs. The short-version card keeps
+     its frosted glass: the painting dissolving behind it is part of the opening. */
+  .panel:not(.summary-card),
   .scene-head {
     background: rgb(10 15 70 / 0.92);
     backdrop-filter: none;

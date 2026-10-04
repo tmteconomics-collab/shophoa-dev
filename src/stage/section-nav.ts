@@ -3,7 +3,7 @@
  * - marks the current section's links (section dots and the Sections menu) with
  *   aria-current: the last section whose top has passed the middle of the screen;
  * - fills the reading progress bar under the header, and makes the header solid
- *   once the page has scrolled (data-scrolled on <html>);
+ *   once the opening painting has scrolled past it (data-scrolled on <html>);
  * - closes the Sections menu after a jump, on Escape, or on a click outside it.
  * Returns a cleanup function.
  */
@@ -13,14 +13,19 @@ export function startSectionNav(): () => void {
   const targets = ids.map((id) => document.getElementById(id));
   const bar = document.querySelector<HTMLElement>("[data-read]");
   const menu = document.querySelector<HTMLDetailsElement>("details[data-toc]");
+  const hero = document.getElementById("top");
+  const header = document.querySelector<HTMLElement>(".site-header");
 
   let raf = 0;
   let last = "";
   const update = () => {
     raf = 0;
     const root = document.documentElement;
-    // Solid header once the page moves, so text never shows through it.
-    const scrolled = window.scrollY > 8 ? "on" : "off";
+    // Solid header once the opening painting has scrolled past it, so text never
+    // shows through; over the painting it stays see-through.
+    const heroBottom = hero ? hero.getBoundingClientRect().bottom : 0;
+    const headerH = header ? header.offsetHeight : 0;
+    const scrolled = (hero ? heroBottom <= headerH + 1 : window.scrollY > 8) ? "on" : "off";
     if (root.dataset.scrolled !== scrolled) root.dataset.scrolled = scrolled;
     const max = root.scrollHeight - window.innerHeight;
     if (bar) bar.style.transform = `scaleX(${max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)).toFixed(4) : 0})`;
