@@ -1,35 +1,19 @@
 "use client";
 
 // Fixed dot navigation on wide screens: where you are on a long page, and a
-// one-click jump to any section. The active dot is set by src/stage/section-dots.ts.
+// one-click jump to any section. Also starts src/stage/section-nav.ts, which marks
+// the current section here and in the Sections menu and fills the progress bar.
 import { useEffect } from "react";
-import { startSectionDots } from "@/stage/section-dots";
+import { startSectionNav } from "@/stage/section-nav";
 import type { SectionId } from "@/content/roles";
-
-const middle: Record<SectionId, string> = {
-  solutions: "Ad solutions",
-  process: "How I work",
-  measurement: "Measurement",
-  websites: "WordPress",
-};
+import { sectionList } from "@/content/sections";
 
 export default function SectionDots({ order, proof }: { order: SectionId[]; proof: boolean }) {
-  useEffect(() => startSectionDots(), []);
-  const sections: [string, string][] = [
-    ["top", "Start"],
-    ["summary", "The short version"],
-    ["about", "About"],
-    ...order.map((id): [string, string] => [id, middle[id]]),
-    ["tools", "Tools"],
-    ...(proof ? [["proof", "Results and references"] as [string, string]] : []),
-    ["built-with-ai", "Built with AI"],
-    ["skills", "Skills"],
-    ["contact", "Contact"],
-  ];
+  useEffect(() => startSectionNav(), []);
   return (
     <nav className="dots" aria-label="Sections">
       <ol>
-        {sections.map(([id, label]) => (
+        {sectionList(order, proof).map(([id, label]) => (
           <li key={id}>
             <a href={`#${id}`} data-dot={id}>
               <span className="dots-label">{label}</span>

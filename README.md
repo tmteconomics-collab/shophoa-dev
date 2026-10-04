@@ -30,9 +30,10 @@ Testing switches (query string):
 npm run lint           # ESLint (Next.js rules) and TypeScript
 npm run format:check   # Prettier (npm run format to fix)
 npm run build          # lean export to out/
+npm run screenshots    # every section on a phone and a desktop, into screenshots/
 ```
 
-GitHub Actions (`.github/workflows/ci.yml`) runs the same on every pull request and on `main`, then checks the export (no framework scripts left, role versions are noindex, no email address anywhere) and runs Lighthouse CI against `lighthouserc.json`: Accessibility 100, Best Practices and SEO 95 or more, Performance 85 or more on a mobile profile, CLS under 0.05, TBT under 300 ms. Reports are kept as a build artifact, not uploaded anywhere public.
+GitHub Actions (`.github/workflows/ci.yml`) runs the same on every pull request and on `main`, then checks the export (no framework scripts left, role versions are noindex, no email address anywhere) and runs Lighthouse CI against `lighthouserc.json`: Accessibility 100, Best Practices and SEO 95 or more, Performance 85 or more on a mobile profile, CLS under 0.05, TBT under 300 ms. Reports are kept as a build artifact, not uploaded anywhere public. It also saves screenshots of every section of the home page and a role version, and of the CV, on a 390px phone and a 1440px desktop (`scripts/screenshots.mjs`, reduced motion so runs are repeatable), as a `screenshots` artifact kept for 14 days: open the run on GitHub to review a change without deploying it.
 
 ## Lean build
 
@@ -56,7 +57,7 @@ Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages u
 | `src/components/Portfolio.tsx`, `src/app/page.tsx` | The one-page portfolio as semantic HTML. Works without JavaScript. |
 | `src/content/roles.ts`, `src/app/for/[role]/page.tsx` | Role versions to send with job applications: `/for/account-management/`, `/for/performance-marketing/`, `/for/web/`. Same facts, a different opening line and section order. Noindex, not in the sitemap. |
 | `src/app/cv/page.tsx`, `public/devan-cv.pdf` | Print-ready one-page A4 CV built from `cv` and `credentials` in `src/content/site.ts`. |
-| `src/components/Summary.tsx`, `SectionDots.tsx` | Quick-read path: one card with the whole profile after the hero, and fixed section dots on wide screens (active dot from `src/stage/section-dots.ts`). |
+| `src/components/Summary.tsx`, `SectionDots.tsx`, `SectionMenu.tsx` | Quick-read path: one card with the whole profile after the hero, section dots on wide screens, a Sections menu in the header on smaller ones, and a reading progress bar under the header. The section list is in `src/content/sections.ts`; `src/stage/section-nav.ts` marks the current section and fills the bar. |
 | `src/components/Tools.tsx`, `src/tools/` | Two tools visitors can use: a UTM link builder and a CPM/CPC/CPD budget estimator. Plain TypeScript bound to static markup, so they also run in the preview bundle. No rates built in, nothing sent anywhere. |
 | `src/components/Proof.tsx` | Results, testimonials and work samples. Hidden until a list in `proof` (`src/content/site.ts`) has an entry. Certifications take an optional issuer, year and verification link. |
 | `src/components/mocks/` | Animated illustration panels for the measurement (Tag Manager, GA4, Google Ads, Looker Studio) and WordPress (site editor, blocks, WooCommerce store, responsive preview, speed and SEO) sections. Drawn from scratch, sample data, CSS-only motion that stops under reduced motion. |
@@ -76,6 +77,7 @@ Static export, no server code. Vercel picks up `vercel.json`; Cloudflare Pages u
 | `scripts/render-starry-poster.mjs` | Renders the static hero painting and blur-up posters from the live stage. |
 | `scripts/particle_poster.py` | Pre-renders the static particle portrait for Contact with the same sampling and grade as the shader. |
 | `scripts/build-lean.mjs`, `scripts/static-entry.ts` | Lean build (see above). The same entry runs the preview bundle. |
+| `scripts/screenshots.mjs` | Section-by-section screenshots of the built site (local or CI). |
 | `scripts/render-og.mjs` | Renders `public/og.jpg` from the static hero. |
 | `scripts/render-cv-pdf.mjs` | Renders `public/devan-cv.pdf` from `/cv/`. Rerun after any CV change, with `NEXT_PUBLIC_SITE_URL` set so the PDF prints the site address. |
 

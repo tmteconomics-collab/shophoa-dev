@@ -34,6 +34,7 @@
 /* ---------- Base ---------- */
 html {
   background: var(--color-night);
+  scroll-padding-top: var(--header-h);
   overflow-x: clip;
   -webkit-text-size-adjust: 100%;
 }
@@ -2566,6 +2567,108 @@ html:not([data-scenes="on"]) .mk {
   }
   .split-mock .split-copy {
     padding-top: 6vh;
+  }
+}
+
+/* ---------- Reading progress and Sections menu ---------- */
+.read-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  pointer-events: none;
+}
+.read-bar i {
+  display: block;
+  height: 100%;
+  background: var(--color-sun);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+.toc {
+  display: none;
+}
+@media (max-width: 1000px) {
+  .toc {
+    display: block;
+  }
+}
+.toc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 40px;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgb(242 243 255 / 0.35);
+  background: rgb(7 11 58 / 0.35);
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  list-style: none;
+  cursor: pointer;
+}
+.toc-btn::-webkit-details-marker {
+  display: none;
+}
+.toc-btn:hover,
+.toc[open] .toc-btn {
+  border-color: var(--color-sun);
+}
+.toc-panel {
+  position: fixed;
+  top: calc(var(--header-h) + 0.5rem);
+  right: clamp(1rem, 4vw, 2.5rem);
+  z-index: 45;
+  width: min(19rem, calc(100vw - 2rem));
+  max-height: calc(100svh - var(--header-h) - 1.5rem);
+  overflow-y: auto;
+  margin: 0;
+  padding: 0.4rem;
+  list-style: none;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgb(10 15 70 / 0.97);
+  box-shadow: 0 18px 48px rgb(0 0 0 / 0.45);
+}
+.toc-panel a {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 44px;
+  padding: 0.4rem 0.8rem;
+  border-radius: 10px;
+  text-decoration: none;
+}
+.toc-panel a::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: rgb(242 243 255 / 0.4);
+}
+.toc-panel a:hover {
+  background: rgb(242 243 255 / 0.07);
+}
+.toc-panel a[aria-current] {
+  color: var(--color-sun);
+}
+.toc-panel a[aria-current]::before {
+  background: var(--color-sun);
+}
+@media (max-width: 640px) {
+  .toc-btn {
+    padding: 0.45rem 0.6rem;
+  }
+  .toc-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 }
 

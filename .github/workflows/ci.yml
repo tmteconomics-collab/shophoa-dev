@@ -52,6 +52,20 @@ jobs:
       - name: Lighthouse budgets
         run: npx --yes @lhci/cli@0.15.1 autorun
 
+      - name: Screenshots
+        run: |
+          npx playwright install --with-deps chromium
+          npm run screenshots
+
+      - name: Keep the screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: screenshots/
+          if-no-files-found: ignore
+          retention-days: 14
+
       - name: Keep the Lighthouse reports
         if: always()
         uses: actions/upload-artifact@v4

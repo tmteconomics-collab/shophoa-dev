@@ -4,11 +4,11 @@
 import { bootStage } from "../src/stage/boot";
 import { startScrollScenes } from "../src/stage/scroll-scenes";
 import { bindMotionToggle } from "../src/stage/motion-toggle";
-import { startSectionDots } from "../src/stage/section-dots";
+import { startSectionNav } from "../src/stage/section-nav";
 import { bindTools } from "../src/tools";
 
 startScrollScenes();
-startSectionDots();
+startSectionNav();
 bindTools();
 const toggle = document.querySelector<HTMLButtonElement>("[data-motion-toggle]");
 if (toggle) bindMotionToggle(toggle);

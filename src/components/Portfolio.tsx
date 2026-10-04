@@ -2,6 +2,7 @@ import Stage from "@/components/Stage";
 import MotionToggle from "@/components/MotionToggle";
 import Summary from "@/components/Summary";
 import SectionDots from "@/components/SectionDots";
+import SectionMenu from "@/components/SectionMenu";
 import Tools from "@/components/Tools";
 import Proof, { hasProof } from "@/components/Proof";
 import ScrollScenes from "@/components/ScrollScenes";
@@ -293,7 +294,11 @@ export default function Portfolio({
               </li>
             </ul>
           </nav>
+          <SectionMenu order={order} proof={hasProof} />
           <MotionToggle />
+        </div>
+        <div className="read-bar" aria-hidden="true">
+          <i data-read />
         </div>
       </header>
 

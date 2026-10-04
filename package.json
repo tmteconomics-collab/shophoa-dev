@@ -10,7 +10,8 @@
     "lint": "eslint . && tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "preview:build": "next build && node scripts/build-preview.mjs"
+    "preview:build": "next build && node scripts/build-preview.mjs",
+    "screenshots": "node scripts/screenshots.mjs"
   },
   "dependencies": {
     "next": "^16.3.8",
@@ -27,6 +28,7 @@
     "esbuild": "^0.28.2",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.8",
+    "playwright": "^1.56.1",
     "postcss": "^8.5.28",
     "prettier": "^3.9.9",
     "tailwindcss": "^4.3.3",
