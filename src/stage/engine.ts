@@ -443,8 +443,9 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
     U.uHi.value.set(hi.x, hi.y);
     // Chart lights one more stretch of bars per step; blocks light the group each step is about.
     const tc = active("chart");
+    const chartSteps = scenes.find((x) => x.kind === "chart")?.el.querySelectorAll("[data-step]").length || 1;
     const blockKey = scenes.find((x) => x.kind === "blocks")?.el.dataset.activeKey ?? "";
-    const chartTarget = tc < 0 ? 0.15 : (tc + 1) / 4;
+    const chartTarget = tc < 0 ? 0.15 : (tc + 1) / chartSteps;
     U.uChartLevel.value += (chartTarget - U.uChartLevel.value) * k;
     // Page-block groups (header, hero, columns, cards, footer) each step is about.
     const groupTargets: Record<string, number[]> = {

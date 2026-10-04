@@ -12,7 +12,7 @@ The full original brief is in `docs/original-brief.md`. This file records what w
 - Portrait: the particle portrait (gaze, blinks) lives in Contact. The 1:1 photo looked soft on 2x screens, so it is never shown; it is only a texture for particle colours and the eyes.
 - Static stills: `public/portrait/starry-*.webp` (hero, from `scripts/render-starry-poster.mjs`) and `particles-*.webp` (Contact, from `scripts/particle_poster.py`).
 
-- Sections added on request (2026-10-03): **Measurement and performance marketing** (Google Tag Manager, GA4, Google Ads, Looker Studio) and **Websites on WordPress**. Their panels are illustrations in the site's style: no product screenshots or logos, every figure labelled sample data and kept internally consistent (campaign rows add up to the report scorecards).
+- Sections added on request (2026-10-03): **Measurement and performance marketing** (Google Tag Manager, GA4, Google Ads) and **Websites on WordPress**. Their panels are illustrations in the site's style: no product screenshots or logos, every figure labelled sample data and kept internally consistent (campaign rows add up to the report scorecards).
 
 ## Decisions delegated to Claude (2026-10-03)
 - Positioning line: the hero lead names all three pillars (Cốc Cốc ads, Google measurement, WordPress builds), since the owner added the last two on 2026-10-03.
@@ -20,7 +20,8 @@ The full original brief is in `docs/original-brief.md`. This file records what w
 - CPD on Cốc Cốc = cost per duration (fixed price for a placement over a set time).
 - Certifications listed by name only. MBA research focus not shown. No extra vibe-coding projects: the site is the project.
 - Built with AI lesson line written from how this site was made; the owner can edit it in `src/content/site.ts`.
-- WooCommerce confirmed by the owner (2026-10-03): the WordPress section has an Online store step. Looker Studio and block editor vs page builder are still assumptions marked `TODO:`.
+- WooCommerce confirmed by the owner (2026-10-03): the WordPress section has an Online store step.
+- The owner does not use Looker Studio (2026-10-04): no report step, no Looker Studio anywhere. The owner chose not to say whether he builds with the block editor or a page builder, so the WordPress copy and panels stay tool-neutral (no "site editor", "patterns", "global styles").
 - Funnel mapping: new-tab banner and CPM under Awareness; search, native, targeting under Consideration; shopping, retargeting, CPC and CPD under Conversion.
 
 - Quick-read path: a "The short version" card after the hero (`summary` in `src/content/site.ts`), section dots on wide screens, a Sections menu in the header up to 1000px, and a reading progress bar under the header. One section list feeds both (`src/content/sections.ts`); `src/stage/section-nav.ts` marks the current section. Keep that list in step with the section ids.

@@ -1,5 +1,5 @@
 // Illustrations for the measurement section: one panel per step (tag, measure,
-// optimize, report). Drawn from scratch in the site's own style, with sample data
+// optimize). Drawn from scratch in the site's own style, with sample data
 // that is internally consistent and clearly labelled. Decorative: the step text
 // next to it says everything the panels show.
 
@@ -34,8 +34,6 @@ const users = Array.from({ length: 28 }, (_, i) => 380 + i * 6 + [0, 30, 42, 38,
 // Cost per acquisition by week, in thousand VND, falling as the account is tuned.
 const cpa = [96, 91, 88, 80, 74, 69, 65, 62];
 // Weekly cost (million VND) and conversions; they sum to the scorecards.
-const weekCost = [14.2, 15.1, 15.6, 15.2];
-const weekConv = [212, 236, 251, 268];
 
 export function TagMock() {
   return (
@@ -186,58 +184,4 @@ export function OptimizeMock() {
   );
 }
 
-export function ReportMock() {
-  const maxCost = Math.max(...weekCost);
-  return (
-    <>
-      <Bar title="Looker Studio · Weekly report" />
-      <div className="mk-body mk-report">
-        <div className="mk-cards">
-          <div>
-            <span>Cost (VND)</span>
-            <b>60.1M</b>
-            <em className="good">▼ 4%</em>
-          </div>
-          <div>
-            <span>Conversions</span>
-            <b>967</b>
-            <em className="good">▲ 12%</em>
-          </div>
-          <div>
-            <span>CPA (VND)</span>
-            <b>62K</b>
-            <em className="good">▼ 14%</em>
-          </div>
-          <div>
-            <span>ROAS</span>
-            <b>4.2</b>
-            <em className="good">▲ 0.6</em>
-          </div>
-        </div>
-        <div className="mk-combo">
-          <p className="mk-h">Cost and conversions by week</p>
-          <div className="mk-combo-plot">
-            {weekCost.map((c, i) => (
-              <div
-                key={i}
-                className="mk-col-bar"
-                style={{ "--h": `${(c / maxCost) * 100}%`, "--i": i } as React.CSSProperties}
-              >
-                <i />
-                <span>W{i + 1}</span>
-              </div>
-            ))}
-            <svg viewBox="0 0 200 100" preserveAspectRatio="none" className="mk-combo-line">
-              <path className="mk-line" d={path(weekConv, 200, 100, 25)} pathLength={1} />
-            </svg>
-          </div>
-        </div>
-        <p className="mk-next">
-          <b>Next week</b> Shift 10% of Generic budget to Brand, test a shorter lead form.
-        </p>
-      </div>
-    </>
-  );
-}
-
-export const growthMocks = [TagMock, MeasureMock, OptimizeMock, ReportMock];
+export const growthMocks = [TagMock, MeasureMock, OptimizeMock];

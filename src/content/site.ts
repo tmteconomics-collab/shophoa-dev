@@ -51,18 +51,10 @@ export const summary = {
   role: "Strategic Account Executive at Cốc Cốc Ad Platform, Hanoi. Account Manager from November 2024, in this role since June 2025.",
   pillars: [
     { text: "Sell and run ad campaigns on Cốc Cốc", href: "#solutions" },
-    { text: "Set up and report on GA4, Tag Manager and Google Ads", href: "#measurement" },
+    { text: "Set up measurement with GA4, Tag Manager and Google Ads", href: "#measurement" },
     { text: "Build WordPress sites and WooCommerce stores", href: "#websites" },
   ],
-  tools: [
-    "Google Analytics 4",
-    "Google Tag Manager",
-    "Google Ads",
-    "Looker Studio",
-    "WordPress",
-    "WooCommerce",
-    "Claude",
-  ],
+  tools: ["Google Analytics 4", "Google Tag Manager", "Google Ads", "WordPress", "WooCommerce", "Claude"],
   education: "MBA, Foreign Trade University, 2026 to 2028 (part-time)",
   languages: "Vietnamese (native), English (professional working)",
 };
@@ -169,11 +161,11 @@ export const workflow = {
 };
 
 // Owner request (2026-10-03): show measurement and performance work on Google's tools.
-// TODO: owner to confirm Looker Studio is part of his reporting.
+// The owner does not use Looker Studio (confirmed 2026-10-04), so there is no report step.
 export const growth = {
   title: "Measurement and performance marketing",
   intro:
-    "I set up Google Tag Manager, Google Analytics 4 and Google Ads so every campaign is measured the same way, then use that data to improve results and report them plainly.",
+    "I set up Google Tag Manager, Google Analytics 4 and Google Ads so every campaign is measured the same way, then use that data to improve results.",
   steps: [
     {
       tool: "Google Tag Manager",
@@ -190,32 +182,28 @@ export const growth = {
       name: "Optimize",
       text: "Key events imported as conversions, a bidding strategy that matches the goal, negative keywords to cut wasted clicks, and steady tests of ads and landing pages.",
     },
-    {
-      tool: "Looker Studio",
-      name: "Report",
-      text: "GA4 and Google Ads in one report a client can read in a minute: spend, results, cost per result, and what changes next.",
-    },
   ],
   note: "Panels show sample data to illustrate the workflow. They are not client results.",
 };
 
 // Owner request (2026-10-03): show that he builds websites on WordPress.
-// WooCommerce confirmed by the owner. TODO: block editor or a page builder (Elementor)?
+// WooCommerce confirmed by the owner. The owner chose not to name an editor
+// (block editor or page builder), so the copy stays tool-neutral.
 // Each step's key drives the particle highlight in src/stage/engine.ts.
 export const websites = {
   title: "Websites and stores on WordPress",
   intro:
-    "I build WordPress sites and WooCommerce stores that marketing teams can update on their own: one design system, reusable blocks and fast pages.",
+    "I build WordPress sites and WooCommerce stores that marketing teams can update on their own: one design system, reusable sections and fast pages.",
   steps: [
     {
       key: "theme",
       name: "Theme and layout",
-      text: "Start from a theme, then shape the header, footer and page templates in the site editor so every page shares one system.",
+      text: "Start from a theme, then set up the header, footer and page templates so every page shares one system.",
     },
     {
       key: "blocks",
-      name: "Blocks and patterns",
-      text: "Build pages from blocks, save repeated sections as patterns, and keep colours and type in global styles so edits stay consistent.",
+      name: "Reusable sections",
+      text: "Build pages from reusable sections, and keep colours and type in one place so edits stay consistent.",
     },
     {
       key: "store",
@@ -300,7 +288,6 @@ export const credentials = {
     "Google Analytics 4",
     "Google Tag Manager",
     "Google Ads",
-    "Looker Studio",
     "WordPress",
     "WooCommerce",
     "Vibe coding with Claude",
@@ -370,7 +357,7 @@ export const cv = {
         "Third-party campaign tracking",
       ],
     },
-    { name: "Measurement", items: ["Google Tag Manager", "Google Analytics 4", "Google Ads", "Looker Studio"] },
+    { name: "Measurement", items: ["Google Tag Manager", "Google Analytics 4", "Google Ads"] },
     { name: "Web", items: ["WordPress", "WooCommerce", "SEO"] },
     { name: "Marketing", items: ["Digital marketing", "Inbound marketing"] },
     { name: "AI", items: ["Vibe coding with Claude (Claude app and Claude Code)"] },

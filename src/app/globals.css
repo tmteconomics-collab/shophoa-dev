@@ -1490,11 +1490,6 @@ html:not([data-scenes="on"]) .mk {
     transform: scaleX(0);
   }
 }
-@keyframes mk-rise {
-  from {
-    transform: scaleY(0);
-  }
-}
 .mk-log {
   list-style: none;
   margin: 0;
@@ -1636,14 +1631,12 @@ html:not([data-scenes="on"]) .mk {
 }
 
 /* Analytics */
-.mk-kpis,
-.mk-cards {
+.mk-kpis {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0.4rem;
 }
-.mk-kpis div,
-.mk-cards div {
+.mk-kpis div {
   min-width: 0;
   display: grid;
   gap: 0.08rem;
@@ -1651,16 +1644,14 @@ html:not([data-scenes="on"]) .mk {
   border-radius: 6px;
   background: rgb(7 11 58 / 0.55);
 }
-.mk-kpis span,
-.mk-cards span {
+.mk-kpis span {
   font-size: 0.66rem;
   color: var(--color-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.mk-kpis b,
-.mk-cards b {
+.mk-kpis b {
   font-family: var(--font-display);
   font-stretch: 90%;
   font-size: 1rem;
@@ -1708,20 +1699,16 @@ html:not([data-scenes="on"]) .mk {
 .mk.is-on .mk-bars i {
   animation: mk-grow 0.8s 0.4s ease-out both;
 }
-.mk.is-on .mk-kpis div,
-.mk.is-on .mk-cards div {
+.mk.is-on .mk-kpis div {
   animation: mk-in 0.4s both;
 }
-.mk.is-on .mk-kpis div:nth-child(2),
-.mk.is-on .mk-cards div:nth-child(2) {
+.mk.is-on .mk-kpis div:nth-child(2) {
   animation-delay: 0.1s;
 }
-.mk.is-on .mk-kpis div:nth-child(3),
-.mk.is-on .mk-cards div:nth-child(3) {
+.mk.is-on .mk-kpis div:nth-child(3) {
   animation-delay: 0.2s;
 }
-.mk.is-on .mk-kpis div:nth-child(4),
-.mk.is-on .mk-cards div:nth-child(4) {
+.mk.is-on .mk-kpis div:nth-child(4) {
   animation-delay: 0.3s;
 }
 
@@ -1771,77 +1758,6 @@ html:not([data-scenes="on"]) .mk {
   font-weight: 600;
   color: var(--color-ok);
   font-variant-numeric: tabular-nums;
-}
-
-/* Report */
-.mk-report {
-  grid-template-rows: auto 1fr auto;
-  align-content: stretch;
-}
-.mk-cards em {
-  font-style: normal;
-  font-size: 0.68rem;
-  font-weight: 600;
-}
-.mk-cards .good {
-  color: var(--color-ok);
-}
-.mk-combo {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-.mk-combo-plot {
-  position: relative;
-  flex: 1;
-  min-height: 80px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12%;
-  align-items: end;
-  padding: 0 6% 1.1rem;
-}
-.mk-col-bar {
-  position: relative;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-}
-.mk-col-bar i {
-  width: 100%;
-  height: var(--h);
-  border-radius: 4px 4px 0 0;
-  background: rgb(140 147 255 / 0.55);
-  transform-origin: bottom;
-}
-.mk-col-bar span {
-  position: absolute;
-  bottom: -1.05rem;
-  font-size: 0.66rem;
-  color: var(--color-muted);
-}
-.mk.is-on .mk-col-bar i {
-  animation: mk-rise 0.7s calc(var(--i) * 0.12s + 0.2s) ease-out both;
-}
-.mk-combo-line {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: calc(100% - 1.1rem);
-}
-.mk-next {
-  margin: 0;
-  padding: 0.5rem 0.6rem;
-  border-radius: 6px;
-  border: 1px solid rgb(255 210 63 / 0.45);
-  background: rgb(255 210 63 / 0.08);
-}
-.mk-next b {
-  margin-right: 0.4rem;
-  color: var(--color-sun);
 }
 
 /* WordPress editor */
@@ -2543,8 +2459,7 @@ html:not([data-scenes="on"]) .mk {
   .wc-add {
     display: none;
   }
-  .mk-kpis b,
-  .mk-cards b {
+  .mk-kpis b {
     font-size: 0.88rem;
   }
 }

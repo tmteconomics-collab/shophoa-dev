@@ -13,7 +13,7 @@ Gần như mọi chữ trên site nằm trong `src/content/site.ts`. Mở file, 
 | Đoạn giới thiệu trong cửa sổ trình duyệt | `about` |
 | Giải pháp quảng cáo Cốc Cốc | `solutions` |
 | Cách làm việc với khách hàng | `workflow` |
-| GA4, Tag Manager, Google Ads, Looker Studio | `growth` |
+| GA4, Tag Manager, Google Ads | `growth` |
 | WordPress và WooCommerce | `websites` |
 | Hai công cụ (UTM, ước tính ngân sách) | `tools` |
 | Kết quả, lời giới thiệu, sản phẩm mẫu | `proof` (xem mục 3) |
@@ -31,11 +31,11 @@ Quy tắc nội dung (giữ nguyên, không ngoại lệ):
 
 ## 2. Việc còn chờ bạn xác nhận
 
-Tìm chữ `TODO` trong `src/content/site.ts`:
+Tìm chữ `TODO` trong `src/content/site.ts`. Hiện chỉ còn:
 
-1. Bạn có dùng **Looker Studio** để báo cáo không? Nếu không, bỏ bước "Report" trong `growth` và chữ "Looker Studio" ở `summary`, `credentials`, `cv`.
-2. Bạn dựng WordPress bằng **block editor** (Gutenberg) hay **page builder** (Elementor…)? Nếu là page builder, sửa chữ trong `websites` cho đúng.
-3. **Chứng chỉ**: thêm đơn vị cấp, năm và link xác minh (xem mục 3).
+1. **Chứng chỉ**: thêm đơn vị cấp, năm và link xác minh (xem mục 3).
+
+Đã chốt: không dùng Looker Studio (đã bỏ khỏi site và CV); phần WordPress không nêu tên công cụ dựng trang (block editor hay page builder).
 
 ## 3. Thêm bằng chứng (phần đang ẩn)
 

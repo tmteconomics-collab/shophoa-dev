@@ -1,5 +1,6 @@
 // Illustrations for the WordPress section: an editor panel per step (theme and
-// layout, blocks and patterns, WooCommerce store, responsive, speed and SEO). Drawn from scratch in
+// layout, reusable sections, WooCommerce store, responsive, speed and SEO). Labels
+// stay generic: the owner did not name a block editor or a page builder. Drawn from scratch in
 // the site's own style; no WordPress screenshots or logos. Decorative.
 
 function Bar({ title }: { title: string }) {
@@ -49,7 +50,7 @@ function PagePreview({ outline = false }: { outline?: boolean }) {
 export function ThemeMock() {
   return (
     <>
-      <Bar title="Site editor · Templates" />
+      <Bar title="Theme · Templates" />
       <div className="mk-body wp-editor">
         <aside className="wp-side">
           <p className="mk-h">Templates</p>
@@ -74,13 +75,13 @@ export function ThemeMock() {
 }
 
 export function BlocksMock() {
-  const blocks = ["Heading", "Paragraph", "Image", "Columns", "Buttons", "Pattern: Hero"];
+  const blocks = ["Heading", "Text", "Image", "Columns", "Button", "Section: Hero"];
   return (
     <>
-      <Bar title="Block editor · Landing page" />
+      <Bar title="Page editor · Landing page" />
       <div className="mk-body wp-editor">
         <aside className="wp-side">
-          <p className="mk-h">Blocks</p>
+          <p className="mk-h">Elements</p>
           <ul className="wp-inserter">
             {blocks.map((b) => (
               <li key={b}>{b}</li>
