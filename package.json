@@ -4,9 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/build-lean.mjs",
+    "build:next": "next build",
     "start": "npx serve out",
-    "lint": "tsc --noEmit"
+    "lint": "eslint . && tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "preview:build": "next build && node scripts/build-preview.mjs",
+    "screenshots": "node scripts/screenshots.mjs"
   },
   "dependencies": {
     "next": "^16.3.8",
@@ -20,7 +25,12 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@types/three": "^0.186.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.8",
+    "playwright": "^1.56.1",
     "postcss": "^8.5.28",
+    "prettier": "^3.9.9",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3"
   }

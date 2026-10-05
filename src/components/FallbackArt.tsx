@@ -1,7 +1,12 @@
 // Static drawings shown in place of the particle shapes when WebGL is off
 // (reduced motion, low-power devices, no WebGL). Decorative only.
 
-const stroke = { fill: "none", stroke: "currentColor", strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+const stroke = {
+  fill: "none",
+  stroke: "currentColor",
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
+};
 
 export function FunnelArt() {
   return (

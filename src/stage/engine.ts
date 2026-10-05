@@ -1,21 +1,24 @@
 import {
+  type BufferAttribute,
   ColorManagement,
   Color,
   LinearFilter,
   PerspectiveCamera,
   Scene as ThreeScene,
   Texture,
-  TextureLoader,
   WebGLRenderer,
 } from "three";
-import { character, focalCover, heroFraming, pickVariant, variantInfo, type ImageBox, type Variant } from "./config";
+import { character, pickVariant, variantInfo, type Variant } from "./config";
 import { Gaze } from "./gaze";
 import { palette } from "./palette";
 import { createParticles } from "./particles";
-import { createPortrait } from "./portrait";
 import { buildShapes, SHAPE, type PortraitSample } from "./shapes";
-import { collectScenes, frameAt, measureScenes, type Frame, type Scene } from "./timeline";
+import { starryFlowField, starryLayout } from "./starry";
+import { collectScenes, frameAt, measureScenes, type Scene } from "./timeline";
 import { createTrails } from "./trails";
+
+// Content the cursor trail must not draw behind.
+const TRAIL_FREE = ".panel, .mk-stage, .browser, .scene-head, .site-header, .toc-panel, .dots";
 import { createFunnelCage, createPromptCage } from "./cage";
 
 ColorManagement.enabled = false;
@@ -29,19 +32,44 @@ const smooth = (a: number, b: number, x: number) => {
   return t * t * (3 - 2 * t);
 };
 
+// Page-block groups (header, hero, columns, cards, footer) each WordPress step is about.
+const GROUP_TARGETS: Record<string, number[]> = {
+  theme: [1, 0, 0, 0, 1],
+  blocks: [0, 1, 1, 1, 0],
+  store: [0, 0.3, 0, 1, 0], // the cards become the product grid
+  responsive: [0.35, 0.35, 0.35, 0.35, 0.35],
+  speed: [0.7, 0.7, 0.7, 0.7, 0.7],
+};
+const NO_GROUP = [0, 0, 0, 0, 0];
+
+// The step a scene's DOM side marks as active, or -1.
+const activeStep = (s: Scene | undefined) => {
+  const v = s?.el.dataset.active;
+  return v === undefined || v === "" ? -1 : Number(v);
+};
+
 export interface StageHandle {
   destroy(): void;
 }
 
-function loadImage(url: string) {
-  return new Promise<HTMLImageElement>((resolve, reject) => {
-    const img = new Image();
-    img.decoding = "async";
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("image failed: " + url));
-    img.src = url;
-  });
+async function loadImage(url: string) {
+  const img = new Image();
+  img.decoding = "async";
+  img.src = url;
+  // decode() works off the main thread, so drawing the image below does not stall.
+  await img.decode().catch(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        if (img.complete && img.naturalWidth) return resolve();
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error("image failed: " + url));
+      }),
+  );
+  return img;
 }
+
+// Lets the browser paint and scroll between the heavy steps of starting the stage.
+const breathe = () => new Promise<void>((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
 
 function sampleImage(img: HTMLImageElement, w: number, h: number) {
   const c = document.createElement("canvas");
@@ -53,8 +81,16 @@ function sampleImage(img: HTMLImageElement, w: number, h: number) {
   return ctx.getImageData(0, 0, w, h).data;
 }
 
-function texture(img: HTMLImageElement) {
-  const t = new Texture(img);
+// The photo only colours the eyes in Contact, read once per particle, so a copy
+// about twice the sampling grid is plenty. A canvas also uploads without the full
+// re-decode an image element costs on a phone.
+function eyeTexture(img: HTMLImageElement, width: number) {
+  const s = Math.min(1, width / img.naturalWidth);
+  const c = document.createElement("canvas");
+  c.width = Math.round(img.naturalWidth * s);
+  c.height = Math.round(img.naturalHeight * s);
+  c.getContext("2d")?.drawImage(img, 0, 0, c.width, c.height);
+  const t = new Texture(c);
   t.flipY = false;
   t.generateMipmaps = false;
   t.minFilter = LinearFilter;
@@ -70,23 +106,35 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
   const small = innerWidth < 768;
   const tier = coarse || small ? P.quality.mobile : P.quality.desktop;
   const trailsOn = tier.trails && P.cursorTrail.enabled && !coarse;
-  const dprCap = coarse || small ? 1.5 : character.performance.maxDevicePixelRatio;
+  const perf = character.performance;
+  const dprCap = coarse || small ? perf.maxDevicePixelRatioMobile : perf.maxDevicePixelRatio;
 
   const variant: Variant = pickVariant(innerWidth, innerHeight);
   const info = variantInfo(variant);
 
-  const [photo, depth] = await Promise.all([loadImage(info.image), loadImage(info.depth)]);
+  // Asset base from the canvas: "/" on the site (pages live at any depth), "" in the preview bundle.
+  const base = canvas.dataset.assets ?? "";
+  const [photo, depth] = await Promise.all([loadImage(base + info.image), loadImage(base + info.depth)]);
 
   // Sample colour, depth and mask on a small grid to place the portrait particles.
   const sw = variant === "desktop" ? 540 : 360;
   const shRows = Math.round((sw * info.size[1]) / info.size[0]);
   const fb = character.faceBoxPx;
   const crop = character.variants[variant].cropPx;
+  const color = sampleImage(photo, sw, shRows);
+  await breathe();
+  const depthMask = sampleImage(depth, sw, shRows);
   const sample: PortraitSample = {
     width: sw,
     height: shRows,
-    color: sampleImage(photo, sw, shRows),
-    depthMask: sampleImage(depth, sw, shRows),
+    color,
+    depthMask,
+    eyes: {
+      left: info.landmarks.leftEye,
+      right: info.landmarks.rightEye,
+      rx: info.eyeRadius[0],
+      ry: info.eyeRadius[1],
+    },
     face: {
       x: (fb.x + fb.w / 2 - crop.x) / crop.w,
       y: (fb.hairTopY + (fb.y + fb.h - fb.hairTopY) / 2 - crop.y) / crop.h,
@@ -94,9 +142,14 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
       ry: ((fb.y + fb.h - fb.hairTopY) * 0.58) / crop.h,
     },
   };
+  await breathe();
   // ?count=N overrides the particle budget (testing and tuning).
   const count = clamp(Number(params.get("count")) || tier.count, 2000, 200000);
-  const shapes = buildShapes(count, sample);
+  // The hero painting is laid out for the viewport's shape (wide or tall).
+  const heroAspect = innerWidth / Math.max(1, innerHeight);
+  const layout = starryLayout(heroAspect);
+  const shapes = await buildShapes(count, sample, { layout, aspect: heroAspect }, breathe);
+  await breathe();
 
   const renderer = new WebGLRenderer({
     canvas,
@@ -105,26 +158,45 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
     powerPreference: "high-performance",
   });
   renderer.setClearColor(new Color(palette.night), 1);
+  renderer.clear(); // night blue, not black, while the shaders compile
   const scene = new ThreeScene();
   const camera = new PerspectiveCamera(FOV, 1, 0.05, 60);
   camera.position.set(0, 0, CAM_D);
 
-  const portrait = createPortrait(texture(photo), texture(depth), info);
-  const particles = createParticles(shapes);
+  // The photo is kept as a texture so eye particles can sample it for gaze and blinks.
+  const photoTex = eyeTexture(photo, sw * 2);
+  const particles = createParticles(shapes, photoTex, {
+    left: info.landmarks.leftEye,
+    right: info.landmarks.rightEye,
+    radius: info.eyeRadius,
+  });
   const trails = trailsOn ? createTrails(1536) : null;
   const funnelCage = createFunnelCage();
   const promptCage = createPromptCage();
-  scene.add(portrait.mesh, funnelCage.lines, promptCage.lines, particles.points);
+  scene.add(funnelCage.lines, promptCage.lines, particles.points);
   if (trails) scene.add(trails.points);
+  // Where the browser can (KHR_parallel_shader_compile), shaders compile in the
+  // background instead of freezing the page on the first frame.
+  if (renderer.extensions.has("KHR_parallel_shader_compile")) await renderer.compileAsync(scene, camera);
+  else renderer.compile(scene, camera);
+  await breathe();
 
   const U = particles.material.uniforms;
-  const PU = portrait.material.uniforms;
 
   // ---------- Scenes ----------
   let scenes: Scene[] = collectScenes();
   const hero = scenes.find((s) => s.kind === "hero");
   const contact = scenes.find((s) => s.kind === "portrait");
   const railsScene = scenes.find((s) => s.kind === "rails");
+  const funnelScene = scenes.find((s) => s.kind === "funnel");
+  const chartScene = scenes.find((s) => s.kind === "chart");
+  const blocksScene = scenes.find((s) => s.kind === "blocks");
+  const browserEl = scenes.find((s) => s.kind === "browser")?.anchor;
+  const promptEl = scenes.find((s) => s.kind === "prompt")?.anchor;
+  const funnelEl = funnelScene?.anchor;
+  const chartEl = chartScene?.anchor;
+  const blocksEl = blocksScene?.anchor;
+  const chartSteps = chartScene?.el.querySelectorAll("[data-step]").length || 1;
   if (!hero) throw new Error("hero scene missing");
   const remeasure = () => measureScenes(scenes);
   remeasure();
@@ -132,8 +204,13 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
   ro.observe(document.body);
 
   // ---------- Input ----------
-  let vw = innerWidth;
-  let vh = innerHeight;
+  // Sizes come from the canvas, which CSS sizes to the large viewport (100lvh): a
+  // phone's address bar sliding in and out never resizes it, only real changes do.
+  let vw = canvas.clientWidth || innerWidth;
+  let vh = canvas.clientHeight || innerHeight;
+  let sizeChanged = false;
+  const cro = new ResizeObserver(() => (sizeChanged = true));
+  cro.observe(canvas);
   const pointer = { x: vw / 2, y: vh / 2, inside: false, touch: false };
   let gazeEl: HTMLElement | null = null;
   const gaze = new Gaze(performance.now());
@@ -162,7 +239,10 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
       y += (c.y - y) * k;
     }
     gazeFromPoint(x, y, now, pointer.touch ? 0.6 : 1);
-    if (trails && !pointer.touch) {
+    // Trails draw only over open sky: behind a glass card or a panel they would show
+    // through as streaks across the text.
+    const overContent = (e.target as Element | null)?.closest?.(TRAIL_FREE);
+    if (trails && !pointer.touch && root.dataset.paused !== "on" && !overContent) {
       trails.push((e.clientX / vw) * 2 - 1, -((e.clientY / vh) * 2 - 1), now / 1000, vw / vh);
     }
   };
@@ -191,9 +271,14 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
   // ---------- Intro ----------
   const hp = P.heroAssembly;
   // Skip the opening if the visitor has scrolled, asked for it, or the stage started late
-  // (the static photo is already showing by then).
+  // (the static photo is already showing by then). The formed particle portrait is the
+  // hero's resting state; there is no hand-off to the photo.
   const introAllowed =
-    hp.enabled && scrollY < innerHeight * 0.3 && !params.has("nointro") && performance.now() < 4000;
+    hp.enabled &&
+    scrollY < innerHeight * 0.3 &&
+    !params.has("nointro") &&
+    performance.now() < 4000 &&
+    root.dataset.paused !== "on";
   let introStart = introAllowed ? performance.now() : -1e9;
   const introEnd = hp.maxDurationMs;
   const skip = () => {
@@ -213,41 +298,44 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
   const ndcX = (px: number) => (px / vw) * 2 - 1;
   const ndcY = (py: number) => -((py / vh) * 2 - 1);
   const wpp = () => 2 / vh; // world units per CSS pixel at the focal plane
-  let heroBox: ImageBox = { x: 0, y: 0, w: 1, h: 1 };
   const face = info.landmarks.faceCenter;
 
-  const placePortrait = (frame: Frame) => {
-    const useContact = contact && (frame.a === contact || frame.b === contact);
-    if (useContact) {
-      const r = contact.anchor.getBoundingClientRect();
-      const ia = info.size[0] / info.size[1];
-      const w = Math.min(r.width, r.height * ia);
-      const h = w / ia;
-      particles.xf[SHAPE.portrait].set(ndcX(r.left + r.width / 2), ndcY(r.top + r.height / 2), w * wpp(), h * wpp());
-      U.uZs.value[SHAPE.portrait] = h * wpp() * 0.3;
-      particles.rot[SHAPE.portrait].set(gaze.head.x * 0.18, -gaze.head.y * 0.08);
-      U.uPortraitWin.value.set(-0.5, -0.5, 0.5, 0.5);
-      U.uPortraitBg.value = 0.75;
-      portraitPx = { w, h };
-    } else {
-      particles.xf[SHAPE.portrait].set(
-        ndcX(heroRect.left + heroBox.x + heroBox.w / 2),
-        ndcY(heroRect.top + heroBox.y + heroBox.h / 2),
-        heroBox.w * wpp(),
-        heroBox.h * wpp(),
-      );
-      U.uZs.value[SHAPE.portrait] = heroBox.h * wpp() * 0.04;
-      particles.rot[SHAPE.portrait].set(0, 0);
-      // Only the part of the image inside the hero box is visible.
-      const x0 = -heroBox.x / heroBox.w - 0.5;
-      const x1 = (heroRect.width - heroBox.x) / heroBox.w - 0.5;
-      const y1 = 0.5 + heroBox.y / heroBox.h;
-      const y0 = 0.5 - (heroRect.height - heroBox.y) / heroBox.h;
-      U.uPortraitWin.value.set(x0, y0, x1, y1);
-      U.uPortraitBg.value = 0.45;
-      portraitPx = { w: heroBox.w, h: heroBox.h };
+  // The particle portrait lives in the Contact scene, fitted inside its box.
+  const placePortrait = () => {
+    if (!contact) return;
+    const r = contact.anchor.getBoundingClientRect();
+    const ia = info.size[0] / info.size[1];
+    const w = Math.min(r.width, r.height * ia);
+    const h = w / ia;
+    particles.xf[SHAPE.portrait].set(ndcX(r.left + r.width / 2), ndcY(r.top + r.height / 2), w * wpp(), h * wpp());
+    U.uZs.value[SHAPE.portrait] = h * wpp() * 0.2;
+    portraitPx = { w, h };
+    portraitFace = { x: r.left + (r.width - w) / 2 + face[0] * w, y: r.top + (r.height - h) / 2 + face[1] * h };
+  };
+
+  // The painting fills the hero box.
+  const placeHero = () => {
+    const r = heroRect;
+    particles.xf[SHAPE.starry].set(
+      ndcX(r.left + r.width / 2),
+      ndcY(r.top + r.height / 2),
+      (r.width / 2) * wpp(),
+      (r.height / 2) * wpp(),
+    );
+    U.uZs.value[SHAPE.starry] = r.height * wpp() * 0.5;
+    const aspect = r.width / Math.max(1, r.height);
+    U.uHeroAspect.value = aspect;
+    U.uStarSize.value = Math.sqrt((r.width * r.height) / Math.max(1, drawCount)) * 2.5;
+    // The sky's flow follows the hero's shape: work it out again if that changes.
+    if (Math.abs(aspect - flowAspect) > aspect * 0.002) {
+      flowAspect = aspect;
+      starryFlowField(shapes.starryA, count, layout, aspect, flowAttr.array as Float32Array);
+      flowAttr.needsUpdate = true;
     }
   };
+  const flowAttr = particles.geometry.getAttribute("aStarryF") as BufferAttribute;
+  let flowAspect = heroAspect;
+  U.uBand.value.set(layout.band.v, layout.band.amp, layout.band.tilt, layout.band.thick);
 
   const placeAnchor = (shape: number, el: HTMLElement, mode: "box" | "square", fill = 1) => {
     const r = el.getBoundingClientRect();
@@ -266,9 +354,13 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
 
   let heroRect = hero.el.getBoundingClientRect();
   let portraitPx = { w: 1, h: 1 };
+  let portraitFace = { x: 0, y: 0 };
 
   // ---------- Quality ----------
+  // ?fixed keeps the full particle budget (for screenshots on slow test machines).
+  const adaptive = !params.has("fixed");
   let drawCount = count;
+  let pixelRatio = Math.min(devicePixelRatio || 1, dprCap);
   let slowSince = -1;
   let ema = 16;
   const started = performance.now();
@@ -281,25 +373,62 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
   let ready = false;
   const hi = { x: -1, y: -1 };
   let mouseOn = 0;
+  let animTime = performance.now() / 1000;
+  let lastScroll = -1;
+  let wasPaused = false;
 
   const resize = () => {
-    vw = innerWidth;
-    vh = innerHeight;
-    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, dprCap));
+    vw = canvas.clientWidth || innerWidth;
+    vh = canvas.clientHeight || innerHeight;
+    renderer.setPixelRatio(pixelRatio);
     renderer.setSize(vw, vh, false);
     camera.aspect = vw / vh;
     camera.updateProjectionMatrix();
   };
   resize();
 
+  // Most of the painting's cost is pixels, and its strokes grow when there are fewer
+  // of them, so a slow device first draws at a lower resolution, then with fewer
+  // particles, then at a last, softer resolution.
+  const degrade = () => {
+    if (pixelRatio > 1) {
+      pixelRatio = pixelRatio > 1.5 ? 1.5 : 1;
+    } else if (drawCount > 8000) {
+      drawCount = Math.max(8000, Math.floor(drawCount * 0.6));
+      particles.geometry.setDrawRange(0, drawCount);
+      return true;
+    } else if (pixelRatio > perf.minDevicePixelRatio) {
+      pixelRatio = perf.minDevicePixelRatio;
+    } else {
+      return false;
+    }
+    resize();
+    return true;
+  };
+
   const frame = (now: number) => {
     raf = requestAnimationFrame(frame);
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
-    if (innerWidth !== vw || innerHeight !== vh) {
-      resize();
-      remeasure();
+    let resized = false;
+    if (sizeChanged) {
+      sizeChanged = false;
+      if (canvas.clientWidth !== vw || canvas.clientHeight !== vh) {
+        resize();
+        remeasure();
+        resized = true;
+      }
     }
+
+    // Pause motion (header button, WCAG 2.2.2): time stops, so the painting, idle
+    // gaze and loops freeze. Scrolling still morphs the shapes, since the visitor
+    // drives that. While paused, frames are drawn only when something changed.
+    const paused = root.dataset.paused === "on";
+    if (paused && ready && !resized && scrollY === lastScroll && paused === wasPaused) return;
+    lastScroll = scrollY;
+    wasPaused = paused;
+    if (!paused) animTime += dt;
+    else skip(); // a paused visitor sees the finished painting, not a frozen assembly
 
     // Shared timeline from scroll position.
     let f = frameAt(scenes, scrollY, vh);
@@ -314,10 +443,9 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
         a: hero,
         b: hero,
         from: SHAPE.cloud,
-        to: SHAPE.portrait,
-        mix: smooth(150, 2300, el),
-        photo: smooth(introEnd - hp.handoffCrossfadeMs, introEnd, el),
-        alpha: smooth(0, 450, el) * (1 - smooth(2350, introEnd - 150, el)),
+        to: SHAPE.starry,
+        mix: smooth(150, introEnd - 300, el),
+        alpha: smooth(0, 450, el),
         travel: 0,
       };
     } else if (root.dataset.intro === "on") {
@@ -326,43 +454,57 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
 
     // Hero framing.
     heroRect = hero.el.getBoundingClientRect();
-    const fr = heroFraming[variant];
-    heroBox = focalCover(heroRect.width, heroRect.height, info.size[0], info.size[1], face, fr.target, fr.overscan);
-    faceScreen = { x: heroRect.left + heroBox.x + face[0] * heroBox.w, y: heroRect.top + heroBox.y + face[1] * heroBox.h };
+    const contactInView = !!contact && (f.a === contact || f.b === contact);
 
-    // Gaze.
-    gaze.update(now, dt);
-    PU.uLook.value.set(gaze.head.x, gaze.head.y);
+    // Shape placement. The gaze is measured from the face in Contact, and from the
+    // centre of the hero elsewhere (it drives the painting's depth parallax).
+    placeHero();
+    placePortrait();
+    faceScreen = contactInView
+      ? portraitFace
+      : { x: heroRect.left + heroRect.width / 2, y: Math.max(heroRect.top + heroRect.height * 0.4, vh * 0.4) };
+
+    // Gaze: the particle portrait follows the cursor, eyes first.
+    if (!paused) gaze.update(now, dt);
+    U.uLook.value.set(gaze.head.x, gaze.head.y);
     const iris = gaze.iris();
-    PU.uIris.value.set(iris.x, iris.y);
-    PU.uBlink.value = gaze.blink;
-
-    // Portrait photo.
-    const heroVisible = heroRect.bottom > 0 && heroRect.top < vh;
-    portrait.mesh.visible = heroVisible && f.photo > 0.001;
-    PU.uOpacity.value = f.photo;
-    PU.uRect.value.set(
-      ndcX(heroRect.left + heroRect.width / 2),
-      ndcY(heroRect.top + heroRect.height / 2),
-      heroRect.width / vw,
-      heroRect.height / vh,
-    );
-    PU.uImg.value.set(heroBox.x / heroRect.width, heroBox.y / heroRect.height, heroBox.w / heroRect.width, heroBox.h / heroRect.height);
-
-    // Shape placement.
-    placePortrait(f);
-    const t = now / 1000;
-    const mx = pointer.inside ? ndcX(pointer.x) : 0;
-    const my = pointer.inside ? ndcY(pointer.y) : 0;
+    U.uIris.value.set(iris.x, iris.y);
+    U.uBlink.value = paused ? 0 : gaze.blink;
+    const ls = character.tracking.headParallax.strengthFractionOfWidth;
+    U.uLookStrength.value.set(ls, ls * character.tracking.headParallax.yAxisGain * (info.size[0] / info.size[1]));
+    const t = animTime;
+    const active3d = pointer.inside && !paused;
+    const mx = active3d ? ndcX(pointer.x) : 0;
+    const my = active3d ? ndcY(pointer.y) : 0;
     particles.xf[SHAPE.cloud].set(0, 0, (vw / vh) * 1.05, 1.25);
     U.uZs.value[SHAPE.cloud] = 1;
-    const anchorOf = (kind: string) => scenes.find((s) => s.kind === kind)?.anchor;
-    const browserEl = anchorOf("browser");
     if (browserEl) placeAnchor(SHAPE.browser, browserEl, "box");
-    const funnelEl = anchorOf("funnel");
     if (funnelEl) placeAnchor(SHAPE.funnel, funnelEl, "square", 0.74);
     particles.rot[SHAPE.funnel].set(t * 0.22 + mx * 0.25, 0.42 - my * 0.1);
-    const promptEl = anchorOf("prompt");
+    // Measurement: a 3D bar chart rising behind the dashboard panel.
+    if (chartEl) {
+      const r = chartEl.getBoundingClientRect();
+      particles.xf[SHAPE.chart].set(
+        ndcX(r.left + r.width / 2),
+        ndcY(r.top + r.height * 0.56),
+        r.width * 0.64 * wpp(),
+        r.height * 0.5 * wpp(),
+      );
+      U.uZs.value[SHAPE.chart] = r.width * 0.5 * wpp();
+    }
+    particles.rot[SHAPE.chart].set(-0.38 + mx * 0.15, 0.2 - my * 0.06);
+    // WordPress: page blocks floating behind the editor panel.
+    if (blocksEl) {
+      const r = blocksEl.getBoundingClientRect();
+      particles.xf[SHAPE.blocks].set(
+        ndcX(r.left + r.width / 2),
+        ndcY(r.top + r.height / 2),
+        r.width * 0.62 * wpp(),
+        r.height * 0.6 * wpp(),
+      );
+      U.uZs.value[SHAPE.blocks] = r.width * 0.5 * wpp();
+    }
+    particles.rot[SHAPE.blocks].set(0.42 + mx * 0.12, 0.2 - my * 0.06);
     if (promptEl) placeAnchor(SHAPE.prompt, promptEl, "square", 1.1);
     particles.rot[SHAPE.prompt].set(mx * 0.35 + Math.sin(t * 0.4) * 0.12, -my * 0.15);
     const railsInScene = railsScene && (f.a === railsScene || f.b === railsScene);
@@ -378,17 +520,23 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
     particles.rot[SHAPE.rails].set(mx * 0.12, railsPitch - my * 0.05);
 
     // Highlights driven by the DOM side of each scene.
-    const active = (kind: string) => {
-      const s = scenes.find((x) => x.kind === kind);
-      const v = s?.el.dataset.active;
-      return v === undefined || v === "" ? -1 : Number(v);
-    };
-    const tf = active("funnel");
-    const tr = active("rails");
+    const tf = activeStep(funnelScene);
+    const tr = activeStep(railsScene);
     const k = 1 - Math.pow(0.001, dt);
     hi.y = tf < 0 ? -1 : hi.y < 0 ? tf : hi.y + (tf - hi.y) * k;
     hi.x = tr < 0 ? -1 : hi.x < 0 ? tr : hi.x + (tr - hi.x) * k;
     U.uHi.value.set(hi.x, hi.y);
+    // Chart lights one more stretch of bars per step; blocks light the group each step is about.
+    const tc = activeStep(chartScene);
+    const blockKey = blocksScene?.el.dataset.activeKey ?? "";
+    const chartTarget = tc < 0 ? 0.15 : (tc + 1) / chartSteps;
+    U.uChartLevel.value += (chartTarget - U.uChartLevel.value) * k;
+    const gt = GROUP_TARGETS[blockKey] ?? NO_GROUP;
+    const gh = U.uGroupHi.value as number[];
+    for (let i = 0; i < 5; i++) gh[i] += (gt[i] - gh[i]) * k;
+    // On the responsive step the page squeezes from desktop to phone width and back.
+    const squeezeTarget = blockKey === "responsive" ? 0.5 + 0.5 * Math.sin(t * 0.9) : 0;
+    U.uSqueeze.value += (squeezeTarget - U.uSqueeze.value) * k;
 
     // Particle uniforms.
     U.uTime.value = t;
@@ -396,14 +544,14 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
     U.uTo.value = f.to;
     U.uMix.value = f.mix;
     U.uAlpha.value = f.alpha;
-    U.uDensity.value = Math.min(1, 50000 / drawCount);
+    U.uDensity.value = Math.min(1, 35000 / drawCount);
     U.uTurb.value = intro ? 0.9 : 0.6;
     U.uAspect.value = vw / vh;
     U.uDpr.value = renderer.getPixelRatio();
     U.uCamD.value = CAM_D;
     U.uPortraitSize.value = Math.sqrt((portraitPx.w * portraitPx.h) / Math.max(1, drawCount));
     U.uSize.value = coarse || small ? 2.4 : 2.1;
-    mouseOn += ((pointer.inside ? 1 : 0) - mouseOn) * Math.min(1, dt * 4);
+    mouseOn += ((pointer.inside && !paused ? 1 : 0) - mouseOn) * Math.min(1, dt * 4);
     U.uMouseOn.value = mouseOn;
     U.uMouse.value.set(ndcX(pointer.x), ndcY(pointer.y));
     U.uMouseR.value = P.cursorTrail.influenceRadiusFractionOfWidth * 2 * (vw / vh) * 0.5;
@@ -424,14 +572,15 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
 
     // Trails stay off the face.
     if (trails) {
+      trails.points.visible = !paused && drawCount >= 30000;
       const TU = trails.material.uniforms;
       TU.uTime.value = now / 1000;
       TU.uAspect.value = vw / vh;
       TU.uDpr.value = renderer.getPixelRatio();
       TU.uLife.value = P.cursorTrail.lifetimeMs / 1000;
-      const faceR = (character.faceBoxPx.h / character.variants[variant].cropPx.h) * heroBox.h * 1.1;
-      TU.uFace.value.set(ndcX(faceScreen.x), ndcY(faceScreen.y), faceR * wpp());
-      TU.uFaceOn.value = P.cursorTrail.keepClearOfFace && heroVisible ? Math.max(f.photo, 0.5) : 0;
+      const faceR = (character.faceBoxPx.h / character.variants[variant].cropPx.h) * portraitPx.h * 1.1;
+      TU.uFace.value.set(ndcX(portraitFace.x), ndcY(portraitFace.y), faceR * wpp());
+      TU.uFaceOn.value = P.cursorTrail.keepClearOfFace && contactInView ? 1 : 0;
     }
 
     // A short trip down the rails between scenes.
@@ -444,17 +593,14 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
       root.dataset.gl = "on";
     }
 
-    // Adaptive quality: drop particles if frames stay slow.
+    // Adaptive quality: step down while frames stay slow.
     ema += (dt * 1000 - ema) * 0.1;
-    if (now - started > 2500) {
+    if (adaptive && now - started > 1500) {
       if (ema > 20) {
         if (slowSince < 0) slowSince = now;
-        if (now - slowSince > 1000 && now - lastDrop > 1500 && drawCount > 8000) {
-          drawCount = Math.max(8000, Math.floor(drawCount * 0.6));
-          particles.geometry.setDrawRange(0, drawCount);
+        if (now - slowSince > 700 && now - lastDrop > 1200 && degrade()) {
           lastDrop = now;
           slowSince = -1;
-          if (drawCount < 30000 && trails) trails.points.visible = false;
         }
       } else {
         slowSince = -1;
@@ -488,6 +634,7 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
     destroy() {
       stop();
       ro.disconnect();
+      cro.disconnect();
       removeEventListener("pointermove", onMove);
       removeEventListener("pointerdown", onMove);
       document.removeEventListener("mouseout", onLeave);
@@ -502,8 +649,7 @@ export async function createStage(canvas: HTMLCanvasElement): Promise<StageHandl
         m.geometry?.dispose();
         m.material?.dispose();
       });
-      (PU.uMap.value as Texture).dispose();
-      (PU.uDepth.value as Texture).dispose();
+      photoTex.dispose();
       renderer.dispose();
       scenes = [];
       delete root.dataset.intro;
