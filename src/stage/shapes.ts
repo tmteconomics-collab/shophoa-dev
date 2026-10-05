@@ -1,6 +1,6 @@
 // Target positions for every particle, one buffer per shape.
 // All shapes are built once on the CPU; the GPU blends between them.
-import { fillStarry, type StarryLayout } from "./starry";
+import { fillStarry, starryFlowField, type StarryLayout } from "./starry";
 
 export const SHAPE = {
   cloud: 0,
@@ -87,15 +87,19 @@ export interface ShapeBuffers {
   blocks: Float32Array;
   starryA: Float32Array; // family, u, v, a (see starry.ts)
   starryB: Float32Array; // b, c, d, depth
+  starryF: Float32Array; // sky flow direction and warm tint, per hero aspect (see starryFlowField)
   color: Float32Array; // rgb + portrait size factor
   rand: Float32Array;
 }
 
-export function buildShapes(
+// pause() runs between the larger fills so the page can paint and scroll while the
+// stage starts on a phone.
+export async function buildShapes(
   count: number,
   sample: PortraitSample,
   starry: { layout: StarryLayout; aspect: number },
-): ShapeBuffers {
+  pause: () => Promise<void> = async () => {},
+): Promise<ShapeBuffers> {
   const r = mulberry32(20260415);
   const b: ShapeBuffers = {
     count,
@@ -109,6 +113,7 @@ export function buildShapes(
     blocks: new Float32Array(count * 3),
     starryA: new Float32Array(count * 4),
     starryB: new Float32Array(count * 4),
+    starryF: new Float32Array(count * 3),
     color: new Float32Array(count * 4),
     rand: new Float32Array(count * 4),
   };
@@ -121,14 +126,18 @@ export function buildShapes(
   }
 
   fillCloud(b.cloud, count, r);
+  await pause();
   fillPortrait(b.portrait, b.color, count, r, sample);
+  await pause();
   fillRails(b.rails, count, r);
   fillBrowser(b.browser, count, r);
   fillFunnel(b.funnel, count, r, b.rand);
   fillPrompt(b.prompt, count, r);
   fillChart(b.chart, count, r);
   fillBlocks(b.blocks, count, r);
+  await pause();
   fillStarry(b.starryA, b.starryB, count, r, starry.layout, starry.aspect);
+  starryFlowField(b.starryA, count, starry.layout, starry.aspect, b.starryF);
   return b;
 }
 

@@ -193,6 +193,8 @@
   },
   "performance": {
     "maxDevicePixelRatio": 2,
+    "maxDevicePixelRatioMobile": 1.25,
+    "minDevicePixelRatio": 0.75,
     "pauseWhenOffscreen": true,
     "pauseWhenTabHidden": true,
     "loadWebglOnClientOnly": true,
@@ -251,7 +253,7 @@
         "count": 0,
         "fallback": "static"
       },
-      "adaptive": "reduce count when frame time stays above 20 ms for 1 second"
+      "adaptive": "when frame time stays above 20 ms for 0.7 seconds: lower the pixel ratio to 1, then the count (down to 8000), then the pixel ratio to minDevicePixelRatio"
     },
     "reducedMotion": "no assembly, no trails, static portrait and panels"
   },

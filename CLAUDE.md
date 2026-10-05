@@ -29,6 +29,7 @@ The full original brief is in `docs/original-brief.md`. This file records what w
 - Proof slots (`proof` in `src/content/site.ts`): results, testimonials and work samples stay empty until the owner supplies them; the section is hidden while empty. Testimonials only with the person's written permission. Certifications can take issuer, year and a verification link.
 - Tools section: UTM builder and budget estimator. They never ship platform prices; every rate comes from the visitor.
 - Devices (2026-10-04): checked from 320px phones to 2560px screens. The header turns solid once the hero painting has scrolled past it (`data-scrolled`); phones get shorter vh gaps, near-solid panels without backdrop blur (except the short-version card, which keeps its frosted glass over the dissolving painting), and the tool forms folded behind a button; short screens (small phones, phones held sideways) show one illustration per section instead of the pinned panel; screens from 1800px scale the type. Re-run the device sweep after layout changes.
+- Phone smoothness (2026-10-05): the hero painting is the stage's heaviest scene (fill rate), so phones start at pixel ratio 1.25 and adaptive quality lowers the pixel ratio before the particle count (values in `character.config.json`, `performance`). The stage canvas is sized to the large viewport (`100lvh`) and only resizes when its CSS size changes, so a phone's address bar never reallocates it. On phones no glass layer blurs the stage except the short-version card. Startup work is split with pauses between steps, and shaders compile in the background where the browser allows.
 
 ## Content rules
 - English only, sentence case, plain verbs, no hype.
@@ -42,7 +43,7 @@ The full original brief is in `docs/original-brief.md`. This file records what w
 - WebGL is decided before first paint by the boot script in `src/app/layout.tsx` (`data-gl`, `data-motion`, `data-intro` on `<html>`). Every scene must stay fully readable with `data-gl="off"`.
 - Character behaviour numbers come from `character.config.json`; do not hard-code them in the shaders.
 - The painting has two layouts (wide and tall) in `src/stage/starry.ts`; keep the hero text area (bottom left on wide screens, bottom half on tall ones) free of bright features.
-- Particle shapes are blended on the GPU; per-frame CPU work is uniforms only.
+- Particle shapes are blended on the GPU; per-frame CPU work is uniforms only. Values that depend only on a particle's place (the sky's flow direction and warm tint, `starryFlowField`) are computed once on the CPU and again only when the hero's shape changes.
 - Every looping or automatic motion must stop when `<html data-paused="on">` (the header Pause motion button, WCAG 2.2.2): the stage freezes its clock, CSS animations are switched off.
 - `assets/portrait/source.png` is the original photo. Never edit it, never move it into `public/`. Keep EXIF stripped on any new export.
 

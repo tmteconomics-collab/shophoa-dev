@@ -98,9 +98,11 @@ main,
 /* ---------- WebGL stage ---------- */
 .stage {
   position: fixed;
-  inset: 0;
+  inset: 0 0 auto 0;
   width: 100%;
-  height: 100%;
+  /* The large viewport: a phone's address bar sliding in and out never resizes it. */
+  height: 100vh;
+  height: 100lvh;
   display: block;
   z-index: 0;
   pointer-events: none;
@@ -3003,6 +3005,24 @@ html[data-scrolled="on"] .site-header {
   }
   .mk {
     background: rgb(10 15 70 / 0.96);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  /* The same for the rest of the glass: every blurred layer over the stage has to
+     be redrawn on each frame of the particles. */
+  .site-header {
+    background: linear-gradient(180deg, rgb(7 11 58 / 0.9), rgb(7 11 58 / 0.6));
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .browser,
+  .ai-step {
+    background: rgb(10 15 70 / 0.92);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .btn-ghost {
+    background: rgb(7 11 58 / 0.6);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }

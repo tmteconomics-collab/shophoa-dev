@@ -13,7 +13,7 @@ import {
   Vector4,
 } from "three";
 import { CHART, RAILS, SHAPE_COUNT, type ShapeBuffers } from "./shapes";
-import { MAX_VORTICES, STARRY_GLSL } from "./starry";
+import { STARRY_GLSL } from "./starry";
 import { palette } from "./palette";
 
 const vertex = /* glsl */ `
@@ -70,6 +70,7 @@ attribute vec3 aChart;
 attribute vec3 aBlocks;
 attribute vec4 aStarryA;
 attribute vec4 aStarryB;
+attribute vec3 aStarryF;
 
 varying vec4 vColor;
 varying float vSoft;
@@ -136,7 +137,7 @@ vec3 local(int id) {
     p.x *= mix(1.0, 0.42, uSqueeze);
     return p;
   }
-  return starryLocal(aStarryA, aStarryB, uTime);
+  return starryLocal(aStarryA, aStarryB, aStarryF, uTime);
 }
 
 // Returns the shape-space position scaled to world units; center goes out in NDC.
@@ -253,7 +254,7 @@ void main() {
   pcol = max(pcol, vec3(0.07, 0.09, 0.26) * (1.0 - bgness * 0.5));
   vec3 pal = aRand.y < 0.1 ? uSun : (aRand.y < 0.32 ? uSoft : uInk);
   vec3 col = mix(pal, pcol * 1.05, wPortrait);
-  if (wStarry > 0.001) col = mix(col, starryColor(aStarryA, aStarryB, aRand.y, aRand.z), wStarry);
+  if (wStarry > 0.001) col = mix(col, starryColor(aStarryA, aStarryB, aStarryF, aRand.y, aRand.z), wStarry);
   float alpha = 0.8;
 
   // Funnel: light up the active stage.
@@ -335,7 +336,9 @@ void main() {
 
 // Premultiplied output with blend (ONE, ONE_MINUS_SRC_ALPHA): alpha 0 adds light,
 // alpha 1 paints over. vOver picks between the two per particle.
+// Medium precision is plenty for a soft sprite and runs faster on many phone GPUs.
 const fragment = /* glsl */ `
+precision mediump float;
 varying vec4 vColor;
 varying float vSoft;
 varying float vOver;
@@ -373,6 +376,7 @@ export function createParticles(b: ShapeBuffers, map: Texture, eyes: EyeSetup) {
   g.setAttribute("aBlocks", new BufferAttribute(b.blocks, 3));
   g.setAttribute("aStarryA", new BufferAttribute(b.starryA, 4));
   g.setAttribute("aStarryB", new BufferAttribute(b.starryB, 4));
+  g.setAttribute("aStarryF", new BufferAttribute(b.starryF, 3));
 
   const xf = Array.from({ length: SHAPE_COUNT }, () => new Vector4(0, 0, 1, 1));
   const rot = Array.from({ length: SHAPE_COUNT }, () => new Vector2());
@@ -425,7 +429,6 @@ export function createParticles(b: ShapeBuffers, map: Texture, eyes: EyeSetup) {
       uStarParallax: { value: 0.12 },
       uStarSize: { value: 6 },
       uHeroAspect: { value: 1.6 },
-      uVort: { value: Array.from({ length: MAX_VORTICES }, () => new Vector4()) },
       uBand: { value: new Vector4() },
     },
   });

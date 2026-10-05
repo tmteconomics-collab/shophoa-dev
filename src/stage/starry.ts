@@ -93,6 +93,48 @@ export function vortexUniforms(l: StarryLayout): number[][] {
   return v.slice(0, MAX_VORTICES);
 }
 
+/**
+ * The sky's flow direction and the warm tint near stars and the moon depend only on
+ * where a stroke sits, so they are worked out here once per hero shape instead of
+ * in the vertex shader every frame (two loops over every swirl, per particle).
+ * Writes (dir x, dir y, warm) per particle into out; zeros for other families.
+ */
+export function starryFlowField(A: Float32Array, n: number, l: StarryLayout, aspect: number, out: Float32Array) {
+  const vort = vortexUniforms(l);
+  for (let i = 0; i < n; i++) {
+    const o = i * 3;
+    if (Math.round(A[i * 4]) !== FAMILY.sky) {
+      out[o] = out[o + 1] = out[o + 2] = 0;
+      continue;
+    }
+    const sx = A[i * 4 + 1] * aspect;
+    const sy = A[i * 4 + 2];
+    let vx = 0.7;
+    let vy = 0.18 * Math.sin(sx * 3.1 + 0.6);
+    let warm = 0;
+    for (let k = 0; k < vort.length; k++) {
+      const [u, v, r, w] = vort[k];
+      const dx = sx - u * aspect;
+      const dy = sy - v;
+      const d2 = dx * dx + dy * dy;
+      const R = r * 1.9;
+      const f = (Math.exp(-d2 / (R * R)) * w * 2.2) / Math.max(Math.sqrt(d2), 0.004);
+      vx -= dy * f;
+      vy += dx * f;
+      // Stars and the moon warm the strokes around them; the spirals (first two) do not.
+      if (k >= 2 && w >= 0.01) {
+        const R2 = r * 1.7;
+        warm = Math.max(warm, Math.exp(-d2 / (R2 * R2)));
+      }
+    }
+    const len = Math.hypot(vx, vy) || 1;
+    out[o] = vx / len;
+    out[o + 1] = vy / len;
+    out[o + 2] = warm;
+  }
+  return out;
+}
+
 export function horizonAt(l: StarryLayout, u: number) {
   return l.horizon + 0.035 * Math.sin(u * 7 + 1.3) + 0.018 * Math.sin(u * 17 + 0.4) - 0.04 * u;
 }
@@ -248,7 +290,6 @@ export function fillStarry(
 // GLSL: positions in scene space (x = u * aspect, y = v; height units, y down).
 export const STARRY_GLSL = /* glsl */ `
 uniform float uHeroAspect;
-uniform vec4 uVort[${MAX_VORTICES}];
 uniform vec4 uBand; // v, amplitude, tilt, thickness
 
 // Set by starryLocal() for the colour and sprite code in main().
@@ -256,24 +297,13 @@ vec2 gStarDir = vec2(1.0, 0.0);
 float gStarFade = 1.0;
 float gStarFamily = 0.0;
 
-vec2 starryFlow(vec2 S) {
-  vec2 v = vec2(0.7, 0.18 * sin(S.x * 3.1 + 0.6));
-  for (int i = 0; i < ${MAX_VORTICES}; i++) {
-    vec4 o = uVort[i];
-    vec2 d = S - vec2(o.x * uHeroAspect, o.y);
-    float R = o.z * 1.9;
-    float f = exp(-dot(d, d) / (R * R)) * o.w;
-    v += vec2(-d.y, d.x) / max(length(d), 0.004) * f * 2.2;
-  }
-  return normalize(v);
-}
-
 float bandV(float u) {
   return uBand.x + uBand.y * sin(u * 5.0 + 0.7) + uBand.z * (u - 0.5);
 }
 
 // Returns the local position in the shape box (-1..1, y up) and z.
-vec3 starryLocal(vec4 A, vec4 B, float t) {
+// F holds the sky's precomputed flow direction (xy) and warm tint (z), see starryFlowField.
+vec3 starryLocal(vec4 A, vec4 B, vec3 F, float t) {
   int fam = int(A.x + 0.5);
   float asp = uHeroAspect;
   vec2 S = vec2(A.y * asp, A.z);
@@ -281,7 +311,7 @@ vec3 starryLocal(vec4 A, vec4 B, float t) {
   float fade = 1.0;
   if (fam == 0) {
     // Sky: a = phase, b = stroke length.
-    dir = starryFlow(S);
+    dir = F.xy;
     float ph = fract(t * 0.11 + A.w);
     S += dir * (ph - 0.5) * 0.045 * B.x;
     fade = smoothstep(0.0, 0.18, ph) * smoothstep(1.0, 0.82, ph);
@@ -334,7 +364,7 @@ vec3 pick4(float k, vec3 a, vec3 b, vec3 c, vec3 d) {
 }
 
 // Colour by family; k and k2 are per-particle randoms.
-vec3 starryColor(vec4 A, vec4 B, float k, float k2) {
+vec3 starryColor(vec4 A, vec4 B, vec3 F, float k, float k2) {
   int fam = int(A.x + 0.5);
   vec3 deep = vec3(0.07, 0.11, 0.42);
   vec3 cobalt = vec3(0.17, 0.24, 0.86);
@@ -347,14 +377,7 @@ vec3 starryColor(vec4 A, vec4 B, float k, float k2) {
   if (fam == 0) {
     vec3 c = k < 0.14 ? deep : (k < 0.5 ? cobalt : (k < 0.8 ? mid : (k2 < 0.6 ? light : vec3(0.75, 0.82, 1.0))));
     // Warm up strokes that sit near a star or the moon.
-    vec2 S = vec2(A.y * uHeroAspect, A.z);
-    float warm = 0.0;
-    for (int i = 2; i < ${MAX_VORTICES}; i++) {
-      vec4 o = uVort[i];
-      vec2 d = S - vec2(o.x * uHeroAspect, o.y);
-      float R = o.z * 1.7;
-      warm = max(warm, exp(-dot(d, d) / (R * R)) * step(0.01, o.w));
-    }
+    float warm = F.z;
     return mix(c, mix(ochre, pale, k2), warm * 0.7);
   }
   if (fam == 1) return pick4(k, pale, light, cream, k2 < 0.5 ? sun : mid);
