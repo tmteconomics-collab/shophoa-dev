@@ -33,7 +33,7 @@ npm run build          # lean export to out/
 npm run screenshots    # every section on a phone and a desktop, into screenshots/
 ```
 
-GitHub Actions (`.github/workflows/ci.yml`) runs the same on every pull request and on `main`, then checks the export (no framework scripts left, role versions are noindex, no email address anywhere) and runs Lighthouse CI against `lighthouserc.json`: Accessibility 100, Best Practices and SEO 95 or more, Performance 85 or more on a mobile profile, CLS under 0.05, TBT under 300 ms. Reports are kept as a build artifact, not uploaded anywhere public. It also saves screenshots of every section of the home page and a role version, and of the CV, on a 390px phone and a 1440px desktop (`scripts/screenshots.mjs`, reduced motion so runs are repeatable), as a `screenshots` artifact kept for 14 days: open the run on GitHub to review a change without deploying it.
+GitHub Actions (`.github/workflows/ci.yml`) runs the same on every pull request and on `main`, then checks the export (no framework scripts left, role versions are noindex, the owner email is on the home page and no other email appears) and runs Lighthouse CI against `lighthouserc.json`: Accessibility 100, Best Practices and SEO 95 or more, Performance 85 or more on a mobile profile, CLS under 0.05, TBT under 300 ms. Reports are kept as a build artifact, not uploaded anywhere public. It also saves screenshots of every section of the home page and a role version, and of the CV, on a 390px phone and a 1440px desktop (`scripts/screenshots.mjs`, reduced motion so runs are repeatable), as a `screenshots` artifact kept for 14 days: open the run on GitHub to review a change without deploying it.
 
 ## Lean build
 

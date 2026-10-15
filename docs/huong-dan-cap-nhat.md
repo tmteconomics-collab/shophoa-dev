@@ -6,24 +6,24 @@ Tài liệu cho chủ site (Devan). Nội dung trên site luôn bằng tiếng A
 
 Gần như mọi chữ trên site nằm trong `src/content/site.ts`. Mở file, tìm đúng khối, sửa phần chữ trong dấu ngoặc kép, lưu lại.
 
-| Muốn sửa | Khối trong `site.ts` |
-| --- | --- |
-| Câu mở đầu trên ảnh Starry Night | `hero` (`lead`, `highlight` là phần tô vàng, `tail`) |
-| Thẻ "The short version" | `summary` |
-| Đoạn giới thiệu trong cửa sổ trình duyệt | `about` |
-| Giải pháp quảng cáo Cốc Cốc | `solutions` |
-| Cách làm việc với khách hàng | `workflow` |
-| GA4, Tag Manager, Google Ads | `growth` |
-| WordPress và WooCommerce | `websites` |
-| Hai công cụ (UTM, ước tính ngân sách) | `tools` |
-| Kết quả, lời giới thiệu, sản phẩm mẫu | `proof` (xem mục 3) |
-| Kỹ năng, chứng chỉ, học vấn, ngoại ngữ | `credentials` |
-| CV | `cv` (xem mục 4) |
-| Lời kêu gọi liên hệ cuối trang | `contact` |
+| Muốn sửa                                 | Khối trong `site.ts`                                 |
+| ---------------------------------------- | ---------------------------------------------------- |
+| Câu mở đầu trên ảnh Starry Night         | `hero` (`lead`, `highlight` là phần tô vàng, `tail`) |
+| Thẻ "The short version"                  | `summary`                                            |
+| Đoạn giới thiệu trong cửa sổ trình duyệt | `about`                                              |
+| Giải pháp quảng cáo Cốc Cốc              | `solutions`                                          |
+| Cách làm việc với khách hàng             | `workflow`                                           |
+| GA4, Tag Manager, Google Ads             | `growth`                                             |
+| WordPress và WooCommerce                 | `websites`                                           |
+| Hai công cụ (UTM, ước tính ngân sách)    | `tools`                                              |
+| Kết quả, lời giới thiệu, sản phẩm mẫu    | `proof` (xem mục 3)                                  |
+| Kỹ năng, chứng chỉ, học vấn, ngoại ngữ   | `credentials`                                        |
+| CV                                       | `cv` (xem mục 4)                                     |
+| Lời kêu gọi liên hệ cuối trang           | `contact`                                            |
 
 Quy tắc nội dung (giữ nguyên, không ngoại lệ):
 
-- Chỉ tên **Devan**. Không đưa tên thật hay email lên site; liên hệ chỉ qua LinkedIn.
+- Chỉ tên **Devan**, không đưa tên thật lên site. Liên hệ qua LinkedIn và email `tmt.economics@gmail.com` (sửa ở `site.email` trong `src/content/site.ts`); email hiện ở phần Contact, footer và CV.
 - Tiếng Anh, viết hoa đầu câu, câu ngắn, không phóng đại.
 - Không tên hay logo khách hàng, không case study.
 - Không bịa số liệu. Số liệu minh họa trong các bảng mô phỏng luôn ghi "Sample".
@@ -86,11 +86,11 @@ node scripts/render-cv-pdf.mjs
 
 Cùng nội dung, khác câu mở đầu và thứ tự phần:
 
-| Ứng tuyển vị trí | Gửi link |
-| --- | --- |
-| Account management, ad sales | `/for/account-management/` |
+| Ứng tuyển vị trí                 | Gửi link                      |
+| -------------------------------- | ----------------------------- |
+| Account management, ad sales     | `/for/account-management/`    |
 | Performance marketing, analytics | `/for/performance-marketing/` |
-| WordPress, web | `/for/web/` |
+| WordPress, web                   | `/for/web/`                   |
 
 Các trang này không hiện trên Google (noindex), chỉ ai có link mới xem. Thêm phiên bản mới: chép một khối trong `src/content/roles.ts`, đổi `slug`, `label`, `hero` và `order`.
 

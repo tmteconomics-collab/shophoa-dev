@@ -47,7 +47,9 @@ jobs:
           test -f out/devan-cv.pdf
           for f in out/for/*/index.html; do grep -q 'noindex' "$f" || { echo "$f is missing noindex"; exit 1; }; done
           if grep -rl --include='*.html' '/_next/static/chunks/[^"]*\.js' out; then echo "framework script left in the lean build"; exit 1; fi
-          if grep -rIl --include='*.html' -E '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}' out; then echo "an email address is on the site"; exit 1; fi
+          owner='tmt.economics@gmail.com'
+          if grep -rhoIE --include='*.html' '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}' out | grep -vxF "$owner" | grep -q .; then echo "an unexpected email address is on the site"; exit 1; fi
+          grep -qF "$owner" out/index.html || { echo "the owner email is missing from the home page"; exit 1; }
 
       - name: Lighthouse budgets
         run: npx --yes @lhci/cli@0.15.1 autorun

@@ -22,6 +22,8 @@ export const site = {
   // Pages gives the project, so shared links never point at localhost.
   url: siteUrl(),
   linkedin: "https://www.linkedin.com/in/tuantran-ams",
+  // Personal email, shown in Contact, the footer and the CV (owner request, 2026-10-15).
+  email: "tmt.economics@gmail.com",
   title: "Devan · Digital advertising in Vietnam",
   description:
     "Devan is a Strategic Account Executive at Cốc Cốc Ad Platform in Hanoi. He helps brands reach Vietnamese users, measures what works with Google Analytics, Tag Manager and Google Ads, and builds WordPress and WooCommerce sites.",
@@ -314,8 +316,9 @@ export const credentials = {
 
 export const contact = {
   title: "Let's talk.",
-  text: "Planning a campaign for Vietnamese users, or curious how I build with AI? Send me a message on LinkedIn.",
+  text: "Planning a campaign for Vietnamese users, or curious how I build with AI? Send me a message on LinkedIn or by email.",
   cta: { label: "Message me on LinkedIn", href: site.linkedin },
+  email: { label: `Email ${site.email}`, href: `mailto:${site.email}` },
   meta: "Hanoi, Vietnam · English and Vietnamese",
 };
 

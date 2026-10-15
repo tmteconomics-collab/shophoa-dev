@@ -61,6 +61,9 @@ export default function CvPage() {
               <li>
                 <a href={site.linkedin}>{bare(site.linkedin)}</a>
               </li>
+              <li>
+                <a href={`mailto:${site.email}`}>{site.email}</a>
+              </li>
               {publicUrl ? (
                 <li>
                   <a href={publicUrl}>{bare(publicUrl)}</a>

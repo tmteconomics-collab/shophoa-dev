@@ -5,7 +5,7 @@ The full original brief is in `docs/original-brief.md`. This file records what w
 ## Decisions made by the owner
 - Display name: **Devan** (LinkedIn name Tuan Tran appears only in JSON-LD `alternateName`).
 - Palette: **Cobalt & sun**. Night `#070b3a`, cobalt `#2b35f5`, soft `#8c93ff`, sun `#ffd23f`, ink `#f2f3ff`. Tokens live in `src/app/globals.css` and `src/stage/palette.ts`; keep them in sync.
-- Contact: **LinkedIn only**. Do not put the email address on the site.
+- Contact: **LinkedIn and email** (owner reversed the LinkedIn-only decision, 2026-10-15). The email `tmt.economics@gmail.com` (`site.email`) shows in Contact, the footer and the CV. CI allows this one address but still fails on any other email in the export.
 - Vibe coding: **both the Claude app and Claude Code**. This site was built with Claude Code.
 - Dark theme only (particles need the dark stage). Revisit only if the owner asks.
 - Hero: a **particle painting after Van Gogh's The Starry Night** (owner request, 2026-10-03), not the owner's photo. Built procedurally in `src/stage/starry.ts`; never trace or copy a reproduction of the painting (the owner's reference was a photo of a 3D print, used for mood only). A small credit line names the painting.
@@ -25,7 +25,7 @@ The full original brief is in `docs/original-brief.md`. This file records what w
 - Funnel mapping: new-tab banner and CPM under Awareness; search, native, targeting under Consideration; shopping, retargeting, CPC and CPD under Conversion.
 
 - Quick-read path: a "The short version" card after the hero (`summary` in `src/content/site.ts`), section dots on wide screens, a Sections menu in the header up to 1000px, and a reading progress bar under the header. One section list feeds both (`src/content/sections.ts`); `src/stage/section-nav.ts` marks the current section. Keep that list in step with the section ids.
-- Job-hunting kit: a one-page A4 CV at `/cv/` with `public/devan-cv.pdf` rendered from it (`scripts/render-cv-pdf.mjs`; keep the PDF in sync whenever CV facts change), and role versions at `/for/<slug>/` (`src/content/roles.ts`): same facts, own hero line and section order, noindex. The CV shows "Devan" only and no email, like the site.
+- Job-hunting kit: a one-page A4 CV at `/cv/` with `public/devan-cv.pdf` rendered from it (`scripts/render-cv-pdf.mjs`; keep the PDF in sync whenever CV facts change), and role versions at `/for/<slug>/` (`src/content/roles.ts`): same facts, own hero line and section order, noindex. The CV shows "Devan" only; it now also carries `site.email`, like the Contact section and footer.
 - Proof slots (`proof` in `src/content/site.ts`): results, testimonials and work samples stay empty until the owner supplies them; the section is hidden while empty. Testimonials only with the person's written permission. Certifications can take issuer, year and a verification link.
 - Tools section: UTM builder and budget estimator. They never ship platform prices; every rate comes from the visitor.
 - Devices (2026-10-04): checked from 320px phones to 2560px screens. The header turns solid once the hero painting has scrolled past it (`data-scrolled`); phones get shorter vh gaps, near-solid panels without backdrop blur (except the short-version card, which keeps its frosted glass over the dissolving painting), and the tool forms folded behind a button; short screens (small phones, phones held sideways) show one illustration per section instead of the pinned panel; screens from 1800px scale the type. Re-run the device sweep after layout changes.

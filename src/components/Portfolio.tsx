@@ -487,9 +487,14 @@ export default function Portfolio({
                 {contact.title}
               </h2>
               <p className="contact-text">{contact.text}</p>
-              <External className="btn btn-sun" href={contact.cta.href}>
-                {contact.cta.label}
-              </External>
+              <div className="contact-actions">
+                <External className="btn btn-sun" href={contact.cta.href}>
+                  {contact.cta.label}
+                </External>
+                <a className="btn btn-ghost" href={contact.email.href}>
+                  {contact.email.label}
+                </a>
+              </div>
               <p className="contact-meta">{contact.meta}</p>
             </div>
             <div className="contact-visual">
@@ -527,6 +532,9 @@ export default function Portfolio({
               <a href={site.linkedin} target="_blank" rel="noopener noreferrer">
                 LinkedIn<span className="sr-only"> (opens in a new tab)</span>
               </a>
+            </li>
+            <li>
+              <a href={`mailto:${site.email}`}>Email</a>
             </li>
           </ul>
         </div>
