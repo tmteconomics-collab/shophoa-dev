@@ -2830,6 +2830,14 @@ button.cv-btn {
   font-size: 12.5px;
   line-height: 1.6;
 }
+/* On screen the contact links are tap targets, so give them at least 24px of
+   height (WCAG 2.5.8). Print keeps the compact one-page layout. */
+@media screen {
+  .cv-contact a {
+    display: inline-block;
+    padding-block: 4px;
+  }
+}
 .cv-grid {
   display: grid;
   gap: 18px 32px;
