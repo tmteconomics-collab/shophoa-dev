@@ -1,0 +1,10 @@
+.next/
+out/
+preview/
+node_modules/
+assets/
+public/
+docs/original-brief.md
+package-lock.json
+*.md
+character.config.json

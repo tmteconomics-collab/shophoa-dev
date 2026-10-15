@@ -128,13 +128,14 @@
   },
   "tracking": {
     "headParallax": {
-      "strengthFractionOfWidth": 0.03,
+      "strengthFractionOfWidth": 0.045,
       "yAxisGain": 0.6,
       "clamp": 1.0,
       "easing": {
         "type": "lerp",
         "perFrameAt60fps": 0.08
-      }
+      },
+      "note": "applied to particle positions by depth (near particles move with the gaze, far ones against it)"
     },
     "eyes": {
       "extraGainOverHead": 1.6,
@@ -181,17 +182,19 @@
       ],
       "durationMs": 140,
       "doubleBlinkChance": 0.15,
-      "technique": "close each eye by sampling skin from just above it and compressing vertically inside a soft ellipse; keep it subtle"
+      "technique": "eye particles sample the photo through a lid transform: skin from just above the eye is stretched down over it"
     }
   },
   "devices": {
     "desktop": "full pointer tracking",
     "touch": "nudge gaze toward touch point; otherwise idle motion only; no gyroscope",
-    "reducedMotion": "show portrait-*.webp as a static image; no tracking, no idle motion",
-    "noWebGL": "static image with identical layout and all content readable"
+    "reducedMotion": "static images: public/portrait/starry-*.webp in the hero, particles-*.webp in Contact; no tracking, no idle motion",
+    "noWebGL": "same static images with identical layout and all content readable"
   },
   "performance": {
     "maxDevicePixelRatio": 2,
+    "maxDevicePixelRatioMobile": 1.25,
+    "minDevicePixelRatio": 0.75,
     "pauseWhenOffscreen": true,
     "pauseWhenTabHidden": true,
     "loadWebglOnClientOnly": true,
@@ -202,21 +205,17 @@
     "note": "Source file has no metadata. Keep it that way for any new export."
   },
   "todo": [
-    "Place the original highest-resolution photo as public/portrait/source.png if you have one larger than 2048px and regenerate crops and depth maps",
-    "Tune strength, easing and eye gain by eye in the hero prototype",
-    "Hand-correct the depth map hair edge near the right rail, shoes and hands"
+    "Tune strength, easing, eye gain and particle counts by eye on real devices"
   ],
   "particles": {
     "_note": "Starting values; tune on real devices. Counts are particles, not pixels.",
     "heroAssembly": {
       "enabled": true,
-      "maxDurationMs": 3500,
-      "handoffCrossfadeMs": 1400,
+      "maxDurationMs": 2600,
       "skippable": true,
-      "sampleFrom": [
-        "public/portrait/portrait-desktop.webp",
-        "public/portrait/depthmask-desktop.png"
-      ]
+      "handoff": "none: the painting is the hero. The particle portrait (with gaze and blinks) appears in Contact.",
+      "density": "face weight +1.6 and eye area +2.5 over the body, so gaze and blinks read in particles",
+      "target": "the hero painting after Van Gogh, The Starry Night (src/stage/starry.ts), which keeps moving as brushstrokes"
     },
     "cursorTrail": {
       "enabled": true,
@@ -228,9 +227,12 @@
     "sceneMorph": {
       "drivenBy": "scroll progress of each scene timeline",
       "targets": [
+        "starryNight (hero)",
         "browserWindow (About)",
         "funnel (Ad solutions)",
-        "rails path (between scenes)"
+        "rails path (between scenes, How I work)",
+        "prompt (Built with AI)",
+        "particle portrait (Contact)"
       ]
     },
     "stage": {
@@ -244,14 +246,14 @@
         "trails": true
       },
       "mobile": {
-        "count": 20000,
+        "count": 36000,
         "trails": false
       },
       "lowPower": {
         "count": 0,
         "fallback": "static"
       },
-      "adaptive": "reduce count when frame time stays above 20 ms for 1 second"
+      "adaptive": "when frame time stays above 20 ms for 0.7 seconds: lower the pixel ratio to 1, then the count (down to 8000), then the pixel ratio to minDevicePixelRatio"
     },
     "reducedMotion": "no assembly, no trails, static portrait and panels"
   },
