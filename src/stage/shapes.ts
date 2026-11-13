@@ -1,5 +1,6 @@
 // Target positions for every particle, one buffer per shape.
 // All shapes are built once on the CPU; the GPU blends between them.
+import { fillStarry, starryFlowField, type StarryLayout } from "./starry";
 
 export const SHAPE = {
   cloud: 0,
@@ -8,9 +9,12 @@ export const SHAPE = {
   browser: 3,
   funnel: 4,
   prompt: 5,
+  starry: 6,
+  chart: 7,
+  blocks: 8,
 } as const;
 export type ShapeName = keyof typeof SHAPE;
-export const SHAPE_COUNT = 6;
+export const SHAPE_COUNT = 9;
 
 /** Rails geometry, shared with the shader for station highlights. */
 export const RAILS = {
@@ -21,6 +25,26 @@ export const RAILS = {
   sleeperGap: 0.32,
   stations: [0.35, -0.95, -2.25, -3.55],
 };
+
+/** 3D bar chart (measurement section): bar heights rise left to right. */
+export const CHART = {
+  bars: [0.42, 0.58, 0.5, 0.76, 0.7, 0.98, 1.08, 1.3, 1.52],
+  base: -0.9,
+  half: 0.07,
+  lineZ: 0.6,
+};
+
+/** Page blocks (WordPress section): x0, x1, y0, y1 in the local box, plus group. */
+export const BLOCKS: [number, number, number, number, number][] = [
+  [-1, 1, 0.82, 0.98, 0], // header
+  [-1, 1, 0.3, 0.74, 1], // hero
+  [-1, -0.04, -0.22, 0.22, 2], // columns
+  [0.04, 1, -0.22, 0.22, 2],
+  [-1, -0.36, -0.68, -0.3, 3], // cards
+  [-0.32, 0.32, -0.68, -0.3, 3],
+  [0.36, 1, -0.68, -0.3, 3],
+  [-1, 1, -0.98, -0.82, 4], // footer
+];
 
 /** Funnel band edges in local y (top = 1). */
 export const FUNNEL_BANDS = [1 / 3, -1 / 3];
@@ -48,6 +72,7 @@ export interface PortraitSample {
   color: Uint8ClampedArray; // RGBA
   depthMask: Uint8ClampedArray; // R = depth, G = mask
   face: { x: number; y: number; rx: number; ry: number }; // 0-1 image space
+  eyes: { left: [number, number]; right: [number, number]; rx: number; ry: number }; // 0-1 image space
 }
 
 export interface ShapeBuffers {
@@ -58,11 +83,23 @@ export interface ShapeBuffers {
   browser: Float32Array;
   funnel: Float32Array;
   prompt: Float32Array;
+  chart: Float32Array;
+  blocks: Float32Array;
+  starryA: Float32Array; // family, u, v, a (see starry.ts)
+  starryB: Float32Array; // b, c, d, depth
+  starryF: Float32Array; // sky flow direction and warm tint, per hero aspect (see starryFlowField)
   color: Float32Array; // rgb + portrait size factor
   rand: Float32Array;
 }
 
-export function buildShapes(count: number, sample: PortraitSample): ShapeBuffers {
+// pause() runs between the larger fills so the page can paint and scroll while the
+// stage starts on a phone.
+export async function buildShapes(
+  count: number,
+  sample: PortraitSample,
+  starry: { layout: StarryLayout; aspect: number },
+  pause: () => Promise<void> = async () => {},
+): Promise<ShapeBuffers> {
   const r = mulberry32(20260415);
   const b: ShapeBuffers = {
     count,
@@ -72,6 +109,11 @@ export function buildShapes(count: number, sample: PortraitSample): ShapeBuffers
     browser: new Float32Array(count * 3),
     funnel: new Float32Array(count * 3),
     prompt: new Float32Array(count * 3),
+    chart: new Float32Array(count * 3),
+    blocks: new Float32Array(count * 3),
+    starryA: new Float32Array(count * 4),
+    starryB: new Float32Array(count * 4),
+    starryF: new Float32Array(count * 3),
     color: new Float32Array(count * 4),
     rand: new Float32Array(count * 4),
   };
@@ -84,11 +126,18 @@ export function buildShapes(count: number, sample: PortraitSample): ShapeBuffers
   }
 
   fillCloud(b.cloud, count, r);
+  await pause();
   fillPortrait(b.portrait, b.color, count, r, sample);
+  await pause();
   fillRails(b.rails, count, r);
   fillBrowser(b.browser, count, r);
   fillFunnel(b.funnel, count, r, b.rand);
   fillPrompt(b.prompt, count, r);
+  fillChart(b.chart, count, r);
+  fillBlocks(b.blocks, count, r);
+  await pause();
+  fillStarry(b.starryA, b.starryB, count, r, starry.layout, starry.aspect);
+  starryFlowField(b.starryA, count, starry.layout, starry.aspect, b.starryF);
   return b;
 }
 
@@ -102,15 +151,19 @@ function fillCloud(out: Float32Array, n: number, r: () => number) {
   }
 }
 
-function fillPortrait(
-  out: Float32Array,
-  color: Float32Array,
-  n: number,
-  r: () => number,
-  s: PortraitSample,
-) {
+function fillPortrait(out: Float32Array, color: Float32Array, n: number, r: () => number, s: PortraitSample) {
   const { width: W, height: H } = s;
-  const maxW = 2.2;
+  const maxW = 5.3;
+  const { eyes } = s;
+  const nearEye = (u: number, v: number) => {
+    // A generous box around each eye (lids and brows) gets the densest sampling.
+    for (const [ex, ey] of [eyes.left, eyes.right]) {
+      const dx = (u - ex) / (eyes.rx * 2.2);
+      const dy = (v - ey) / (eyes.ry * 3.2);
+      if (dx * dx + dy * dy < 1) return 1;
+    }
+    return 0;
+  };
   let i = 0;
   let guard = 0;
   while (i < n && guard < n * 40) {
@@ -124,8 +177,9 @@ function fillPortrait(
     const fx = (u - s.face.x) / s.face.rx;
     const fy = (v - s.face.y) / s.face.ry;
     const inFace = fx * fx + fy * fy < 1 ? 1 : 0;
-    // Denser on the person, densest on the face, sparse on the background.
-    const w = 0.28 + 0.92 * mask + inFace;
+    // Denser on the person, denser on the face, densest around the eyes so
+    // gaze and blinks read; sparse on the background.
+    const w = 0.28 + 0.92 * mask + 1.6 * inFace + 2.5 * nearEye(u, v);
     if (r() * maxW > w) continue;
     const depth = s.depthMask[k] / 255;
     out[i * 3] = u - 0.5;
@@ -299,5 +353,87 @@ function fillPrompt(out: Float32Array, n: number, r: () => number) {
     out[i * 3] = x;
     out[i * 3 + 1] = y;
     out[i * 3 + 2] = z;
+  }
+}
+
+/** A point on the surface of a box, with most points on its 12 edges. */
+function boxPoint(
+  r: () => number,
+  x0: number,
+  x1: number,
+  y0: number,
+  y1: number,
+  z0: number,
+  z1: number,
+  edgeShare: number,
+) {
+  const pick = (a: number, b: number) => (r() < 0.5 ? a : b);
+  if (r() < edgeShare) {
+    const axis = (r() * 3) | 0;
+    const t = r();
+    if (axis === 0) return [x0 + (x1 - x0) * t, pick(y0, y1), pick(z0, z1)];
+    if (axis === 1) return [pick(x0, x1), y0 + (y1 - y0) * t, pick(z0, z1)];
+    return [pick(x0, x1), pick(y0, y1), z0 + (z1 - z0) * t];
+  }
+  // Faint fill on the front face.
+  return [x0 + (x1 - x0) * r(), y0 + (y1 - y0) * r(), z1];
+}
+
+function fillChart(out: Float32Array, n: number, r: () => number) {
+  const { bars, base, half, lineZ } = CHART;
+  const count = bars.length;
+  const xAt = (i: number) => -1 + ((i + 0.5) * 2) / count;
+  const total = bars.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < n; i++) {
+    const t = r();
+    let p: number[];
+    if (t < 0.62) {
+      // Bars, chosen by height so tall bars get more particles.
+      let pick = r() * total;
+      let k = 0;
+      for (; k < count - 1; k++) {
+        pick -= bars[k];
+        if (pick <= 0) break;
+      }
+      const x = xAt(k);
+      p = boxPoint(r, x - half, x + half, base, base + bars[k], -half, half, 0.7);
+    } else if (t < 0.8) {
+      // Trend line floating in front of the bars.
+      const u = r() * (count - 1);
+      const k = Math.floor(u);
+      const f = u - k;
+      const y = base + bars[k] + (bars[k + 1] - bars[k]) * f + 0.14;
+      p = [xAt(k) + (xAt(k + 1) - xAt(k)) * f, y + (r() - 0.5) * 0.02, lineZ + (r() - 0.5) * 0.03];
+    } else {
+      // Floor grid.
+      if (r() < 0.6) {
+        const z = -0.5 + Math.floor(r() * 5) * 0.25;
+        p = [-1.1 + r() * 2.2, base, z];
+      } else {
+        const x = -1.1 + Math.floor(r() * 12) * 0.2;
+        p = [x, base, -0.5 + r()];
+      }
+    }
+    out[i * 3] = p[0];
+    out[i * 3 + 1] = p[1];
+    out[i * 3 + 2] = p[2];
+  }
+}
+
+function fillBlocks(out: Float32Array, n: number, r: () => number) {
+  const area = BLOCKS.map(([x0, x1, y0, y1]) => (x1 - x0) * (y1 - y0) + 0.4 * (x1 - x0 + y1 - y0));
+  const total = area.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < n; i++) {
+    let pick = r() * total;
+    let k = 0;
+    for (; k < BLOCKS.length - 1; k++) {
+      pick -= area[k];
+      if (pick <= 0) break;
+    }
+    const [x0, x1, y0, y1] = BLOCKS[k];
+    const p = boxPoint(r, x0, x1, y0, y1, -0.12, 0.12, 0.72);
+    out[i * 3] = p[0];
+    out[i * 3 + 1] = p[1];
+    out[i * 3 + 2] = p[2];
   }
 }

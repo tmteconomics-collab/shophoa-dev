@@ -1,13 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import "./fonts.css";
 import "./globals.css";
-import { site } from "@/content/site";
+import { ogImage, site } from "@/content/site";
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: site.title,
   description: site.description,
-  alternates: { canonical: "/" },
+  alternates: { canonical: "/", languages: { en: "/", vi: "/vi/", "x-default": "/" } },
   openGraph: {
     type: "profile",
     title: site.title,
@@ -15,13 +15,14 @@ export const metadata: Metadata = {
     url: "/",
     siteName: site.name,
     locale: "en_US",
-    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "Devan sitting on an old railway track in a green park" }],
+    alternateLocale: "vi_VN",
+    images: [ogImage],
   },
   twitter: {
     card: "summary_large_image",
     title: site.title,
     description: site.description,
-    images: ["/og.jpg"],
+    images: [ogImage.url],
   },
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
@@ -42,8 +43,11 @@ export const viewport: Viewport = {
 // layout. ?static forces the fallback; ?gl=force keeps WebGL on software renderers.
 const boot = `(function(){var d=document.documentElement;try{
 var q=location.search;
+if(location.pathname.indexOf('/vi/')===0)d.lang='vi';
 var rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
 d.dataset.motion=rm?'reduce':'full';
+var pz=false;try{pz=localStorage.getItem('devan-motion')==='paused'}catch(_){}
+d.dataset.paused=pz?'on':'off';
 var n=navigator,c=n.connection||{};
 var low=c.saveData||/(^|-)2g$/.test(c.effectiveType||'')||(n.deviceMemory&&n.deviceMemory<=2)||(n.hardwareConcurrency&&n.hardwareConcurrency<=2);
 var gl=false;
@@ -52,7 +56,7 @@ if(x){var ri=x.getExtension('WEBGL_debug_renderer_info');var rn=String(x.getPara
 if(/swiftshader|llvmpipe|softpipe|software|basic render/i.test(rn)&&q.indexOf('gl=force')<0)gl=false;
 var e=x.getExtension('WEBGL_lose_context');e&&e.loseContext();}}
 d.dataset.gl=gl?'pending':'off';
-d.dataset.intro=gl&&q.indexOf('nointro')<0&&scrollY<innerHeight*0.3?'on':'off';
+d.dataset.intro=gl&&!pz&&q.indexOf('nointro')<0&&scrollY<innerHeight*0.3?'on':'off';
 }catch(_){d.dataset.gl='off';d.dataset.intro='off';}})();`;
 
 const jsonLd = {
@@ -70,11 +74,23 @@ const jsonLd = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" data-motion="full" data-gl="off" data-intro="off" suppressHydrationWarning>
+    <html lang="en" data-motion="full" data-gl="off" data-intro="off" data-paused="off" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: boot }} />
-        <link rel="preload" href="/fonts/bricolage-grotesque-latin-wdth-normal.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preload" href="/fonts/be-vietnam-pro-latin-400-normal.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link
+          rel="preload"
+          href="/fonts/bricolage-grotesque-latin-wdth-normal.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/be-vietnam-pro-latin-400-normal.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </head>
       <body>{children}</body>

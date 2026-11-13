@@ -5,16 +5,18 @@ import { SHAPE } from "./shapes";
 // how far they are through a morph. The DOM side (ScrollScenes) reads the same
 // section ranges, so text and particles stay in step.
 
-export type SceneKind = "hero" | "browser" | "funnel" | "rails" | "prompt" | "cloud" | "portrait";
+export type SceneKind = "hero" | "browser" | "funnel" | "rails" | "chart" | "blocks" | "prompt" | "cloud" | "portrait";
 
-const KINDS: Record<SceneKind, { shape: number; photo: boolean; alpha: number }> = {
-  hero: { shape: SHAPE.portrait, photo: true, alpha: 1 },
-  browser: { shape: SHAPE.browser, photo: false, alpha: 1 },
-  funnel: { shape: SHAPE.funnel, photo: false, alpha: 1 },
-  rails: { shape: SHAPE.rails, photo: false, alpha: 1 },
-  prompt: { shape: SHAPE.prompt, photo: false, alpha: 1 },
-  cloud: { shape: SHAPE.cloud, photo: false, alpha: 0.45 },
-  portrait: { shape: SHAPE.portrait, photo: false, alpha: 0.9 },
+const KINDS: Record<SceneKind, { shape: number; alpha: number }> = {
+  hero: { shape: SHAPE.starry, alpha: 1 },
+  browser: { shape: SHAPE.browser, alpha: 1 },
+  funnel: { shape: SHAPE.funnel, alpha: 1 },
+  rails: { shape: SHAPE.rails, alpha: 1 },
+  chart: { shape: SHAPE.chart, alpha: 0.85 },
+  blocks: { shape: SHAPE.blocks, alpha: 0.85 },
+  prompt: { shape: SHAPE.prompt, alpha: 1 },
+  cloud: { shape: SHAPE.cloud, alpha: 0.45 },
+  portrait: { shape: SHAPE.portrait, alpha: 0.9 },
 };
 
 export interface Scene {
@@ -22,7 +24,6 @@ export interface Scene {
   el: HTMLElement;
   anchor: HTMLElement;
   shape: number;
-  photo: boolean;
   alpha: number;
   top: number;
   bottom: number;
@@ -36,7 +37,6 @@ export interface Frame {
   from: number;
   to: number;
   mix: number;
-  photo: number;
   alpha: number;
   /** 0..1..0 bump during transitions, used for the camera's short trip down the rails. */
   travel: number;
@@ -67,11 +67,6 @@ export function measureScenes(scenes: Scene[]) {
     s.bottom = r.bottom + y;
   }
 }
-
-const smooth = (a: number, b: number, x: number) => {
-  const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
-  return t * t * (3 - 2 * t);
-};
 
 export function frameAt(scenes: Scene[], scrollY: number, vh: number): Frame {
   const c = scrollY + vh * 0.5;
@@ -111,15 +106,8 @@ export function frameAt(scenes: Scene[], scrollY: number, vh: number): Frame {
     }
   }
 
-  const pA = a.photo ? 1 : a.alpha;
-  const pB = b.photo ? 1 : b.alpha;
-  let alpha = pA + (pB - pA) * t;
-  if (a.photo) alpha *= smooth(0, 0.12, t);
-  if (b.photo) alpha *= 1 - smooth(0.88, 1, t);
-  if (t === 0 && a.photo) alpha = 0;
-
-  const photo = (a.photo ? 1 - smooth(0, 0.15, t) : 0) + (b !== a && b.photo ? smooth(0.85, 1, t) : 0);
+  const alpha = a.alpha + (b.alpha - a.alpha) * t;
   const travel = a !== b ? Math.sin(Math.PI * t) : 0;
 
-  return { a, b, t, from, to, mix, photo, alpha, travel };
+  return { a, b, t, from, to, mix, alpha, travel };
 }
