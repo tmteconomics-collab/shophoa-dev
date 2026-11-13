@@ -15,7 +15,9 @@ concurrency:
 jobs:
   check:
     name: Lint, build and Lighthouse
-    runs-on: ubuntu-latest
+    # Pinned to 24.04: ubuntu-latest moved to 26.04, which Playwright's
+    # `install --with-deps` does not yet support (browser dep provisioning fails).
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
