@@ -66,8 +66,13 @@ for (const f of fs.readdirSync(out, { recursive: true })) {
 }
 
 // Framework chunks and RSC payloads are no longer referenced (the CSS stays).
+// The chunks directory may not exist (newer Next/Turbopack exports can emit no
+// framework .js there); the lean rewrite above already stripped the references,
+// so if there is nothing to clean up, skip it.
 const chunks = path.join(out, "_next", "static", "chunks");
-for (const f of fs.readdirSync(chunks)) if (f.endsWith(".js")) fs.rmSync(path.join(chunks, f));
+if (fs.existsSync(chunks)) {
+  for (const f of fs.readdirSync(chunks)) if (f.endsWith(".js")) fs.rmSync(path.join(chunks, f));
+}
 for (const f of fs.readdirSync(out, { recursive: true })) {
   const name = path.basename(f);
   if (name === "index.txt" || (name.startsWith("__next.") && name.endsWith(".txt"))) fs.rmSync(path.join(out, f));
