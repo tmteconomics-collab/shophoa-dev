@@ -5,9 +5,10 @@ import type { Content } from "@/content/i18n";
 const bare = (url: string) => url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 
 /**
- * The print-ready CV, shared by /cv/ (English) and /vi/cv/ (Vietnamese). The
- * downloadable PDF stays the English one (public/devan-cv.pdf); the Vietnamese
- * toolbar labels its button accordingly and prints the page itself instead.
+ * The print-ready CV, shared by /cv/ (English) and /vi/cv/ (Vietnamese). Each
+ * language downloads its own PDF (c.cvPdf: public/devan-cv.pdf or
+ * devan-cv-vi.pdf). The Vietnamese CV also shows the owner's real name after
+ * the display name (c.cvNameSuffix); the English CV shows "Devan" only.
  */
 export default function CvView({ c, altCv }: { c: Content; altCv: string }) {
   const { site, credentials, cv, ui } = c;
@@ -24,7 +25,7 @@ export default function CvView({ c, altCv }: { c: Content; altCv: string }) {
           </a>
           <div className="cv-actions">
             <LangToggle c={c} href={altCv} />
-            <a className="btn btn-sun cv-btn" href="/devan-cv.pdf" download>
+            <a className="btn btn-sun cv-btn" href={c.cvPdf} download>
               {ui.cvUi.download}
             </a>
             <PrintButton label={ui.cvUi.print} />
@@ -37,8 +38,9 @@ export default function CvView({ c, altCv }: { c: Content; altCv: string }) {
           <header className="cv-head">
             <div>
               <h1 id="cv-name" className="cv-name">
-                {site.name}
+                <span className="cv-brand">{site.name}</span>
               </h1>
+              {c.cvNameSuffix ? <p className="cv-realname">{c.cvNameSuffix}</p> : null}
               <p className="cv-role">
                 {site.role}, {site.company}
               </p>

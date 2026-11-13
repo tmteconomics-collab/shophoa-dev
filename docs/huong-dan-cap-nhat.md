@@ -6,7 +6,7 @@ Tài liệu cho chủ site (Devan). Site có hai ngôn ngữ: tiếng Anh ở `/
 
 - Chữ tiếng Anh nằm trong `src/content/site.ts`, chữ tiếng Việt trong `src/content/vi.ts`. Hai file có **cùng cấu trúc**: mỗi khối (`hero`, `about`, `solutions`…) phải có đủ các mục như nhau. Nếu thêm/xoá một mục ở file này mà quên file kia, lệnh `npm run build` sẽ báo lỗi — đó là lớp bảo vệ, cứ sửa theo thông báo.
 - Các nhãn giao diện (menu, nút, nhãn công cụ) nằm trong `src/content/i18n.ts` (`uiEn` cho tiếng Anh, `uiVi` cho tiếng Việt).
-- Nút **EN | VI** trên đầu trang để người xem chuyển ngôn ngữ. File CV tải về (PDF) vẫn là bản tiếng Anh; trang CV tiếng Việt ghi rõ "Tải PDF (tiếng Anh)".
+- Nút **EN | VI** trên đầu trang để người xem chuyển ngôn ngữ. Mỗi ngôn ngữ có file CV PDF riêng: `public/devan-cv.pdf` (tiếng Anh) và `public/devan-cv-vi.pdf` (tiếng Việt). Trang CV tiếng Việt còn hiển thị tên thật "Tuấn Trần" dưới chữ "Devan"; CV tiếng Anh và các trang khác chỉ "Devan".
 - Các bảng minh họa (GA4, Google Ads, WooCommerce) giữ nguyên tiếng Anh vì mô phỏng giao diện thật của các công cụ đó.
 
 ## 1. Sửa nội dung: hai file song song
@@ -76,8 +76,8 @@ Chứng chỉ có thể thêm đơn vị cấp, năm và link xác minh; trang w
 
 ## 4. CV và file PDF
 
-- Trang `/cv/` lấy dữ liệu từ `cv` và `credentials` trong `site.ts`.
-- File tải về `public/devan-cv.pdf` được tạo từ trang đó. **Mỗi lần sửa nội dung CV, tạo lại PDF:**
+- Trang `/cv/` (tiếng Anh) và `/vi/cv/` (tiếng Việt) lấy dữ liệu từ `cv` và `credentials` trong `site.ts`/`vi.ts`.
+- Hai file tải về `public/devan-cv.pdf` và `public/devan-cv-vi.pdf` được tạo từ hai trang đó. **Mỗi lần sửa nội dung hoặc bố cục CV, tạo lại cả hai PDF** (một lệnh tạo cả hai):
 
 ```bash
 npm install
@@ -87,7 +87,7 @@ npx serve out -l 4173 &
 node scripts/render-cv-pdf.mjs
 ```
 
-Đặt `NEXT_PUBLIC_SITE_URL` để PDF in kèm địa chỉ website. Kiểm tra PDF vẫn đúng **1 trang A4** trước khi commit.
+Đặt `NEXT_PUBLIC_SITE_URL` để PDF in kèm địa chỉ website. Kiểm tra **cả hai PDF vẫn đúng 1 trang A4** trước khi commit (tiếng Việt dài hơn nên dễ tràn sang trang 2 — nếu tràn, rút gọn chữ hoặc giảm khoảng cách trong `.cv-head`/các mục).
 
 ## 5. Gửi bản phù hợp từng vị trí ứng tuyển
 

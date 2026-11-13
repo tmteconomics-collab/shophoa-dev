@@ -299,7 +299,7 @@ const uiVi: Ui = {
   },
   cvUi: {
     back: "Về trang portfolio",
-    download: "Tải PDF (tiếng Anh)",
+    download: "Tải PDF (tiếng Việt)",
     print: "In",
     profile: "Giới thiệu",
     experience: "Kinh nghiệm",
@@ -334,6 +334,8 @@ export interface Content {
   home: string;
   cvPath: string;
   alt: string; // the other language's equivalent page
+  cvPdf: string; // the downloadable CV PDF for this language
+  cvNameSuffix: string; // real name shown after the display name on the CV only (empty = none)
 }
 
 const en: Content = {
@@ -356,6 +358,8 @@ const en: Content = {
   home: "/",
   cvPath: "/cv/",
   alt: "/vi/",
+  cvPdf: "/devan-cv.pdf",
+  cvNameSuffix: "",
 };
 
 const vi: Content = {
@@ -378,6 +382,8 @@ const vi: Content = {
   home: "/vi/",
   cvPath: "/vi/cv/",
   alt: "/",
+  cvPdf: "/devan-cv-vi.pdf",
+  cvNameSuffix: "Tuấn Trần",
 };
 
 const bundles: Record<Locale, Content> = { en, vi };

@@ -2795,7 +2795,6 @@ button.cv-btn {
   --cv-rule: #d9dbf2;
   box-sizing: border-box;
   max-width: 794px;
-  min-height: 1123px;
   margin-inline: auto;
   padding: 52px 54px;
   background: #fff;
@@ -2824,9 +2823,9 @@ button.cv-btn {
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 0.75rem 2rem;
-  padding-bottom: 14px;
-  margin-bottom: 18px;
+  gap: 0.6rem 2rem;
+  padding-bottom: 11px;
+  margin-bottom: 14px;
   border-bottom: 2px solid var(--cv-ink);
 }
 .cv-name {
@@ -2838,7 +2837,7 @@ button.cv-btn {
   line-height: 0.9;
   letter-spacing: -0.02em;
 }
-.cv-name::after {
+.cv-brand::after {
   content: "";
   display: inline-block;
   width: 9px;
@@ -2846,6 +2845,14 @@ button.cv-btn {
   margin-left: 4px;
   background: var(--color-sun);
   border-radius: 1px;
+}
+/* The owner's real name, shown under "Devan" on the Vietnamese CV only. */
+.cv-realname {
+  margin: 4px 0 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--cv-dim);
 }
 .cv-role {
   margin: 8px 0 0 !important;
@@ -2858,7 +2865,7 @@ button.cv-btn {
   padding: 0;
   text-align: right;
   font-size: 12.5px;
-  line-height: 1.6;
+  line-height: 1.5;
 }
 /* On screen the contact links are tap targets, so give them at least 24px of
    height (WCAG 2.5.8). Print keeps the compact one-page layout. */
@@ -2879,7 +2886,7 @@ button.cv-btn {
 }
 .cv-main > section,
 .cv-side > section {
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 .cv-h {
   margin: 0 0 6px;
