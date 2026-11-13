@@ -2883,6 +2883,20 @@ button.cv-btn {
   .cv-grid {
     grid-template-columns: 1fr 210px;
   }
+  /* Keep the header two-column (name left, contact top-right) and never let the
+     contact wrap below the name — the wordier Vietnamese role line used to push
+     it onto its own row and look misaligned. The name block takes the rest and
+     the contact stays a fixed column. */
+  .cv-head {
+    flex-wrap: nowrap;
+  }
+  .cv-head > :first-child {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .cv-contact {
+    flex: 0 0 auto;
+  }
 }
 .cv-main > section,
 .cv-side > section {
