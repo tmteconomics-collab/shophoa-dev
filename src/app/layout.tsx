@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: site.title,
   description: site.description,
-  alternates: { canonical: "/" },
+  alternates: { canonical: "/", languages: { en: "/", vi: "/vi/", "x-default": "/" } },
   openGraph: {
     type: "profile",
     title: site.title,
@@ -15,6 +15,7 @@ export const metadata: Metadata = {
     url: "/",
     siteName: site.name,
     locale: "en_US",
+    alternateLocale: "vi_VN",
     images: [ogImage],
   },
   twitter: {
@@ -42,6 +43,7 @@ export const viewport: Viewport = {
 // layout. ?static forces the fallback; ?gl=force keeps WebGL on software renderers.
 const boot = `(function(){var d=document.documentElement;try{
 var q=location.search;
+if(location.pathname.indexOf('/vi/')===0)d.lang='vi';
 var rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
 d.dataset.motion=rm?'reduce':'full';
 var pz=false;try{pz=localStorage.getItem('devan-motion')==='paused'}catch(_){}

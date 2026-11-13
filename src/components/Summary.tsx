@@ -1,8 +1,9 @@
-import { site, summary } from "@/content/site";
+import type { Content } from "@/content/i18n";
 import type { SectionId } from "@/content/roles";
 
 /** One card with the whole portfolio, for visitors who skim. Pillars follow the section order. */
-export default function Summary({ order }: { order: SectionId[] }) {
+export default function Summary({ c, order }: { c: Content; order: SectionId[] }) {
+  const { summary, site, ui, cvPath } = c;
   const rank = (href: string) => order.indexOf(href.slice(1) as SectionId);
   const pillars = [...summary.pillars].sort((a, b) => rank(a.href) - rank(b.href));
   return (
@@ -14,11 +15,11 @@ export default function Summary({ order }: { order: SectionId[] }) {
           </h2>
           <dl className="summary-list">
             <div>
-              <dt>Now</dt>
+              <dt>{ui.summaryTerms.now}</dt>
               <dd>{summary.role}</dd>
             </div>
             <div>
-              <dt>What I do</dt>
+              <dt>{ui.summaryTerms.whatIDo}</dt>
               <dd>
                 <ul className="summary-pillars">
                   {pillars.map((p) => (
@@ -30,24 +31,25 @@ export default function Summary({ order }: { order: SectionId[] }) {
               </dd>
             </div>
             <div>
-              <dt>Tools</dt>
+              <dt>{ui.summaryTerms.tools}</dt>
               <dd>{summary.tools.join(" · ")}</dd>
             </div>
             <div>
-              <dt>Study</dt>
+              <dt>{ui.summaryTerms.study}</dt>
               <dd>{summary.education}</dd>
             </div>
             <div>
-              <dt>Languages</dt>
+              <dt>{ui.summaryTerms.languages}</dt>
               <dd>{summary.languages}</dd>
             </div>
           </dl>
           <div className="cta-row">
             <a className="btn btn-sun" href={site.linkedin} target="_blank" rel="noopener noreferrer">
-              Message me on LinkedIn<span className="sr-only"> (opens in a new tab)</span>
+              {ui.summaryCta.linkedin}
+              <span className="sr-only">{ui.openNewTab}</span>
             </a>
-            <a className="btn btn-ghost" href="/cv/">
-              View CV
+            <a className="btn btn-ghost" href={cvPath}>
+              {ui.summaryCta.cv}
             </a>
           </div>
         </div>

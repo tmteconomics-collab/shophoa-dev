@@ -1,10 +1,14 @@
-import { proof } from "@/content/site";
+import type { Content } from "@/content/i18n";
 
-export const hasProof = proof.results.length + proof.testimonials.length + proof.samples.length > 0;
+type ProofData = Content["proof"];
+
+export const hasProof = (proof: ProofData) =>
+  proof.results.length + proof.testimonials.length + proof.samples.length > 0;
 
 /** Results, testimonials and work samples. Renders nothing until the owner fills a list in site.ts. */
-export default function Proof() {
-  if (!hasProof) return null;
+export default function Proof({ c }: { c: Content }) {
+  const { proof } = c;
+  if (!hasProof(proof)) return null;
   return (
     <section id="proof" className="proof" aria-labelledby="proof-title">
       <div className="wrap">

@@ -15,10 +15,13 @@ export interface BudgetInput {
   cvr?: number;
 }
 
+/** Which figure a row shows; the visible label and money unit come from the markup. */
+export type RowKey = "impressions" | "clicks" | "costPerClick" | "conversions" | "costPerConversion" | "days";
+
 export interface BudgetRow {
-  label: string;
+  key: RowKey;
   value: number;
-  /** "count" rounds down to whole units; "money" is VND; "days" keeps one decimal. */
+  /** "count" rounds down to whole units; "money" adds the currency; "days" keeps one decimal. */
   kind: "count" | "money" | "days";
 }
 
@@ -36,44 +39,49 @@ const ok = (n: number | undefined): n is number => typeof n === "number" && Numb
 
 export function estimate(i: BudgetInput): BudgetRow[] {
   if (!ok(i.budget) || !ok(i.rate)) return [];
-  if (i.model === "cpd") return [{ label: "Days on the placement", value: i.budget / i.rate, kind: "days" }];
+  if (i.model === "cpd") return [{ key: "days", value: i.budget / i.rate, kind: "days" }];
 
   const rows: BudgetRow[] = [];
   let clicks: number | undefined;
   if (i.model === "cpm") {
     const impressions = (i.budget / i.rate) * 1000;
-    rows.push({ label: "Impressions", value: impressions, kind: "count" });
+    rows.push({ key: "impressions", value: impressions, kind: "count" });
     if (ok(i.ctr)) {
       clicks = impressions * (i.ctr / 100);
-      rows.push({ label: "Clicks", value: clicks, kind: "count" });
-      if (Math.floor(clicks) > 0) rows.push({ label: "Cost per click", value: i.budget / clicks, kind: "money" });
+      rows.push({ key: "clicks", value: clicks, kind: "count" });
+      if (Math.floor(clicks) > 0) rows.push({ key: "costPerClick", value: i.budget / clicks, kind: "money" });
     }
   } else {
     clicks = i.budget / i.rate;
-    rows.push({ label: "Clicks", value: clicks, kind: "count" });
+    rows.push({ key: "clicks", value: clicks, kind: "count" });
   }
   if (clicks !== undefined && ok(i.cvr)) {
     const conversions = clicks * (i.cvr / 100);
-    rows.push({ label: "Conversions", value: conversions, kind: "count" });
+    rows.push({ key: "conversions", value: conversions, kind: "count" });
     if (Math.floor(conversions) > 0)
-      rows.push({ label: "Cost per conversion", value: i.budget / conversions, kind: "money" });
+      rows.push({ key: "costPerConversion", value: i.budget / conversions, kind: "money" });
   }
   return rows;
 }
 
-const nf = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
-const nf1 = new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 });
-
-export function formatRow(r: BudgetRow): string {
+export function formatRow(r: BudgetRow, nf: Intl.NumberFormat, nf1: Intl.NumberFormat, money: string): string {
   if (r.kind === "count") return nf.format(Math.floor(r.value));
-  if (r.kind === "money") return `${nf.format(Math.round(r.value))} VND`;
+  if (r.kind === "money") return `${nf.format(Math.round(r.value))} ${money}`;
   return nf1.format(r.value);
 }
 
-const rateLabels: Record<Model, string> = {
+const enRateLabels: Record<Model, string> = {
   cpm: "Your price per 1,000 impressions (VND)",
   cpc: "Your price per click (VND)",
   cpd: "Your price per day (VND)",
+};
+const enRowLabels: Record<RowKey, string> = {
+  impressions: "Impressions",
+  clicks: "Clicks",
+  costPerClick: "Cost per click",
+  conversions: "Conversions",
+  costPerConversion: "Cost per conversion",
+  days: "Days on the placement",
 };
 
 export function bindBudgetEstimator(form: HTMLFormElement): () => void {
@@ -84,6 +92,24 @@ export function bindBudgetEstimator(form: HTMLFormElement): () => void {
   if (!out) return () => {};
   const value = (name: string) => (form.elements.namedItem(name) as HTMLInputElement | null)?.value ?? "";
   const empty = out.innerHTML;
+  const d = form.dataset;
+  // Labels, currency and number format come from the markup; English is the fallback.
+  const rateLabels: Record<Model, string> = {
+    cpm: d.rateCpm || enRateLabels.cpm,
+    cpc: d.rateCpc || enRateLabels.cpc,
+    cpd: d.rateCpd || enRateLabels.cpd,
+  };
+  const rowLabels: Record<RowKey, string> = {
+    impressions: d.rowImpressions || enRowLabels.impressions,
+    clicks: d.rowClicks || enRowLabels.clicks,
+    costPerClick: d.rowCpc || enRowLabels.costPerClick,
+    conversions: d.rowConversions || enRowLabels.conversions,
+    costPerConversion: d.rowCpconv || enRowLabels.costPerConversion,
+    days: d.rowDays || enRowLabels.days,
+  };
+  const money = d.money || "VND";
+  const nf = new Intl.NumberFormat(d.numLocale || "en-US", { maximumFractionDigits: 0 });
+  const nf1 = new Intl.NumberFormat(d.numLocale || "en-US", { maximumFractionDigits: 1 });
 
   const update = () => {
     const model = ((form.elements.namedItem("model") as RadioNodeList | null)?.value || "cpm") as Model;
@@ -107,8 +133,8 @@ export function bindBudgetEstimator(form: HTMLFormElement): () => void {
       const div = document.createElement("div");
       const dt = document.createElement("dt");
       const dd = document.createElement("dd");
-      dt.textContent = r.label;
-      dd.textContent = formatRow(r);
+      dt.textContent = rowLabels[r.key];
+      dd.textContent = formatRow(r, nf, nf1, money);
       div.append(dt, dd);
       dl.append(div);
     }

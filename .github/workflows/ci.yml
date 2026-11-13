@@ -44,8 +44,13 @@ jobs:
         run: |
           test -f out/index.html
           test -f out/cv/index.html
+          test -f out/vi/index.html
+          test -f out/vi/cv/index.html
           test -f out/devan-cv.pdf
           for f in out/for/*/index.html; do grep -q 'noindex' "$f" || { echo "$f is missing noindex"; exit 1; }; done
+          # The Vietnamese pages are meant to be indexed, so they must not be noindex.
+          for f in out/vi/index.html out/vi/cv/index.html; do grep -q 'noindex' "$f" && { echo "$f should not be noindex"; exit 1; }; done
+          grep -qi 'hreflang="vi"' out/index.html || { echo "home is missing the vi hreflang alternate"; exit 1; }
           if grep -rl --include='*.html' '/_next/static/chunks/[^"]*\.js' out; then echo "framework script left in the lean build"; exit 1; fi
           owner='tmt.economics@gmail.com'
           if grep -rhoIE --include='*.html' '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}' out | grep -vxF "$owner" | grep -q .; then echo "an unexpected email address is on the site"; exit 1; fi

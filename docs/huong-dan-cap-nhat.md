@@ -1,10 +1,17 @@
 # Hướng dẫn cập nhật portfolio
 
-Tài liệu cho chủ site (Devan). Nội dung trên site luôn bằng tiếng Anh; hướng dẫn này bằng tiếng Việt để dễ dùng.
+Tài liệu cho chủ site (Devan). Site có hai ngôn ngữ: tiếng Anh ở `/` và `/cv/`, tiếng Việt ở `/vi/` và `/vi/cv/`. Hướng dẫn này bằng tiếng Việt để dễ dùng.
 
-## 1. Sửa nội dung: chỉ một file
+## 0. Hai ngôn ngữ
 
-Gần như mọi chữ trên site nằm trong `src/content/site.ts`. Mở file, tìm đúng khối, sửa phần chữ trong dấu ngoặc kép, lưu lại.
+- Chữ tiếng Anh nằm trong `src/content/site.ts`, chữ tiếng Việt trong `src/content/vi.ts`. Hai file có **cùng cấu trúc**: mỗi khối (`hero`, `about`, `solutions`…) phải có đủ các mục như nhau. Nếu thêm/xoá một mục ở file này mà quên file kia, lệnh `npm run build` sẽ báo lỗi — đó là lớp bảo vệ, cứ sửa theo thông báo.
+- Các nhãn giao diện (menu, nút, nhãn công cụ) nằm trong `src/content/i18n.ts` (`uiEn` cho tiếng Anh, `uiVi` cho tiếng Việt).
+- Nút **EN | VI** trên đầu trang để người xem chuyển ngôn ngữ. File CV tải về (PDF) vẫn là bản tiếng Anh; trang CV tiếng Việt ghi rõ "Tải PDF (tiếng Anh)".
+- Các bảng minh họa (GA4, Google Ads, WooCommerce) giữ nguyên tiếng Anh vì mô phỏng giao diện thật của các công cụ đó.
+
+## 1. Sửa nội dung: hai file song song
+
+Gần như mọi chữ tiếng Anh nằm trong `src/content/site.ts`, chữ tiếng Việt trong `src/content/vi.ts` (cùng tên khối, thêm tiền tố `vi`, ví dụ `hero` ↔ `viHero`). Mở file, tìm đúng khối, sửa phần chữ trong dấu ngoặc kép, lưu lại. **Sửa cả hai file** để hai ngôn ngữ khớp nhau.
 
 | Muốn sửa                                 | Khối trong `site.ts`                                 |
 | ---------------------------------------- | ---------------------------------------------------- |

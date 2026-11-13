@@ -1,5 +1,6 @@
 import Stage from "@/components/Stage";
 import MotionToggle from "@/components/MotionToggle";
+import LangToggle from "@/components/LangToggle";
 import Summary from "@/components/Summary";
 import SectionDots from "@/components/SectionDots";
 import SectionMenu from "@/components/SectionMenu";
@@ -10,18 +11,7 @@ import HeroBackdrop from "@/components/HeroBackdrop";
 import { FunnelArt, PromptArt, RailsArt } from "@/components/FallbackArt";
 import { growthMocks } from "@/components/mocks/GrowthMocks";
 import { websiteMocks } from "@/components/mocks/WebsiteMocks";
-import {
-  about,
-  ai,
-  contact,
-  credentials,
-  growth,
-  hero as defaultHero,
-  site,
-  solutions,
-  websites,
-  workflow,
-} from "@/content/site";
+import { getContent, type Content } from "@/content/i18n";
 import { defaultOrder, type HeroCopy, type SectionId } from "@/content/roles";
 
 function Arrow() {
@@ -39,18 +29,29 @@ function Arrow() {
   );
 }
 
-function External({ href, className, children }: { href: string; className: string; children: React.ReactNode }) {
+function External({
+  href,
+  className,
+  newTab,
+  children,
+}: {
+  href: string;
+  className: string;
+  newTab: string;
+  children: React.ReactNode;
+}) {
   return (
     <a className={className} href={href} target="_blank" rel="noopener noreferrer" data-gaze>
       {children}
       <Arrow />
-      <span className="sr-only"> (opens in a new tab)</span>
+      <span className="sr-only">{newTab}</span>
     </a>
   );
 }
 
 /** Ad solutions: the funnel. */
-function SolutionsSection({ rev }: { rev: boolean }) {
+function SolutionsSection({ c, rev }: { c: Content; rev: boolean }) {
+  const { solutions } = c;
   return (
     <section
       id="solutions"
@@ -101,7 +102,8 @@ function SolutionsSection({ rev }: { rev: boolean }) {
 }
 
 /** How I work: four stops along the rails. */
-function ProcessSection({ rev }: { rev: boolean }) {
+function ProcessSection({ c, rev }: { c: Content; rev: boolean }) {
+  const { workflow } = c;
   return (
     <section
       id="process"
@@ -143,7 +145,8 @@ function ProcessSection({ rev }: { rev: boolean }) {
 }
 
 /** Measurement and performance marketing on Google's tools. */
-function MeasurementSection({ rev }: { rev: boolean }) {
+function MeasurementSection({ c, rev }: { c: Content; rev: boolean }) {
+  const { growth } = c;
   return (
     <section
       id="measurement"
@@ -192,7 +195,8 @@ function MeasurementSection({ rev }: { rev: boolean }) {
 }
 
 /** Websites on WordPress. */
-function WebsitesSection({ rev }: { rev: boolean }) {
+function WebsitesSection({ c, rev }: { c: Content; rev: boolean }) {
+  const { websites } = c;
   return (
     <section
       id="websites"
@@ -239,7 +243,7 @@ function WebsitesSection({ rev }: { rev: boolean }) {
   );
 }
 
-const middleSections: Record<SectionId, (props: { rev: boolean }) => React.ReactElement> = {
+const middleSections: Record<SectionId, (props: { c: Content; rev: boolean }) => React.ReactElement> = {
   solutions: SolutionsSection,
   process: ProcessSection,
   measurement: MeasurementSection,
@@ -247,62 +251,70 @@ const middleSections: Record<SectionId, (props: { rev: boolean }) => React.React
 };
 
 /**
- * The whole one-page portfolio. The home page uses the default copy and order;
- * the role versions in src/content/roles.ts pass their own hero line and order.
+ * The whole one-page portfolio. The home page uses the default English copy and
+ * order; /vi/ passes the Vietnamese bundle; the role versions in
+ * src/content/roles.ts pass their own hero line and order (English only).
  */
 export default function Portfolio({
-  hero = defaultHero,
+  content = getContent("en"),
+  hero,
   order = defaultOrder,
 }: {
+  content?: Content;
   hero?: HeroCopy;
   order?: SectionId[];
 }) {
-  const tailSep = /^[,.;:]/.test(hero.tail) ? "" : " ";
+  const c = content;
+  const { site, ui } = c;
+  const h = hero ?? c.hero;
+  const showProof = hasProof(c.proof);
+  const tailSep = /^[,.;:]/.test(h.tail) ? "" : " ";
   return (
     <>
       <a className="skip-link" href="#main">
-        Skip to content
+        {ui.skipToContent}
       </a>
       <Stage />
       <ScrollScenes />
 
       <header className="site-header">
         <div className="wrap header-inner">
-          <a className="wordmark" href="#top" aria-label="Devan, back to top">
+          <a className="wordmark" href="#top" aria-label={ui.backToTop}>
             Devan
             <span className="wordmark-dot" aria-hidden="true" />
           </a>
-          <nav aria-label="Primary">
+          <nav aria-label={ui.sectionsMenu}>
             <ul className="nav-list">
               <li className="nav-extra">
-                <a href="#about">About</a>
+                <a href="#about">{ui.nav.about}</a>
               </li>
               <li className="nav-extra">
-                <a href="#solutions">Ad solutions</a>
+                <a href="#solutions">{ui.nav.solutions}</a>
               </li>
               <li className="nav-extra">
-                <a href="#process">How I work</a>
+                <a href="#process">{ui.nav.process}</a>
               </li>
               <li className="nav-extra">
-                <a href="#measurement">Analytics</a>
+                <a href="#measurement">{ui.nav.measurement}</a>
               </li>
               <li className="nav-extra">
-                <a href="#websites">WordPress</a>
+                <a href="#websites">{ui.nav.websites}</a>
               </li>
               <li>
-                <a href="#contact">Contact</a>
+                <a href="#contact">{ui.nav.contact}</a>
               </li>
             </ul>
           </nav>
-          <SectionMenu order={order} proof={hasProof} />
-          <MotionToggle />
+          <SectionMenu order={order} proof={showProof} labels={ui.sections} menuLabel={ui.sectionsMenu} />
+          <LangToggle c={c} />
+          <MotionToggle pause={ui.motion.pause} play={ui.motion.play} />
         </div>
         <div className="read-bar" aria-hidden="true">
           <i data-read />
         </div>
       </header>
 
-      <SectionDots order={order} proof={hasProof} />
+      <SectionDots order={order} proof={showProof} labels={ui.sections} navLabel={ui.sectionsMenu} />
 
       <main id="main">
         {/* 1. Hero */}
@@ -321,27 +333,27 @@ export default function Portfolio({
               {site.name}
             </h1>
             <p className="hero-lead">
-              {hero.lead} <mark>{hero.highlight}</mark>
+              {h.lead} <mark>{h.highlight}</mark>
               {tailSep}
-              {hero.tail}
+              {h.tail}
             </p>
             <div className="cta-row">
-              <External className="btn btn-sun" href={defaultHero.primaryCta.href}>
-                {defaultHero.primaryCta.label}
+              <External className="btn btn-sun" href={c.hero.primaryCta.href} newTab={ui.openNewTab}>
+                {c.hero.primaryCta.label}
               </External>
-              <a className="btn btn-ghost" href={hero.secondaryCta.href} data-gaze>
-                {hero.secondaryCta.label}
+              <a className="btn btn-ghost" href={h.secondaryCta.href} data-gaze>
+                {h.secondaryCta.label}
               </a>
             </div>
-            <p className="hero-credit">{defaultHero.credit}</p>
+            <p className="hero-credit">{c.hero.credit}</p>
           </div>
           <button type="button" className="skip-intro" data-skip-intro>
-            Skip intro
+            {ui.skipIntro}
           </button>
         </section>
 
         {/* The short version, for visitors who skim */}
-        <Summary order={order} />
+        <Summary c={c} order={order} />
 
         {/* 2. About: a new tab that fills in as you scroll */}
         <section id="about" className="about" data-scene="browser" aria-labelledby="about-title">
@@ -362,7 +374,7 @@ export default function Portfolio({
                     <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" strokeWidth="2" />
                     <path d="m16 16 4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                   </svg>
-                  <span data-typed={about.query}>{about.query}</span>
+                  <span data-typed={c.about.query}>{c.about.query}</span>
                   <span className="caret" />
                 </span>
               </div>
@@ -371,10 +383,10 @@ export default function Portfolio({
                   <span className="ad-pill" aria-hidden="true">
                     Ad
                   </span>
-                  <h2 id="about-title">{about.bannerTitle}</h2>
+                  <h2 id="about-title">{c.about.bannerTitle}</h2>
                 </div>
                 <ul className="bio">
-                  {about.lines.map((line) => (
+                  {c.about.lines.map((line) => (
                     <li key={line} data-line>
                       {line}
                     </li>
@@ -382,37 +394,37 @@ export default function Portfolio({
                 </ul>
               </div>
             </div>
-            <p className="about-caption">{about.caption}</p>
+            <p className="about-caption">{c.about.caption}</p>
           </div>
         </section>
 
         {/* 3 to 6. The four middle sections, in the order this version asks for */}
         {order.map((id, i) => {
           const Section = middleSections[id];
-          return <Section key={id} rev={i % 2 === 1} />;
+          return <Section key={id} c={c} rev={i % 2 === 1} />;
         })}
 
         {/* Interactive tools, then proof (hidden until the owner adds entries) */}
-        <Tools />
-        <Proof />
+        <Tools c={c} />
+        <Proof c={c} />
 
         {/* 7. Built with AI */}
         <section id="built-with-ai" className="ai" data-scene="prompt" aria-labelledby="ai-title">
           <div className="wrap ai-grid">
             <div className="ai-copy">
               <h2 id="ai-title" className="section-title">
-                {ai.title}
+                {c.ai.title}
               </h2>
-              <p className="scene-intro">{ai.intro}</p>
+              <p className="scene-intro">{c.ai.intro}</p>
               <ol className="ai-steps">
-                {ai.steps.map((step) => (
+                {c.ai.steps.map((step) => (
                   <li key={step.name} className="ai-step">
                     <span className="ai-step-name">{step.name}</span>
                     <span className="ai-step-text">{step.text}</span>
                   </li>
                 ))}
               </ol>
-              {ai.lesson ? <p className="ai-lesson">{ai.lesson}</p> : null}
+              {c.ai.lesson ? <p className="ai-lesson">{c.ai.lesson}</p> : null}
             </div>
             <div className="ai-visual">
               <div className="visual-box visual-wide" data-anchor>
@@ -426,31 +438,36 @@ export default function Portfolio({
         <section id="skills" className="creds" data-scene="cloud" aria-labelledby="creds-title">
           <div className="wrap">
             <h2 id="creds-title" className="section-title">
-              {credentials.title}
+              {c.credentials.title}
             </h2>
             <div className="creds-grid">
               <div className="panel">
-                <h3 className="panel-title">Skills</h3>
+                <h3 className="panel-title">{ui.creds.skills}</h3>
                 <ul className="chips">
-                  {credentials.skills.map((s) => (
+                  {c.credentials.skills.map((s) => (
                     <li key={s}>{s}</li>
                   ))}
                 </ul>
               </div>
               <div className="panel">
-                <h3 className="panel-title">Certifications</h3>
+                <h3 className="panel-title">{ui.creds.certifications}</h3>
                 <ul className="ticks">
-                  {credentials.certifications.map((c) => (
-                    <li key={c.name}>
-                      {c.name}
-                      {c.issuer || c.year ? (
-                        <span className="cert-meta"> {[c.issuer, c.year].filter(Boolean).join(", ")}</span>
+                  {c.credentials.certifications.map((cert) => (
+                    <li key={cert.name}>
+                      {cert.name}
+                      {cert.issuer || cert.year ? (
+                        <span className="cert-meta"> {[cert.issuer, cert.year].filter(Boolean).join(", ")}</span>
                       ) : null}
-                      {c.url ? (
+                      {cert.url ? (
                         <>
                           {" "}
-                          <a className="cert-link" href={c.url} target="_blank" rel="noopener noreferrer">
-                            Verify<span className="sr-only"> {c.name} (opens in a new tab)</span>
+                          <a className="cert-link" href={cert.url} target="_blank" rel="noopener noreferrer">
+                            {ui.creds.verify}
+                            <span className="sr-only">
+                              {" "}
+                              {cert.name}
+                              {ui.openNewTab}
+                            </span>
                           </a>
                         </>
                       ) : null}
@@ -459,15 +476,15 @@ export default function Portfolio({
                 </ul>
               </div>
               <div className="panel">
-                <h3 className="panel-title">Education</h3>
-                <p className="degree">{credentials.education.degree}</p>
-                <p>{credentials.education.school}</p>
+                <h3 className="panel-title">{ui.creds.education}</h3>
+                <p className="degree">{c.credentials.education.degree}</p>
+                <p>{c.credentials.education.school}</p>
                 <p className="muted">
-                  {credentials.education.years}. {credentials.education.note}
+                  {c.credentials.education.years}. {c.credentials.education.note}
                 </p>
-                <h3 className="panel-title panel-title-gap">Languages</h3>
+                <h3 className="panel-title panel-title-gap">{ui.creds.languages}</h3>
                 <ul className="langs">
-                  {credentials.languages.map((l) => (
+                  {c.credentials.languages.map((l) => (
                     <li key={l.name}>
                       <span>{l.name}</span>
                       <span className="muted">{l.level}</span>
@@ -484,18 +501,18 @@ export default function Portfolio({
           <div className="wrap contact-grid">
             <div className="contact-copy">
               <h2 id="contact-title" className="contact-title">
-                {contact.title}
+                {c.contact.title}
               </h2>
-              <p className="contact-text">{contact.text}</p>
+              <p className="contact-text">{c.contact.text}</p>
               <div className="contact-actions">
-                <External className="btn btn-sun" href={contact.cta.href}>
-                  {contact.cta.label}
+                <External className="btn btn-sun" href={c.contact.cta.href} newTab={ui.openNewTab}>
+                  {c.contact.cta.label}
                 </External>
-                <a className="btn btn-ghost" href={contact.email.href}>
-                  {contact.email.label}
+                <a className="btn btn-ghost" href={c.contact.email.href}>
+                  {c.contact.email.label}
                 </a>
               </div>
-              <p className="contact-meta">{contact.meta}</p>
+              <p className="contact-meta">{c.contact.meta}</p>
             </div>
             <div className="contact-visual">
               <div className="portrait-box" data-anchor>
@@ -523,18 +540,21 @@ export default function Portfolio({
 
       <footer className="site-footer">
         <div className="wrap footer-inner">
-          <p>© 2026 {site.name}. Built with Claude Code.</p>
+          <p>
+            © 2026 {site.name}. {ui.footer.builtWith}
+          </p>
           <ul className="footer-links">
             <li>
-              <a href="/cv/">CV</a>
+              <a href={c.cvPath}>{ui.footer.cv}</a>
             </li>
             <li>
               <a href={site.linkedin} target="_blank" rel="noopener noreferrer">
-                LinkedIn<span className="sr-only"> (opens in a new tab)</span>
+                {ui.footer.linkedin}
+                <span className="sr-only">{ui.openNewTab}</span>
               </a>
             </li>
             <li>
-              <a href={`mailto:${site.email}`}>Email</a>
+              <a href={`mailto:${site.email}`}>{ui.footer.email}</a>
             </li>
           </ul>
         </div>

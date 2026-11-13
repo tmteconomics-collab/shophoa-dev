@@ -8,12 +8,22 @@ import { startSectionNav } from "@/stage/section-nav";
 import type { SectionId } from "@/content/roles";
 import { sectionList } from "@/content/sections";
 
-export default function SectionDots({ order, proof }: { order: SectionId[]; proof: boolean }) {
+export default function SectionDots({
+  order,
+  proof,
+  labels,
+  navLabel,
+}: {
+  order: SectionId[];
+  proof: boolean;
+  labels: Record<string, string>;
+  navLabel: string;
+}) {
   useEffect(() => startSectionNav(), []);
   return (
-    <nav className="dots" aria-label="Sections">
+    <nav className="dots" aria-label={navLabel}>
       <ol>
-        {sectionList(order, proof).map(([id, label]) => (
+        {sectionList(order, proof, labels).map(([id, label]) => (
           <li key={id}>
             <a href={`#${id}`} data-dot={id}>
               <span className="dots-label">{label}</span>

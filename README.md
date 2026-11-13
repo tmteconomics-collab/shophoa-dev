@@ -53,7 +53,8 @@ Static export, no server code. Vercel picks up `vercel.json`: the Next.js preset
 
 | Path | What it does |
 | --- | --- |
-| `src/content/site.ts` | All copy. Facts only from the owner's LinkedIn and notes. |
+| `src/content/site.ts` | All English copy. Facts only from the owner's LinkedIn and notes. |
+| `src/content/vi.ts`, `src/content/i18n.ts` | Vietnamese copy and the locale layer. `i18n.ts` assembles each language into one `Content` bundle (plus UI chrome) and type-checks `vi.ts` against the English shapes. English at `/` and `/cv/`; Vietnamese at `/vi/` and `/vi/cv/` (`src/app/vi/`), indexed with reciprocal `hreflang`. Header `EN | VI` toggle is `src/components/LangToggle.tsx`. |
 | `src/components/Portfolio.tsx`, `src/app/page.tsx` | The one-page portfolio as semantic HTML. Works without JavaScript. |
 | `src/content/roles.ts`, `src/app/for/[role]/page.tsx` | Role versions to send with job applications: `/for/account-management/`, `/for/performance-marketing/`, `/for/web/`. Same facts, a different opening line and section order. Noindex, not in the sitemap. |
 | `src/app/cv/page.tsx`, `public/devan-cv.pdf` | Print-ready one-page A4 CV built from `cv` and `credentials` in `src/content/site.ts`. |

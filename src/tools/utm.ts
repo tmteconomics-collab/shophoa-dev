@@ -15,20 +15,23 @@ export function cleanUtmValue(v: string): string {
   return v.trim().toLowerCase().replace(/\s+/g, "-");
 }
 
-/** The tagged URL, or an error message when a required part is missing or invalid. */
-export function buildUtmUrl(f: UtmFields): { url: string } | { error: string } {
+/** Which message to show when the link cannot be built; the text comes from the markup. */
+export type UtmError = "fill" | "badUrl";
+
+/** The tagged URL, or an error key when a required part is missing or invalid. */
+export function buildUtmUrl(f: UtmFields): { url: string } | { error: UtmError } {
   const raw = f.url.trim();
   if (!raw || !f.source.trim() || !f.medium.trim() || !f.campaign.trim()) {
-    return { error: "Fill in the page URL, source, medium and campaign." };
+    return { error: "fill" };
   }
   let u: URL;
   try {
     u = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
   } catch {
-    return { error: "That page URL does not look right. Try https://example.com/page" };
+    return { error: "badUrl" };
   }
   if (!/^https?:$/.test(u.protocol) || !u.hostname.includes(".")) {
-    return { error: "That page URL does not look right. Try https://example.com/page" };
+    return { error: "badUrl" };
   }
   const pairs: [string, string | undefined][] = [
     ["utm_source", f.source],
@@ -51,6 +54,13 @@ export function bindUtmBuilder(form: HTMLFormElement): () => void {
   const status = form.querySelector<HTMLElement>("[data-copy-status]");
   if (!out || !copy) return () => {};
   const value = (name: string) => (form.elements.namedItem(name) as HTMLInputElement | null)?.value ?? "";
+  // Messages come from the markup (data-msg-*) so one bundle serves both languages.
+  const msg = {
+    fill: form.dataset.msgFill || "Fill in the page URL, source, medium and campaign.",
+    badUrl: form.dataset.msgBadurl || "That page URL does not look right. Try https://example.com/page",
+    copied: form.dataset.msgCopied || "Copied.",
+    copyFail: form.dataset.msgCopyfail || "Copy did not work here. Select the link and copy it.",
+  };
   let current = "";
 
   const update = () => {
@@ -63,7 +73,7 @@ export function bindUtmBuilder(form: HTMLFormElement): () => void {
       content: value("content"),
     });
     current = "url" in r ? r.url : "";
-    out.textContent = "url" in r ? r.url : r.error;
+    out.textContent = "url" in r ? r.url : msg[r.error];
     out.classList.toggle("is-ready", !!current);
     copy.disabled = !current;
     if (status) status.textContent = "";
@@ -72,9 +82,9 @@ export function bindUtmBuilder(form: HTMLFormElement): () => void {
     if (!current) return;
     try {
       await navigator.clipboard.writeText(current);
-      if (status) status.textContent = "Copied.";
+      if (status) status.textContent = msg.copied;
     } catch {
-      if (status) status.textContent = "Copy did not work here. Select the link and copy it.";
+      if (status) status.textContent = msg.copyFail;
     }
   };
   const onSubmit = (e: Event) => e.preventDefault();

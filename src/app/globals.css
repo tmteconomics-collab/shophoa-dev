@@ -2687,6 +2687,36 @@ html[data-paused="on"] *::after {
   }
 }
 
+/* ---------- Language toggle ---------- */
+.lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgb(242 243 255 / 0.35);
+  border-radius: 999px;
+  overflow: hidden;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1;
+}
+.lang-opt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.2rem;
+  min-height: 40px;
+  padding: 0 0.6rem;
+  color: var(--color-muted);
+  text-decoration: none;
+}
+.lang-opt[aria-current="true"] {
+  background: var(--color-sun);
+  color: var(--color-night);
+}
+a.lang-opt:hover,
+a.lang-opt:focus-visible {
+  color: var(--color-ink);
+}
+
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   *,
